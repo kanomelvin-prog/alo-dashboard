@@ -3,339 +3,507 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alo Therapist Dashboard - Dupree</title>
+  <title>Alo Clinical Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    * {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     
     :root {
-      --primary: #4F46E5;
-      --primary-dark: #4338CA;
-      --success: #10B981;
-      --warning: #F59E0B;
-      --danger: #EF4444;
-      --gray-50: #F9FAFB;
-      --gray-100: #F3F4F6;
-      --gray-200: #E5E7EB;
-      --gray-300: #D1D5DB;
-      --gray-600: #4B5563;
-      --gray-700: #374151;
-      --gray-900: #111827;
+      --slate-950: #0f172a;
+      --slate-900: #1e293b;
+      --slate-800: #334155;
+      --slate-700: #475569;
+      --slate-600: #64748b;
+      --slate-500: #94a3b8;
+      --slate-400: #cbd5e1;
+      --slate-300: #e2e8f0;
+      --slate-200: #f1f5f9;
+      --slate-100: #f8fafc;
+      --slate-50: #fafbfc;
+      
+      --critical: #dc2626;
+      --critical-bg: #fef2f2;
+      --critical-border: #fecaca;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --stable: #059669;
+      --stable-bg: #ecfdf5;
+      --stable-border: #a7f3d0;
+      --info: #2563eb;
+      --info-bg: #eff6ff;
+      
+      --font-display: 'Source Serif 4', Georgia, serif;
+      --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+      
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.12);
+    }
+    
+    html {
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--gray-50);
-      color: var(--gray-900);
-      line-height: 1.6;
+      font-family: var(--font-body);
+      background: var(--slate-100);
+      color: var(--slate-900);
+      line-height: 1.5;
+      min-height: 100vh;
     }
     
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    header {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    
-    h1 {
-      font-size: 28px;
-      color: var(--gray-900);
-      font-weight: 700;
-    }
-    
-    .subtitle {
-      color: var(--gray-600);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-    
-    .last-reviewed {
-      font-size: 13px;
-      color: var(--gray-600);
-    }
-    
-    .btn-mark-reviewed {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.2s;
-    }
-    
-    .btn-mark-reviewed:hover {
-      background: var(--primary-dark);
-    }
-    
-    .btn-mark-reviewed:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .stats-grid {
+    .app {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
     }
     
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .stat-value {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--gray-900);
-    }
-    
-    .stat-label {
-      font-size: 14px;
-      color: var(--gray-600);
-      margin-top: 4px;
-    }
-    
-    .stat-card.alert {
-      border-left: 4px solid var(--danger);
-    }
-    
-    .stat-card.alert .stat-value {
-      color: var(--danger);
-    }
-    
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    
-    .tab {
-      padding: 12px 24px;
-      background: white;
-      border: 2px solid var(--gray-200);
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--gray-600);
-      transition: all 0.2s;
-    }
-    
-    .tab:hover {
-      border-color: var(--gray-300);
-    }
-    
-    .tab.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-    
-    .panel {
-      display: none;
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .panel.active {
-      display: block;
-    }
-    
-    .panel h2 {
-      font-size: 20px;
-      margin-bottom: 20px;
-      color: var(--gray-900);
-    }
-    
-    .client-list {
+    /* === SIDEBAR === */
+    .sidebar {
+      background: var(--slate-900);
+      color: var(--slate-300);
+      padding: var(--space-lg);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      position: fixed;
+      width: 260px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: var(--space-xs);
+      letter-spacing: -0.02em;
+    }
+    
+    .logo-subtitle {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .nav-section {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--slate-500);
+      margin-bottom: var(--space-sm);
+      padding-left: var(--space-sm);
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .nav-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .nav-item.active {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+    
+    .nav-item.active svg {
+      opacity: 1;
+    }
+    
+    .nav-badge {
+      margin-left: auto;
+      background: var(--critical);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--slate-800);
+    }
+    
+    .therapist-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .therapist-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--slate-700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: white;
+    }
+    
+    .therapist-name {
+      font-size: 0.9rem;
+      color: white;
+    }
+    
+    .therapist-role {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+    
+    /* === MAIN CONTENT === */
+    .main {
+      margin-left: 260px;
+      padding: var(--space-xl);
+      max-width: 1200px;
+    }
+    
+    /* === PRIORITY HEADER === */
+    .priority-header {
+      background: var(--critical-bg);
+      border: 1px solid var(--critical-border);
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-lg);
+      display: none;
+    }
+    
+    .priority-header.visible {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .priority-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--critical);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .priority-icon svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+    
+    .priority-content h3 {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--critical);
+      margin-bottom: 2px;
+    }
+    
+    .priority-content p {
+      font-size: 0.85rem;
+      color: var(--slate-700);
+    }
+    
+    .priority-action {
+      margin-left: auto;
+      background: var(--critical);
+      color: white;
+      border: none;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .priority-action:hover {
+      background: #b91c1c;
+    }
+    
+    /* === PAGE HEADER === */
+    .page-header {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-xs);
+    }
+    
+    .page-header p {
+      color: var(--slate-600);
+      font-size: 0.95rem;
+    }
+    
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      margin-top: var(--space-md);
+    }
+    
+    .header-stat {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-xs);
+    }
+    
+    .header-stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--slate-900);
+    }
+    
+    .header-stat-label {
+      font-size: 0.85rem;
+      color: var(--slate-500);
+    }
+    
+    /* === TRIAGE SECTIONS === */
+    .triage-section {
+      margin-bottom: var(--space-xl);
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate-600);
+    }
+    
+    .section-title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .section-title-dot.critical { background: var(--critical); }
+    .section-title-dot.warning { background: var(--warning); }
+    .section-title-dot.stable { background: var(--stable); }
+    
+    .section-count {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+      background: var(--slate-200);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    .section-toggle {
+      background: none;
+      border: none;
+      color: var(--slate-500);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    .section-toggle:hover {
+      color: var(--slate-700);
+    }
+    
+    /* === CLIENT CARDS === */
+    .client-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
     }
     
     .client-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 20px;
-      background: var(--gray-50);
+      background: white;
+      border: 1px solid var(--slate-200);
       border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: var(--space-lg);
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.15s ease;
     }
     
     .client-card:hover {
-      background: var(--gray-100);
+      border-color: var(--slate-300);
+      box-shadow: var(--shadow-md);
     }
     
-    .client-info h3 {
-      font-size: 16px;
-      font-weight: 600;
+    .client-card.critical-border {
+      border-left: 3px solid var(--critical);
     }
     
-    .client-info p {
-      font-size: 13px;
-      color: var(--gray-600);
-      margin-top: 2px;
+    .client-card.warning-border {
+      border-left: 3px solid var(--warning);
     }
     
-    .client-stats {
+    .client-primary {
       display: flex;
-      gap: 16px;
-      align-items: center;
+      flex-direction: column;
+      gap: 2px;
     }
     
-    .client-stat {
-      text-align: center;
+    .client-name {
+      font-weight: 600;
+      color: var(--slate-900);
+      font-size: 0.95rem;
     }
     
-    .client-stat-value {
-      font-size: 18px;
-      font-weight: 700;
+    .client-context {
+      font-size: 0.8rem;
+      color: var(--slate-500);
     }
     
-    .client-stat-label {
-      font-size: 11px;
-      color: var(--gray-600);
+    .client-signal {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+    
+    .signal-label {
+      font-size: 0.7rem;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate-500);
     }
     
-    .engagement-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .engagement-badge.active {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-    
-    .engagement-badge.moderate {
-      background: #FEF3C7;
-      color: #92400E;
-    }
-    
-    .engagement-badge.low {
-      background: #FEE2E2;
-      color: #991B1B;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      font-size: 14px;
+    .signal-value {
+      font-size: 0.85rem;
       font-weight: 500;
-      margin-bottom: 6px;
-      color: var(--gray-700);
     }
     
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--gray-300);
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-    }
+    .signal-value.critical { color: var(--critical); }
+    .signal-value.warning { color: var(--warning); }
+    .signal-value.stable { color: var(--stable); }
     
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    }
-    
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-    
-    .btn-submit {
-      background: var(--success);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    
-    .btn-submit:hover {
-      background: #059669;
-    }
-    
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .alert-item {
-      padding: 16px;
-      background: #FEF2F2;
-      border-left: 4px solid var(--danger);
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 12px;
-    }
-    
-    .alert-item.warning {
-      background: #FFFBEB;
-      border-color: var(--warning);
-    }
-    
-    .alert-header {
+    .client-trend {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
     }
     
-    .alert-client {
-      font-weight: 600;
+    .client-trend.down {
+      background: var(--critical-bg);
+      color: var(--critical);
     }
     
-    .alert-time {
-      font-size: 12px;
-      color: var(--gray-600);
+    .client-trend.up {
+      background: var(--stable-bg);
+      color: var(--stable);
     }
     
-    .alert-message {
-      font-size: 14px;
-      color: var(--gray-700);
-      font-style: italic;
+    .client-trend.flat {
+      background: var(--slate-200);
+      color: var(--slate-600);
     }
     
+    .client-trend svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    /* === STABLE SECTION === */
+    .stable-section .client-grid {
+      display: none;
+    }
+    
+    .stable-section.expanded .client-grid {
+      display: flex;
+    }
+    
+    .stable-summary {
+      background: var(--stable-bg);
+      border: 1px solid var(--stable-border);
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      cursor: pointer;
+    }
+    
+    .stable-section.expanded .stable-summary {
+      display: none;
+    }
+    
+    .stable-summary svg {
+      width: 20px;
+      height: 20px;
+      color: var(--stable);
+    }
+    
+    .stable-summary-text {
+      font-size: 0.9rem;
+      color: var(--slate-700);
+    }
+    
+    .stable-summary-text strong {
+      color: var(--stable);
+    }
+    
+    /* === MODALS === */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -343,11 +511,12 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(15, 23, 42, 0.6);
       z-index: 1000;
       justify-content: center;
-      align-items: center;
-      padding: 20px;
+      align-items: flex-start;
+      padding: var(--space-2xl);
+      overflow-y: auto;
     }
     
     .modal-overlay.active {
@@ -357,249 +526,865 @@
     .modal {
       background: white;
       border-radius: 12px;
-      max-width: 600px;
+      max-width: 700px;
       width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn 0.2s ease;
+    }
+    
+    .modal.wide {
+      max-width: 900px;
+    }
+    
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    
-    .modal-header h2 {
-      margin: 0;
-    }
-    
-    .btn-close {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--gray-600);
-    }
-    
-    .session-prep {
-      background: var(--gray-50);
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-    }
-    
-    .session-prep h4 {
-      font-size: 14px;
-      color: var(--gray-600);
-      margin-bottom: 8px;
-    }
-    
-    .session-prep p {
-      font-size: 15px;
-    }
-    
-    .success-message {
-      display: none;
-      background: #D1FAE5;
-      color: #065F46;
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
-    
-    .success-message.show {
-      display: block;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--gray-600);
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: var(--gray-600);
-    }
-    
-    .empty-state p {
-      margin-bottom: 8px;
-    }
-
-    .homework-item {
-      padding: 16px;
-      background: var(--gray-50);
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    
-    .homework-header {
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--slate-200);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
     }
     
-    .homework-type {
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
       font-weight: 600;
-      color: var(--gray-900);
+      color: var(--slate-900);
+      margin-bottom: 2px;
     }
     
-    .homework-status {
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 12px;
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: var(--slate-500);
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--slate-400);
+      cursor: pointer;
+      padding: var(--space-xs);
+    }
+    
+    .modal-close:hover {
+      color: var(--slate-600);
+    }
+    
+    .modal-body {
+      padding: var(--space-lg);
+    }
+    
+    .modal-footer {
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--slate-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--slate-50);
+      border-radius: 0 0 12px 12px;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    
+    /* === TABS IN MODAL === */
+    .modal-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      padding: 0 var(--space-lg);
+      border-bottom: 1px solid var(--slate-200);
+      background: var(--slate-50);
+    }
+    
+    .modal-tab {
+      padding: var(--space-md) var(--space-lg);
+      font-size: 0.85rem;
       font-weight: 500;
+      color: var(--slate-600);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
     }
     
-    .homework-status.pending {
-      background: #FEF3C7;
-      color: #92400E;
+    .modal-tab:hover {
+      color: var(--slate-900);
     }
     
-    .homework-status.engaged {
-      background: #D1FAE5;
-      color: #065F46;
+    .modal-tab.active {
+      color: var(--info);
+      border-bottom-color: var(--info);
     }
     
-    .homework-description {
-      font-size: 14px;
-      color: var(--gray-700);
+    .tab-content {
+      display: none;
     }
     
-    .homework-meta {
-      font-size: 12px;
-      color: var(--gray-600);
-      margin-top: 8px;
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* === PREP SECTIONS === */
+    .prep-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .prep-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .prep-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--slate-500);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .prep-content {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: var(--space-md);
+    }
+    
+    .prep-content p {
+      font-size: 0.9rem;
+      color: var(--slate-700);
+      line-height: 1.6;
+    }
+    
+    .prep-content p + p {
+      margin-top: var(--space-sm);
+    }
+    
+    .prep-highlight {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+    
+    /* === OPEN LOOPS === */
+    .open-loops {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    
+    .loop-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+    }
+    
+    .loop-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--warning);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .loop-text {
+      font-size: 0.85rem;
+      color: var(--slate-700);
+    }
+    
+    .loop-meta {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+      margin-top: 2px;
+    }
+    
+    /* === SESSION NOTES === */
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    
+    .note-card {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: var(--space-md);
+    }
+    
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .note-date {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--slate-700);
+    }
+    
+    .note-actions {
+      display: flex;
+      gap: var(--space-xs);
+    }
+    
+    .note-action-btn {
+      background: none;
+      border: none;
+      color: var(--slate-400);
+      cursor: pointer;
+      padding: 2px;
+    }
+    
+    .note-action-btn:hover {
+      color: var(--slate-600);
+    }
+    
+    .note-content {
+      font-size: 0.85rem;
+      color: var(--slate-600);
+      line-height: 1.6;
+    }
+    
+    .note-content strong {
+      color: var(--slate-700);
+    }
+    
+    .add-note-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      border: 2px dashed var(--slate-300);
+      border-radius: 6px;
+      background: none;
+      color: var(--slate-500);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    
+    .add-note-btn:hover {
+      border-color: var(--info);
+      color: var(--info);
+    }
+    
+    /* === NOTE FORM === */
+    .note-form {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      padding: var(--space-md);
+    }
+    
+    .note-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    
+    .note-form-full {
+      grid-column: 1 / -1;
+    }
+    
+    .note-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--slate-200);
+    }
+    
+    /* === FORMS === */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--slate-700);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--slate-300);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--info);
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+    
+    /* === TEMPLATE PILLS === */
+    .template-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-top: var(--space-xs);
+    }
+    
+    .template-pill {
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: var(--slate-600);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .template-pill:hover {
+      background: var(--info-bg);
+      border-color: var(--info);
+      color: var(--info);
+    }
+    
+    /* === BUTTONS === */
+    .btn {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    
+    .btn-secondary {
+      background: white;
+      border-color: var(--slate-300);
+      color: var(--slate-700);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--slate-100);
+    }
+    
+    .btn-primary {
+      background: var(--info);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    
+    .btn-sm {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.8rem;
+    }
+    
+    /* === COPY BUTTON === */
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 4px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.75rem;
+      color: var(--slate-600);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .copy-btn:hover {
+      background: var(--slate-200);
+    }
+    
+    .copy-btn.copied {
+      background: var(--stable-bg);
+      border-color: var(--stable);
+      color: var(--stable);
+    }
+    
+    /* === EMPTY STATE === */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl);
+      color: var(--slate-500);
+    }
+    
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--space-md);
+      opacity: 0.5;
+    }
+    
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+    
+    /* === LOADING === */
+    .loading {
+      text-align: center;
+      padding: var(--space-2xl);
+      color: var(--slate-500);
+    }
+    
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--slate-200);
+      border-top-color: var(--info);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--space-md);
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: var(--space-lg);
+      right: var(--space-lg);
+      background: var(--stable);
+      color: white;
+      padding: var(--space-md) var(--space-lg);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      animation: toastIn 0.3s ease;
+      z-index: 2000;
+    }
+    
+    .toast.show {
+      display: block;
+    }
+    
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* === RESPONSIVE === */
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .main {
+        margin-left: 0;
+      }
+      
+      .client-card {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+      }
+      
+      .note-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* === VIEW TOGGLE === */
+    .view {
+      display: none;
+    }
+    
+    .view.active {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div>
-        <h1>Alo Therapist Dashboard</h1>
-        <p class="subtitle">Client engagement between sessions</p>
+  <div class="app">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="logo">Alo</div>
+      <div class="logo-subtitle">Clinical Dashboard</div>
+      
+      <div class="nav-section">
+        <div class="nav-label">Triage</div>
+        <div class="nav-item active" onclick="showView('triage', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Clinical Triage
+        </div>
+        <div class="nav-item" onclick="showView('alerts', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Alerts
+          <span class="nav-badge" id="alertBadge" style="display: none;">0</span>
+        </div>
       </div>
-      <div style="text-align: right;">
-        <p class="last-reviewed" id="lastReviewed">Last reviewed: Never</p>
-        <button class="btn-mark-reviewed" id="btnMarkReviewed" onclick="markAsReviewed()">
-          Mark as Reviewed
+      
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <div class="nav-item" onclick="showView('homework', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Homework Library
+        </div>
+        <div class="nav-item" onclick="showView('settings', this)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Settings
+        </div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <div class="therapist-info">
+          <div class="therapist-avatar">D</div>
+          <div>
+            <div class="therapist-name">Dr. Dupree</div>
+            <div class="therapist-role">LMFT</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Priority Header -->
+      <div class="priority-header" id="priorityHeader">
+        <div class="priority-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="priority-content">
+          <h3>Crisis Signal Detected</h3>
+          <p id="priorityMessage">1 client triggered a crisis response</p>
+        </div>
+        <button class="priority-action" onclick="showView('alerts', document.querySelector('.nav-item:nth-child(2)'))">Review Now</button>
+      </div>
+      
+      <!-- Triage View -->
+      <div class="view active" id="view-triage">
+        <div class="page-header">
+          <h1>Clinical Triage</h1>
+          <p id="currentDate"></p>
+          <div class="header-meta">
+            <div class="header-stat">
+              <span class="header-stat-value" id="totalClients">-</span>
+              <span class="header-stat-label">Total Clients</span>
+            </div>
+            <div class="header-stat">
+              <span class="header-stat-value" id="activeClients">-</span>
+              <span class="header-stat-label">Active This Week</span>
+            </div>
+            <div class="header-stat">
+              <span class="header-stat-value" id="pendingHomework">-</span>
+              <span class="header-stat-label">Open Homework</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Needs Attention -->
+        <div class="triage-section" id="needsAttentionSection">
+          <div class="section-header">
+            <div class="section-title">
+              <span class="section-title-dot warning"></span>
+              Needs Attention
+              <span class="section-count" id="needsAttentionCount">0</span>
+            </div>
+          </div>
+          <div class="client-grid" id="needsAttentionList">
+            <div class="loading">
+              <div class="loading-spinner"></div>
+              Loading clients...
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stable -->
+        <div class="triage-section stable-section" id="stableSection">
+          <div class="section-header">
+            <div class="section-title">
+              <span class="section-title-dot stable"></span>
+              Stable / No Action Needed
+              <span class="section-count" id="stableCount">0</span>
+            </div>
+            <button class="section-toggle" onclick="toggleStableSection()">
+              <span id="stableToggleText">Show all</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+          <div class="stable-summary" onclick="toggleStableSection()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="stable-summary-text">
+              <strong id="stableSummaryCount">0</strong> clients are stable with no action required
+            </span>
+          </div>
+          <div class="client-grid" id="stableList"></div>
+        </div>
+      </div>
+      
+      <!-- Alerts View -->
+      <div class="view" id="view-alerts">
+        <div class="page-header">
+          <h1>Crisis Alerts</h1>
+          <p>Signals requiring immediate clinical review</p>
+        </div>
+        <div id="alertsList">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            Loading alerts...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Homework View -->
+      <div class="view" id="view-homework">
+        <div class="page-header">
+          <h1>Homework Library</h1>
+          <p>Assign and track inter-session exercises</p>
+        </div>
+        <div id="homeworkList">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            Loading homework...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings View -->
+      <div class="view" id="view-settings">
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Dashboard configuration</p>
+        </div>
+        <div class="prep-section">
+          <div class="prep-label">Therapist ID</div>
+          <div class="prep-content">
+            <p id="therapistIdDisplay" style="font-family: monospace; font-size: 0.8rem;"></p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Client Detail Modal (with tabs) -->
+  <div class="modal-overlay" id="clientModal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="clientModalTitle">Client Record</div>
+          <div class="modal-subtitle" id="clientModalSubtitle">Client ID</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('clientModal')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
-    </header>
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotalClients">-</div>
-        <div class="stat-label">Total Clients</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statActiveClients">-</div>
-        <div class="stat-label">Active This Week</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statPendingHomework">-</div>
-        <div class="stat-label">Pending Homework</div>
-      </div>
-      <div class="stat-card alert" id="alertCard" style="display: none;">
-        <div class="stat-value" id="statAlerts">0</div>
-        <div class="stat-label">Recent Alerts</div>
-      </div>
-    </div>
-    
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('clients')">Clients</button>
-      <button class="tab" onclick="switchTab('homework')">Assign Homework</button>
-      <button class="tab" onclick="switchTab('alerts')">Alerts</button>
-      <button class="tab" onclick="switchTab('settings')">Settings</button>
-    </div>
-    
-    <div class="panel active" id="panel-clients">
-      <h2>Your Clients</h2>
-      <div class="client-list" id="clientList">
-        <div class="loading">Loading clients...</div>
-      </div>
-    </div>
-    
-    <div class="panel" id="panel-homework">
-      <h2>Assign New Homework</h2>
-      <div class="success-message" id="homeworkSuccess">
-        ✓ Homework assigned successfully!
-      </div>
-      <form id="homeworkForm" onsubmit="assignHomework(event)">
-        <div class="form-group">
-          <label for="clientSelect">Client</label>
-          <select id="clientSelect" required>
-            <option value="">Select a client...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="homeworkType">Type</label>
-          <select id="homeworkType" required>
-            <option value="noticing">Noticing Practice</option>
-            <option value="behavioral">Behavioral Experiment</option>
-            <option value="cognitive">Cognitive Exercise</option>
-            <option value="grounding">Grounding Technique</option>
-            <option value="journaling">Journaling Prompt</option>
-            <option value="custom">Custom</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="homeworkDescription">Description / Instructions</label>
-          <textarea id="homeworkDescription" placeholder="What should the client practice or try?" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="therapistNotes">Private Notes (client won't see this)</label>
-          <textarea id="therapistNotes" placeholder="Optional: Notes for yourself about this homework..."></textarea>
-        </div>
-        <button type="submit" class="btn-submit" id="btnSubmitHomework">Assign Homework</button>
-      </form>
       
-      <h2 style="margin-top: 40px;">Active Homework</h2>
-      <div id="activeHomeworkList">
-        <div class="loading">Loading homework...</div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchModalTab('prep', this)">Session Prep</button>
+        <button class="modal-tab" onclick="switchModalTab('notes', this)">Session Notes</button>
+        <button class="modal-tab" onclick="switchModalTab('history', this)">Homework History</button>
       </div>
-    </div>
-    
-    <div class="panel" id="panel-alerts">
-      <h2>Recent Alerts</h2>
-      <p class="subtitle" style="margin-bottom: 20px;">Crisis signals detected in the past 7 days</p>
-      <div id="alertsList">
-        <div class="loading">Loading alerts...</div>
+      
+      <div class="modal-body">
+        <!-- Session Prep Tab -->
+        <div class="tab-content active" id="tab-prep">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            Loading session prep...
+          </div>
+        </div>
+        
+        <!-- Session Notes Tab -->
+        <div class="tab-content" id="tab-notes">
+          <div class="notes-list" id="notesList"></div>
+          <button class="add-note-btn" id="addNoteBtn" onclick="showNoteForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Session Note
+          </button>
+          
+          <!-- Note Form (hidden by default) -->
+          <div class="note-form" id="noteForm" style="display: none;">
+            <div class="note-form-grid">
+              <div class="form-group">
+                <label>Session Date</label>
+                <input type="date" id="noteDate">
+              </div>
+              <div class="form-group">
+                <label>Session Type</label>
+                <select id="noteType">
+                  <option value="individual">Individual</option>
+                  <option value="couples">Couples</option>
+                  <option value="family">Family</option>
+                  <option value="group">Group</option>
+                </select>
+              </div>
+              <div class="form-group note-form-full">
+                <label>Themes Discussed</label>
+                <textarea id="noteThemes" placeholder="Main topics and themes from session..."></textarea>
+              </div>
+              <div class="form-group note-form-full">
+                <label>Interventions Used</label>
+                <textarea id="noteInterventions" placeholder="Techniques, exercises, or approaches used..."></textarea>
+              </div>
+              <div class="form-group note-form-full">
+                <label>Clinical Observations</label>
+                <textarea id="noteObservations" placeholder="Affect, engagement, progress, concerns..."></textarea>
+              </div>
+              <div class="form-group note-form-full">
+                <label>Plan / Next Steps</label>
+                <textarea id="notePlan" placeholder="Goals for next session, homework assigned..."></textarea>
+              </div>
+            </div>
+            <div class="note-form-actions">
+              <button class="btn btn-secondary" onclick="hideNoteForm()">Cancel</button>
+              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Homework History Tab -->
+        <div class="tab-content" id="tab-history">
+          <div id="homeworkHistory">
+            <div class="loading">
+              <div class="loading-spinner"></div>
+              Loading homework history...
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <div class="panel" id="panel-settings">
-      <h2>Dashboard Settings</h2>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" id="showHomeworkBarriers" onchange="toggleHomeworkBarriers()">
-          Show homework barriers in client list
-        </label>
-      </div>
-      <div class="form-group">
-        <label>Therapist ID</label>
-        <input type="text" id="therapistIdDisplay" readonly style="background: var(--gray-100);">
+      
+      <div class="modal-footer">
+        <div></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal('clientModal')">Close</button>
+          <button class="btn btn-primary" onclick="openHomeworkModal()">Assign Homework</button>
+        </div>
       </div>
     </div>
   </div>
   
-  <div class="modal-overlay" id="clientModal">
+  <!-- Homework Modal -->
+  <div class="modal-overlay" id="homeworkModal">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="modalClientName">Client Details</h2>
-        <button class="btn-close" onclick="closeModal()">&times;</button>
+        <div>
+          <div class="modal-title">Assign Homework</div>
+          <div class="modal-subtitle" id="homeworkModalSubtitle">Client ID</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('homeworkModal')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <div id="modalContent">
-        <div class="loading">Loading...</div>
+      <div class="modal-body">
+        <form class="homework-form" id="homeworkForm" onsubmit="submitHomework(event)">
+          <div class="form-group">
+            <label>Quick Templates</label>
+            <div class="template-pills">
+              <span class="template-pill" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</span>
+              <span class="template-pill" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</span>
+              <span class="template-pill" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning about current concerns')">Journaling</span>
+              <span class="template-pill" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation this week')">Behavioral</span>
+              <span class="template-pill" onclick="useTemplate('breathing', 'Practice 4-7-8 breathing technique twice daily')">Breathing</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="hwType">Type</label>
+            <select id="hwType" required>
+              <option value="grounding">Grounding Technique</option>
+              <option value="noticing">Noticing Practice</option>
+              <option value="journaling">Journaling Prompt</option>
+              <option value="behavioral">Behavioral Experiment</option>
+              <option value="cognitive">Cognitive Exercise</option>
+              <option value="breathing">Breathing Exercise</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="hwDescription">Instructions</label>
+            <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="hwRationale">Clinical Rationale (private)</label>
+            <textarea id="hwRationale" placeholder="Why this exercise for this client at this time..."></textarea>
+            <span class="form-hint">This note is for your records only.</span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeModal('homeworkModal')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitHomework(event)">Assign Homework</button>
+        </div>
       </div>
     </div>
   </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast">✓ Action completed</div>
 
   <script>
     // =====================================================
@@ -609,16 +1394,20 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
     const THERAPIST_ID = '94ebfe1c-57d1-48d8-a165-a9152ded65db';
     
-    let clients = [];
-    let showBarriers = false;
+    let currentClient = null;
+    let allClients = [];
+    let clientNotes = {}; // In-memory storage for demo (would be database in production)
     
     // =====================================================
     // INITIALIZATION
     // =====================================================
     document.addEventListener('DOMContentLoaded', () => {
-      loadSettings();
+      document.getElementById('therapistIdDisplay').textContent = THERAPIST_ID;
+      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      });
+      document.getElementById('noteDate').valueAsDate = new Date();
       loadDashboard();
-      document.getElementById('therapistIdDisplay').value = THERAPIST_ID;
     });
     
     // =====================================================
@@ -636,8 +1425,7 @@
       const response = await fetch(url, { ...options, headers });
       
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`API Error: ${response.status} - ${error}`);
+        throw new Error(`API Error: ${response.status}`);
       }
       
       const text = await response.text();
@@ -656,24 +1444,25 @@
         
         if (stats && stats.length > 0) {
           const s = stats[0];
-          document.getElementById('statTotalClients').textContent = s.total_clients || 0;
-          document.getElementById('statActiveClients').textContent = s.active_clients || 0;
-          document.getElementById('statPendingHomework').textContent = s.pending_homework || 0;
+          document.getElementById('totalClients').textContent = s.total_clients || 0;
+          document.getElementById('activeClients').textContent = s.active_clients || 0;
+          document.getElementById('pendingHomework').textContent = s.pending_homework || 0;
           
           if (s.recent_alerts > 0) {
-            document.getElementById('alertCard').style.display = 'block';
-            document.getElementById('statAlerts').textContent = s.recent_alerts;
+            document.getElementById('priorityHeader').classList.add('visible');
+            document.getElementById('priorityMessage').textContent = 
+              `${s.recent_alerts} client${s.recent_alerts > 1 ? 's' : ''} triggered a crisis response in the past 7 days`;
+            document.getElementById('alertBadge').style.display = 'block';
+            document.getElementById('alertBadge').textContent = s.recent_alerts;
           }
         }
         
         await loadClients();
-        await loadActiveHomework();
         await loadAlerts();
+        await loadHomework();
         
       } catch (error) {
         console.error('Dashboard load error:', error);
-        document.getElementById('clientList').innerHTML = 
-          `<div class="empty-state"><p>Error loading dashboard: ${error.message}</p></div>`;
       }
     }
     
@@ -687,106 +1476,103 @@
         );
         
         if (!links || links.length === 0) {
-          document.getElementById('clientList').innerHTML = 
-            `<div class="empty-state">
-              <p>No clients linked yet.</p>
-              <p>Clients will appear here once they connect.</p>
-            </div>`;
+          document.getElementById('needsAttentionList').innerHTML = 
+            '<div class="empty-state"><p>No clients linked yet.</p></div>';
           return;
         }
         
-        clients = links;
-        
-        const clientHtml = await Promise.all(links.map(async (client) => {
-          const turns = await supabaseCall(
-            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&order=created_at.desc&limit=1`
-          );
-          
-          const lastActive = turns && turns.length > 0 
-            ? formatTimeAgo(new Date(turns[0].created_at))
-            : 'Never';
-          
+        const clientsWithData = await Promise.all(links.map(async (client) => {
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+          const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+          
           const recentTurns = await supabaseCall(
-            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id`
+            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,created_at,intention_chosen`
           );
           
-          const turnCount = recentTurns ? recentTurns.length : 0;
+          const prevTurns = await supabaseCall(
+            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`
+          );
           
-          let engagementClass, engagementText;
-          if (turnCount >= 10) {
-            engagementClass = 'active';
-            engagementText = 'Active';
-          } else if (turnCount >= 3) {
-            engagementClass = 'moderate';
-            engagementText = 'Moderate';
-          } else {
-            engagementClass = 'low';
-            engagementText = 'Low';
-          }
+          const homework = await supabaseCall(
+            `/rest/v1/homework?client_code=eq.${client.client_code}&status=eq.active&select=id`
+          );
           
-          return `
-            <div class="client-card" onclick="showClientDetail('${client.client_code}')">
-              <div class="client-info">
-                <h3>${client.client_code}</h3>
-                <p>Last active: ${lastActive}</p>
-              </div>
-              <div class="client-stats">
-                <div class="client-stat">
-                  <div class="client-stat-value">${turnCount}</div>
-                  <div class="client-stat-label">Messages (7d)</div>
-                </div>
-                <span class="engagement-badge ${engagementClass}">${engagementText}</span>
-              </div>
-            </div>
-          `;
+          const hasCrisis = recentTurns?.some(t => t.intention_chosen === 'CRISIS');
+          const currentCount = recentTurns?.length || 0;
+          const prevCount = prevTurns?.length || 0;
+          const homeworkCount = homework?.length || 0;
+          
+          let trend = 'flat';
+          if (currentCount > prevCount + 2) trend = 'up';
+          else if (currentCount < prevCount - 2) trend = 'down';
+          
+          const needsAttention = hasCrisis || trend === 'down' || (homeworkCount > 0 && currentCount === 0);
+          
+          return {
+            ...client,
+            messageCount: currentCount,
+            prevMessageCount: prevCount,
+            homeworkCount,
+            trend,
+            hasCrisis,
+            needsAttention
+          };
         }));
         
-        document.getElementById('clientList').innerHTML = clientHtml.join('');
+        allClients = clientsWithData;
         
-        const select = document.getElementById('clientSelect');
-        select.innerHTML = '<option value="">Select a client...</option>' + 
-          links.map(c => `<option value="${c.client_code}">${c.client_code}</option>`).join('');
+        const attention = clientsWithData.filter(c => c.needsAttention);
+        const stable = clientsWithData.filter(c => !c.needsAttention);
+        
+        document.getElementById('needsAttentionCount').textContent = attention.length;
+        if (attention.length === 0) {
+          document.getElementById('needsAttentionList').innerHTML = 
+            '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>All clients are stable. Nice work!</p></div>';
+        } else {
+          document.getElementById('needsAttentionList').innerHTML = attention.map(c => renderClientCard(c)).join('');
+        }
+        
+        document.getElementById('stableCount').textContent = stable.length;
+        document.getElementById('stableSummaryCount').textContent = stable.length;
+        document.getElementById('stableList').innerHTML = stable.map(c => renderClientCard(c)).join('');
         
       } catch (error) {
         console.error('Error loading clients:', error);
-        document.getElementById('clientList').innerHTML = 
-          `<div class="empty-state"><p>Error loading clients: ${error.message}</p></div>`;
+        document.getElementById('needsAttentionList').innerHTML = 
+          `<div class="empty-state"><p>Error loading clients</p></div>`;
       }
     }
     
-    // =====================================================
-    // LOAD ACTIVE HOMEWORK
-    // =====================================================
-    async function loadActiveHomework() {
-      try {
-        const homework = await supabaseCall(
-          `/rest/v1/homework?therapist_id=eq.${THERAPIST_ID}&status=eq.active&order=created_at.desc`
-        );
-        
-        const container = document.getElementById('activeHomeworkList');
-        
-        if (!homework || homework.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No active homework assigned.</p></div>';
-          return;
-        }
-        
-        container.innerHTML = homework.map(hw => `
-          <div class="homework-item">
-            <div class="homework-header">
-              <span class="homework-type">${hw.homework_type || 'Custom'} - ${hw.client_code}</span>
-              <span class="homework-status pending">Pending</span>
-            </div>
-            <p class="homework-description">${hw.description}</p>
-            <p class="homework-meta">Assigned ${formatTimeAgo(new Date(hw.created_at))}</p>
+    function renderClientCard(client) {
+      const borderClass = client.hasCrisis ? 'critical-border' : (client.trend === 'down' ? 'warning-border' : '');
+      const trendClass = client.trend === 'down' ? 'down' : (client.trend === 'up' ? 'up' : 'flat');
+      const trendIcon = client.trend === 'down' 
+        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>'
+        : client.trend === 'up'
+        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg>';
+      
+      let context = [];
+      if (client.hasCrisis) context.push('Crisis signal detected');
+      else if (client.trend === 'down') context.push('Engagement declining');
+      if (client.homeworkCount > 0) context.push(`${client.homeworkCount} active homework`);
+      
+      return `
+        <div class="client-card ${borderClass}" onclick="openClientModal('${client.client_code}')">
+          <div class="client-primary">
+            <div class="client-name">${client.client_code}</div>
+            <div class="client-context">${context.join(' · ') || 'No recent activity'}</div>
           </div>
-        `).join('');
-        
-      } catch (error) {
-        console.error('Error loading homework:', error);
-        document.getElementById('activeHomeworkList').innerHTML = 
-          `<div class="empty-state"><p>Error loading homework: ${error.message}</p></div>`;
-      }
+          <div class="client-signal">
+            <div class="signal-label">This week</div>
+            <div class="signal-value ${client.messageCount > 5 ? 'stable' : (client.messageCount > 0 ? 'warning' : 'critical')}">${client.messageCount} messages</div>
+          </div>
+          <div class="client-trend ${trendClass}">
+            ${trendIcon}
+            ${client.trend === 'down' ? 'Declining' : (client.trend === 'up' ? 'Increasing' : 'Stable')}
+          </div>
+        </div>
+      `;
     }
     
     // =====================================================
@@ -795,7 +1581,6 @@
     async function loadAlerts() {
       try {
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        
         const alerts = await supabaseCall(
           `/rest/v1/conversation_turns?intention_chosen=eq.CRISIS&created_at=gte.${weekAgo}&order=created_at.desc&limit=20`
         );
@@ -803,46 +1588,350 @@
         const container = document.getElementById('alertsList');
         
         if (!alerts || alerts.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No alerts in the past 7 days. ✓</p></div>';
+          container.innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>No crisis alerts in the past 7 days</p></div>';
           return;
         }
         
         container.innerHTML = alerts.map(alert => `
-          <div class="alert-item">
-            <div class="alert-header">
-              <span class="alert-client">${alert.user_id || 'Unknown'}</span>
-              <span class="alert-time">${formatTimeAgo(new Date(alert.created_at))}</span>
+          <div class="client-card critical-border">
+            <div class="client-primary">
+              <div class="client-name">${alert.user_id || 'Unknown'}</div>
+              <div class="client-context">"${truncate(alert.user_message, 100)}"</div>
             </div>
-            <p class="alert-message">"${truncate(alert.user_message, 150)}"</p>
+            <div class="client-signal">
+              <div class="signal-label">Detected</div>
+              <div class="signal-value critical">${formatTimeAgo(new Date(alert.created_at))}</div>
+            </div>
           </div>
         `).join('');
         
       } catch (error) {
         console.error('Error loading alerts:', error);
-        document.getElementById('alertsList').innerHTML = 
-          `<div class="empty-state"><p>Error loading alerts: ${error.message}</p></div>`;
       }
     }
     
     // =====================================================
-    // ASSIGN HOMEWORK (FIXED)
+    // LOAD HOMEWORK
     // =====================================================
-    async function assignHomework(event) {
-      event.preventDefault();
+    async function loadHomework() {
+      try {
+        const homework = await supabaseCall(
+          `/rest/v1/homework?therapist_id=eq.${THERAPIST_ID}&status=eq.active&order=created_at.desc`
+        );
+        
+        const container = document.getElementById('homeworkList');
+        
+        if (!homework || homework.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No active homework assignments</p></div>';
+          return;
+        }
+        
+        container.innerHTML = homework.map(hw => `
+          <div class="client-card" onclick="openClientModal('${hw.client_code}')">
+            <div class="client-primary">
+              <div class="client-name">${hw.client_code}</div>
+              <div class="client-context">${hw.homework_type}: ${truncate(hw.description, 60)}</div>
+            </div>
+            <div class="client-signal">
+              <div class="signal-label">Assigned</div>
+              <div class="signal-value">${formatTimeAgo(new Date(hw.created_at))}</div>
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (error) {
+        console.error('Error loading homework:', error);
+      }
+    }
+    
+    // =====================================================
+    // CLIENT MODAL
+    // =====================================================
+    async function openClientModal(clientCode) {
+      currentClient = clientCode;
+      document.getElementById('clientModalTitle').textContent = 'Client Record';
+      document.getElementById('clientModalSubtitle').textContent = clientCode;
+      document.getElementById('clientModal').classList.add('active');
       
-      const btn = document.getElementById('btnSubmitHomework');
-      btn.disabled = true;
-      btn.textContent = 'Assigning...';
+      // Reset to prep tab
+      switchModalTab('prep', document.querySelector('.modal-tab'));
+      
+      await loadPrepTab(clientCode);
+      loadNotesTab(clientCode);
+      await loadHistoryTab(clientCode);
+    }
+    
+    async function loadPrepTab(clientCode) {
+      const container = document.getElementById('tab-prep');
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading session prep...</div>';
       
       try {
-        const homework = {
-          therapist_id: THERAPIST_ID,
-          client_code: document.getElementById('clientSelect').value,
-          homework_type: document.getElementById('homeworkType').value,
-          description: document.getElementById('homeworkDescription').value,
-          therapist_notes: document.getElementById('therapistNotes').value || null
-        };
+        const turns = await supabaseCall(
+          `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=15`
+        );
         
+        const homework = await supabaseCall(
+          `/rest/v1/homework?client_code=eq.${clientCode}&status=eq.active`
+        );
+        
+        let html = '';
+        
+        // Since Last Session
+        if (turns && turns.length > 0) {
+          const themes = extractThemes(turns);
+          html += `
+            <div class="prep-section">
+              <div class="prep-label">Since Last Session</div>
+              <div class="prep-content ${themes.hasConcern ? 'prep-highlight' : ''}">
+                <p><strong>${turns.length} interactions</strong> with Alo in the past week.</p>
+                ${themes.summary ? `<p>${themes.summary}</p>` : ''}
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="prep-section">
+              <div class="prep-label">Since Last Session</div>
+              <div class="prep-content">
+                <p>No interactions with Alo this week.</p>
+              </div>
+            </div>
+          `;
+        }
+        
+        // Open Loops
+        let openLoops = [];
+        if (homework && homework.length > 0) {
+          homework.forEach(hw => {
+            openLoops.push({
+              text: `Homework: ${hw.homework_type} — "${truncate(hw.description, 50)}"`,
+              meta: `Assigned ${formatTimeAgo(new Date(hw.created_at))}`
+            });
+          });
+        }
+        
+        if (openLoops.length > 0) {
+          html += `
+            <div class="prep-section">
+              <div class="prep-label">Open Loops</div>
+              <div class="open-loops">
+                ${openLoops.map(loop => `
+                  <div class="loop-item">
+                    <svg class="loop-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <div class="loop-text">${loop.text}</div>
+                      <div class="loop-meta">${loop.meta}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        
+        // Recent Excerpts
+        if (turns && turns.length > 0) {
+          html += `
+            <div class="prep-section">
+              <div class="prep-label">Recent Excerpts</div>
+              <div class="prep-content">
+                ${turns.slice(0, 3).map(t => `
+                  <p style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--slate-200);">
+                    <span style="font-size: 0.75rem; color: var(--slate-500);">${formatTimeAgo(new Date(t.created_at))}</span><br>
+                    "${truncate(t.user_message, 120)}"
+                  </p>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        
+        container.innerHTML = html || '<div class="empty-state"><p>No data available</p></div>';
+        
+      } catch (error) {
+        console.error('Error loading prep:', error);
+        container.innerHTML = '<div class="empty-state"><p>Error loading session prep</p></div>';
+      }
+    }
+    
+    function loadNotesTab(clientCode) {
+      const notes = clientNotes[clientCode] || [];
+      const container = document.getElementById('notesList');
+      
+      if (notes.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No session notes yet</p></div>';
+      } else {
+        container.innerHTML = notes.map((note, index) => `
+          <div class="note-card">
+            <div class="note-header">
+              <span class="note-date">${new Date(note.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} — ${note.type}</span>
+              <div class="note-actions">
+                <button class="copy-btn" onclick="copyNoteToClipboard(${index}, this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy for EHR
+                </button>
+              </div>
+            </div>
+            <div class="note-content">
+              ${note.themes ? `<p><strong>Themes:</strong> ${note.themes}</p>` : ''}
+              ${note.interventions ? `<p><strong>Interventions:</strong> ${note.interventions}</p>` : ''}
+              ${note.observations ? `<p><strong>Observations:</strong> ${note.observations}</p>` : ''}
+              ${note.plan ? `<p><strong>Plan:</strong> ${note.plan}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      document.getElementById('addNoteBtn').style.display = 'flex';
+      document.getElementById('noteForm').style.display = 'none';
+    }
+    
+    async function loadHistoryTab(clientCode) {
+      const container = document.getElementById('homeworkHistory');
+      
+      try {
+        const homework = await supabaseCall(
+          `/rest/v1/homework?client_code=eq.${clientCode}&order=created_at.desc`
+        );
+        
+        if (!homework || homework.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No homework history</p></div>';
+          return;
+        }
+        
+        container.innerHTML = homework.map(hw => `
+          <div class="note-card">
+            <div class="note-header">
+              <span class="note-date">${hw.homework_type} — ${new Date(hw.created_at).toLocaleDateString()}</span>
+              <span class="btn btn-sm btn-secondary">${hw.status}</span>
+            </div>
+            <div class="note-content">
+              <p>${hw.description}</p>
+              ${hw.therapist_notes ? `<p style="margin-top: 8px; font-style: italic; color: var(--slate-500);">Rationale: ${hw.therapist_notes}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (error) {
+        console.error('Error loading homework history:', error);
+        container.innerHTML = '<div class="empty-state"><p>Error loading history</p></div>';
+      }
+    }
+    
+    function extractThemes(turns) {
+      const hasCrisis = turns.some(t => t.intention_chosen === 'CRISIS');
+      const messageCount = turns.length;
+      
+      let summary = '';
+      if (hasCrisis) {
+        summary = 'Client triggered a crisis response during this period. Review recommended before session.';
+      } else if (messageCount > 10) {
+        summary = 'High engagement this week. Client may have significant material to process.';
+      } else if (messageCount > 5) {
+        summary = 'Moderate engagement. Client appears to be actively working between sessions.';
+      }
+      
+      return { hasConcern: hasCrisis, summary };
+    }
+    
+    // =====================================================
+    // SESSION NOTES
+    // =====================================================
+    function showNoteForm() {
+      document.getElementById('addNoteBtn').style.display = 'none';
+      document.getElementById('noteForm').style.display = 'block';
+      document.getElementById('noteDate').valueAsDate = new Date();
+    }
+    
+    function hideNoteForm() {
+      document.getElementById('addNoteBtn').style.display = 'flex';
+      document.getElementById('noteForm').style.display = 'none';
+      // Clear form
+      document.getElementById('noteThemes').value = '';
+      document.getElementById('noteInterventions').value = '';
+      document.getElementById('noteObservations').value = '';
+      document.getElementById('notePlan').value = '';
+    }
+    
+    function saveNote() {
+      const note = {
+        date: document.getElementById('noteDate').value,
+        type: document.getElementById('noteType').value,
+        themes: document.getElementById('noteThemes').value,
+        interventions: document.getElementById('noteInterventions').value,
+        observations: document.getElementById('noteObservations').value,
+        plan: document.getElementById('notePlan').value,
+        createdAt: new Date().toISOString()
+      };
+      
+      if (!clientNotes[currentClient]) {
+        clientNotes[currentClient] = [];
+      }
+      clientNotes[currentClient].unshift(note);
+      
+      hideNoteForm();
+      loadNotesTab(currentClient);
+      showToast('Session note saved');
+    }
+    
+    function copyNoteToClipboard(noteIndex, btn) {
+      const notes = clientNotes[currentClient];
+      const note = notes[noteIndex];
+      
+      const text = `Session Date: ${new Date(note.date).toLocaleDateString()}
+Type: ${note.type}
+
+Themes Discussed:
+${note.themes || 'N/A'}
+
+Interventions Used:
+${note.interventions || 'N/A'}
+
+Clinical Observations:
+${note.observations || 'N/A'}
+
+Plan/Next Steps:
+${note.plan || 'N/A'}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
+        }, 2000);
+      });
+    }
+    
+    // =====================================================
+    // HOMEWORK
+    // =====================================================
+    function openHomeworkModal() {
+      document.getElementById('homeworkModalSubtitle').textContent = currentClient;
+      document.getElementById('homeworkModal').classList.add('active');
+    }
+    
+    function useTemplate(type, description) {
+      document.getElementById('hwType').value = type;
+      document.getElementById('hwDescription').value = description;
+    }
+    
+    async function submitHomework(event) {
+      event.preventDefault();
+      
+      const homework = {
+        therapist_id: THERAPIST_ID,
+        client_code: currentClient,
+        homework_type: document.getElementById('hwType').value,
+        description: document.getElementById('hwDescription').value,
+        therapist_notes: document.getElementById('hwRationale').value || null
+      };
+      
+      try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
           method: 'POST',
           headers: {
@@ -854,147 +1943,65 @@
           body: JSON.stringify(homework)
         });
         
-        if (!response.ok) {
-          const error = await response.text();
-          throw new Error(error);
-        }
+        if (!response.ok) throw new Error('Failed');
         
-        // Success - show message and reset form
-        const successMsg = document.getElementById('homeworkSuccess');
-        successMsg.classList.add('show');
-        document.getElementById('homeworkForm').reset();
+        closeModal('homeworkModal');
+        showToast('Homework assigned successfully');
         
-        // Refresh data
-        setTimeout(async () => {
-          await loadActiveHomework();
-          await loadDashboard();
-          successMsg.classList.remove('show');
-        }, 2000);
+        // Refresh
+        await loadPrepTab(currentClient);
+        await loadHistoryTab(currentClient);
+        await loadDashboard();
         
       } catch (error) {
-        console.error('Error assigning homework:', error);
-        alert(`Error: ${error.message}`);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Assign Homework';
+        console.error('Error:', error);
+        alert('Error assigning homework');
       }
     }
     
     // =====================================================
-    // CLIENT DETAIL MODAL
+    // UI HELPERS
     // =====================================================
-    async function showClientDetail(clientCode) {
-      document.getElementById('modalClientName').textContent = clientCode;
-      document.getElementById('clientModal').classList.add('active');
-      document.getElementById('modalContent').innerHTML = '<div class="loading">Loading...</div>';
+    function showView(viewName, navItem) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       
-      try {
-        const recentTurns = await supabaseCall(
-          `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=10`
-        );
-        
-        const homework = await supabaseCall(
-          `/rest/v1/homework?client_code=eq.${clientCode}&status=eq.active`
-        );
-        
-        let html = `
-          <div class="session-prep">
-            <h4>Session Prep Brief</h4>
-            <p><strong>Messages this week:</strong> ${recentTurns ? recentTurns.length : 0}</p>
-          </div>
-        `;
-        
-        if (homework && homework.length > 0) {
-          html += `
-            <div class="session-prep">
-              <h4>Active Homework</h4>
-              ${homework.map(hw => `
-                <p><strong>${hw.homework_type}:</strong> ${hw.description}</p>
-              `).join('')}
-            </div>
-          `;
-        }
-        
-        if (recentTurns && recentTurns.length > 0) {
-          html += `
-            <div class="session-prep">
-              <h4>Recent Conversation Excerpts</h4>
-              ${recentTurns.slice(0, 5).map(turn => `
-                <p style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px;">
-                  <span style="color: var(--gray-600); font-size: 12px;">${formatTimeAgo(new Date(turn.created_at))}</span><br>
-                  "${truncate(turn.user_message, 100)}"
-                </p>
-              `).join('')}
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="session-prep">
-              <h4>Recent Conversations</h4>
-              <p>No recent conversations with Alo.</p>
-            </div>
-          `;
-        }
-        
-        document.getElementById('modalContent').innerHTML = html;
-        
-      } catch (error) {
-        console.error('Error loading client detail:', error);
-        document.getElementById('modalContent').innerHTML = 
-          `<div class="empty-state"><p>Error: ${error.message}</p></div>`;
-      }
+      document.getElementById(`view-${viewName}`).classList.add('active');
+      if (navItem) navItem.classList.add('active');
     }
     
-    function closeModal() {
-      document.getElementById('clientModal').classList.remove('active');
+    function switchModalTab(tabName, tabBtn) {
+      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      tabBtn.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
     }
     
-    document.getElementById('clientModal').addEventListener('click', (e) => {
-      if (e.target.id === 'clientModal') closeModal();
+    function toggleStableSection() {
+      const section = document.getElementById('stableSection');
+      const toggleText = document.getElementById('stableToggleText');
+      section.classList.toggle('expanded');
+      toggleText.textContent = section.classList.contains('expanded') ? 'Hide' : 'Show all';
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = '✓ ' + message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+      });
     });
-    
-    // =====================================================
-    // MARK AS REVIEWED
-    // =====================================================
-    async function markAsReviewed() {
-      const btn = document.getElementById('btnMarkReviewed');
-      btn.disabled = true;
-      btn.textContent = 'Marking...';
-      
-      const now = new Date();
-      document.getElementById('lastReviewed').textContent = 
-        `Last reviewed: ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
-      
-      btn.textContent = '✓ Marked';
-      setTimeout(() => {
-        btn.textContent = 'Mark as Reviewed';
-        btn.disabled = false;
-      }, 2000);
-    }
-    
-    // =====================================================
-    // TAB SWITCHING
-    // =====================================================
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      event.target.classList.add('active');
-      document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-      document.getElementById(`panel-${tabName}`).classList.add('active');
-    }
-    
-    // =====================================================
-    // SETTINGS
-    // =====================================================
-    function loadSettings() {
-      showBarriers = localStorage.getItem('showHomeworkBarriers') === 'true';
-      document.getElementById('showHomeworkBarriers').checked = showBarriers;
-    }
-    
-    function toggleHomeworkBarriers() {
-      showBarriers = document.getElementById('showHomeworkBarriers').checked;
-      localStorage.setItem('showHomeworkBarriers', showBarriers);
-      loadDashboard();
-    }
     
     // =====================================================
     // UTILITIES
