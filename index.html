@@ -6,524 +6,458 @@
   <title>Alo Clinical Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     
     :root {
-      --slate-950: #0f172a;
-      --slate-900: #1e293b;
-      --slate-800: #334155;
-      --slate-700: #475569;
-      --slate-600: #64748b;
-      --slate-500: #94a3b8;
-      --slate-400: #cbd5e1;
-      --slate-300: #e2e8f0;
-      --slate-200: #f1f5f9;
-      --slate-100: #f8fafc;
-      --slate-50: #fafbfc;
-      
-      --critical: #dc2626;
-      --critical-bg: #fef2f2;
-      --critical-border: #fecaca;
-      --warning: #d97706;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #f59e0b;
       --warning-bg: #fffbeb;
       --warning-border: #fde68a;
-      --stable: #059669;
-      --stable-bg: #ecfdf5;
-      --stable-border: #a7f3d0;
-      --info: #2563eb;
-      --info-bg: #eff6ff;
-      
-      --font-display: 'Source Serif 4', Georgia, serif;
-      --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
-      
-      --sidebar-width: 280px;
-    }
-    
-    html {
-      font-size: 15px;
-      -webkit-font-smoothing: antialiased;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
     }
     
     body {
-      font-family: var(--font-body);
-      background: var(--slate-100);
-      color: var(--slate-900);
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.5;
       min-height: 100vh;
     }
     
+    /* === HEADER === */
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .home-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    
+    .home-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    
+    .home-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--text);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
     /* === LAYOUT === */
-    .app {
+    .layout {
       display: grid;
-      grid-template-columns: var(--sidebar-width) 1fr;
-      min-height: 100vh;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 84px 24px 24px;
+    }
+    
+    /* === MAIN CONTENT === */
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    /* === SECTIONS === */
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .section-icon.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+    
+    .section-icon.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .section-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .section-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    
+    .section-count {
+      margin-left: auto;
+      background: var(--bg);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+    
+    .section-body {
+      padding: 8px;
+    }
+    
+    .section-empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    /* === LIST ITEMS === */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .list-item:hover {
+      background: var(--bg);
+    }
+    
+    .list-item-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .list-item-indicator.danger { background: var(--danger); }
+    .list-item-indicator.warning { background: var(--warning); }
+    .list-item-indicator.success { background: var(--success); }
+    
+    .list-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .list-item-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    
+    .list-item-description {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+    }
+    
+    .list-item-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    
+    .list-item-action {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    
+    .list-item-action:hover {
+      background: var(--border);
     }
     
     /* === SIDEBAR === */
     .sidebar {
-      background: white;
-      border-right: 1px solid var(--slate-200);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      width: var(--sidebar-width);
-      height: 100vh;
+      position: sticky;
+      top: 84px;
+      height: fit-content;
+    }
+    
+    .sidebar-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       overflow: hidden;
     }
     
     .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--slate-200);
-    }
-    
-    .logo {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: var(--slate-900);
-      letter-spacing: -0.02em;
-    }
-    
-    .logo-subtitle {
-      font-size: 0.75rem;
-      color: var(--slate-500);
-      margin-top: 2px;
-    }
-    
-    /* === NAV === */
-    .nav-section {
-      padding: 16px 12px;
-      border-bottom: 1px solid var(--slate-200);
-    }
-    
-    .nav-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 0.9rem;
-      color: var(--slate-700);
-    }
-    
-    .nav-item:hover {
-      background: var(--slate-100);
-    }
-    
-    .nav-item.active {
-      background: var(--info-bg);
-      color: var(--info);
-    }
-    
-    .nav-item svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-    }
-    
-    .nav-badge {
-      margin-left: auto;
-      background: var(--critical);
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 10px;
-    }
-    
-    /* === CLIENT LIST === */
-    .client-list-header {
-      padding: 16px 16px 12px;
-      display: flex;
       justify-content: space-between;
-      align-items: center;
     }
     
-    .client-list-title {
-      font-size: 0.7rem;
+    .sidebar-title {
+      font-size: 0.875rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--slate-500);
     }
     
-    .client-list-count {
-      font-size: 0.7rem;
-      color: var(--slate-400);
-    }
-    
-    .client-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 12px 12px;
-    }
-    
-    .client-list-item {
+    .sidebar-sort {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      background: none;
+      border: none;
       cursor: pointer;
-      transition: all 0.15s;
-      margin-bottom: 2px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background 0.15s;
     }
     
-    .client-list-item:hover {
-      background: var(--slate-100);
+    .sidebar-sort:hover {
+      background: var(--bg);
     }
     
-    .client-list-item.active {
-      background: var(--slate-200);
+    .sidebar-sort svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .sidebar-list {
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    
+    .client-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .client-item:last-child {
+      border-bottom: none;
+    }
+    
+    .client-item:hover {
+      background: var(--bg);
+    }
+    
+    .client-item.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .client-item.active .client-name {
+      color: white;
+    }
+    
+    .client-item.active .client-meta {
+      color: rgba(255,255,255,0.8);
     }
     
     .client-avatar {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg);
       border-radius: 50%;
-      background: var(--slate-200);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--slate-600);
+      color: var(--text-light);
       flex-shrink: 0;
     }
     
-    .client-avatar.alert {
-      background: var(--critical-bg);
-      color: var(--critical);
+    .client-item.active .client-avatar {
+      background: rgba(255,255,255,0.2);
+      color: white;
     }
     
-    .client-avatar.warning {
-      background: var(--warning-bg);
-      color: var(--warning);
-    }
-    
-    .client-list-info {
+    .client-info {
       flex: 1;
       min-width: 0;
     }
     
-    .client-list-name {
-      font-size: 0.85rem;
+    .client-name {
+      font-size: 0.875rem;
       font-weight: 500;
-      color: var(--slate-800);
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     
-    .client-list-meta {
+    .client-meta {
       font-size: 0.75rem;
-      color: var(--slate-500);
+      color: var(--text-muted);
     }
     
-    .client-status-dot {
+    .client-status {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
     }
     
-    .client-status-dot.critical { background: var(--critical); }
-    .client-status-dot.warning { background: var(--warning); }
-    .client-status-dot.stable { background: var(--stable); }
+    .client-status.danger { background: var(--danger); }
+    .client-status.warning { background: var(--warning); }
+    .client-status.success { background: var(--success); }
     
-    /* === SIDEBAR FOOTER === */
-    .sidebar-footer {
-      padding: 16px;
-      border-top: 1px solid var(--slate-200);
-      background: var(--slate-50);
-    }
-    
-    .therapist-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .therapist-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--slate-900);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: white;
-    }
-    
-    .therapist-name {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--slate-800);
-    }
-    
-    .therapist-role {
-      font-size: 0.75rem;
-      color: var(--slate-500);
-    }
-    
-    /* === MAIN CONTENT === */
-    .main {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-    }
-    
-    .page {
+    /* === CLIENT PAGE === */
+    .client-page {
       display: none;
-      padding: 32px;
-      max-width: 1000px;
     }
     
-    .page.active {
+    .client-page.active {
       display: block;
     }
     
-    /* === PAGE HEADER === */
     .page-header {
       margin-bottom: 24px;
     }
     
-    .page-header h1 {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: var(--slate-900);
-      letter-spacing: -0.02em;
-    }
-    
-    .page-header p {
-      color: var(--slate-500);
-      font-size: 0.9rem;
-      margin-top: 4px;
-    }
-    
-    .page-header-meta {
-      display: flex;
-      gap: 24px;
-      margin-top: 16px;
-    }
-    
-    .meta-stat {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    
-    .meta-stat-value {
+    .page-title {
       font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--slate-900);
+      font-weight: 700;
+      margin-bottom: 4px;
     }
     
-    .meta-stat-label {
-      font-size: 0.8rem;
-      color: var(--slate-500);
-    }
-    
-    /* === ALERT CARDS === */
-    .alerts-section {
-      margin-bottom: 32px;
-    }
-    
-    .section-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--slate-500);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .section-title-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    
-    .section-title-dot.critical { background: var(--critical); }
-    .section-title-dot.warning { background: var(--warning); }
-    
-    .alert-card {
-      background: white;
-      border: 1px solid var(--slate-200);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    
-    .alert-card:hover {
-      border-color: var(--slate-300);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    
-    .alert-card.critical {
-      border-left: 3px solid var(--critical);
-    }
-    
-    .alert-card.warning {
-      border-left: 3px solid var(--warning);
-    }
-    
-    .alert-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .alert-icon.critical {
-      background: var(--critical-bg);
-      color: var(--critical);
-    }
-    
-    .alert-icon.warning {
-      background: var(--warning-bg);
-      color: var(--warning);
-    }
-    
-    .alert-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-    
-    .alert-content {
-      flex: 1;
-    }
-    
-    .alert-title {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--slate-900);
-      margin-bottom: 2px;
-    }
-    
-    .alert-description {
-      font-size: 0.8rem;
-      color: var(--slate-500);
-    }
-    
-    .alert-time {
-      font-size: 0.75rem;
-      color: var(--slate-400);
-      flex-shrink: 0;
-    }
-    
-    .alert-action {
-      background: var(--slate-100);
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--slate-600);
-      cursor: pointer;
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-    
-    .alert-action:hover {
-      background: var(--slate-200);
-    }
-    
-    /* === EMPTY STATE === */
-    .empty-state {
-      background: var(--stable-bg);
-      border: 1px solid var(--stable-border);
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      color: var(--stable);
-    }
-    
-    .empty-state svg {
-      width: 32px;
-      height: 32px;
-      margin-bottom: 8px;
-    }
-    
-    .empty-state p {
-      font-size: 0.9rem;
-    }
-    
-    /* === CLIENT PAGE === */
-    .client-page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
-    
-    .client-page-title {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: var(--slate-900);
-    }
-    
-    .client-page-meta {
-      font-size: 0.9rem;
-      color: var(--slate-500);
-      margin-top: 4px;
-    }
-    
-    .client-page-actions {
-      display: flex;
-      gap: 8px;
+    .page-meta {
+      font-size: 0.875rem;
+      color: var(--text-light);
     }
     
     /* === TABS === */
     .tabs {
       display: flex;
       gap: 4px;
-      border-bottom: 1px solid var(--slate-200);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
       margin-bottom: 24px;
     }
     
     .tab {
-      padding: 12px 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--slate-500);
-      background: none;
+      flex: 1;
+      padding: 10px 16px;
       border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-light);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
       transition: all 0.15s;
     }
     
     .tab:hover {
-      color: var(--slate-700);
+      background: var(--bg);
+      color: var(--text);
     }
     
     .tab.active {
-      color: var(--info);
-      border-bottom-color: var(--info);
+      background: var(--primary);
+      color: white;
     }
     
     .tab-content {
@@ -534,124 +468,73 @@
       display: block;
     }
     
-    /* === CONTENT CARDS === */
-    .content-card {
-      background: white;
-      border: 1px solid var(--slate-200);
-      border-radius: 8px;
+    /* === CARDS === */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       margin-bottom: 16px;
     }
     
-    .content-card-header {
+    .card-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--slate-200);
+      border-bottom: 1px solid var(--border);
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
     
-    .content-card-title {
-      font-size: 0.9rem;
+    .card-title {
+      font-size: 0.9375rem;
       font-weight: 600;
-      color: var(--slate-800);
     }
     
-    .content-card-body {
+    .card-body {
       padding: 20px;
     }
     
-    .content-card-body.highlight {
+    .card-body p {
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .card-body p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .highlight-box {
       background: var(--warning-bg);
-    }
-    
-    /* === STATS ROW === */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    
-    .stat-card {
-      background: white;
-      border: 1px solid var(--slate-200);
+      border: 1px solid var(--warning-border);
       border-radius: 8px;
-      padding: 20px;
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--slate-900);
-      line-height: 1;
-    }
-    
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--slate-500);
-      margin-top: 4px;
-    }
-    
-    /* === EXCERPT LIST === */
-    .excerpt-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .excerpt-item {
       padding: 12px 16px;
-      background: var(--slate-50);
-      border-radius: 6px;
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    
+    /* === EXCERPTS === */
+    .excerpt {
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .excerpt:last-child {
+      margin-bottom: 0;
     }
     
     .excerpt-time {
       font-size: 0.75rem;
-      color: var(--slate-400);
+      color: var(--text-muted);
       margin-bottom: 4px;
     }
     
     .excerpt-text {
-      font-size: 0.85rem;
-      color: var(--slate-700);
+      font-size: 0.875rem;
+      color: var(--text);
       font-style: italic;
-    }
-    
-    /* === NOTES === */
-    .note-card {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    
-    .note-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    
-    .note-date {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--slate-700);
-    }
-    
-    .note-content p {
-      font-size: 0.85rem;
-      color: var(--slate-600);
-      margin-bottom: 8px;
-      line-height: 1.6;
-    }
-    
-    .note-content p:last-child {
-      margin-bottom: 0;
-    }
-    
-    .note-content strong {
-      color: var(--slate-700);
     }
     
     /* === FORMS === */
@@ -661,7 +544,7 @@
       gap: 16px;
     }
     
-    .form-grid .full-width {
+    .form-grid .full {
       grid-column: 1 / -1;
     }
     
@@ -672,18 +555,18 @@
     }
     
     .form-group label {
-      font-size: 0.8rem;
+      font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--slate-700);
+      color: var(--text);
     }
     
     .form-group input,
     .form-group select,
     .form-group textarea {
       padding: 10px 12px;
-      border: 1px solid var(--slate-300);
-      border-radius: 6px;
-      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
       font-family: inherit;
       transition: border-color 0.15s;
     }
@@ -692,17 +575,17 @@
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
-      border-color: var(--info);
+      border-color: var(--primary);
     }
     
     .form-group textarea {
-      resize: vertical;
       min-height: 80px;
+      resize: vertical;
     }
     
     .form-hint {
       font-size: 0.75rem;
-      color: var(--slate-500);
+      color: var(--text-muted);
     }
     
     .form-actions {
@@ -711,18 +594,18 @@
       gap: 8px;
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid var(--slate-200);
+      border-top: 1px solid var(--border);
     }
     
     /* === BUTTONS === */
     .btn {
       padding: 10px 16px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
-      border: 1px solid transparent;
+      border: none;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -733,53 +616,53 @@
       height: 16px;
     }
     
-    .btn-secondary {
-      background: white;
-      border-color: var(--slate-300);
-      color: var(--slate-700);
-    }
-    
-    .btn-secondary:hover {
-      background: var(--slate-100);
-    }
-    
     .btn-primary {
-      background: var(--info);
+      background: var(--primary);
       color: white;
     }
     
     .btn-primary:hover {
-      background: #1d4ed8;
+      background: var(--primary-hover);
+    }
+    
+    .btn-secondary {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--bg);
     }
     
     .btn-sm {
-      padding: 6px 10px;
-      font-size: 0.8rem;
+      padding: 6px 12px;
+      font-size: 0.8125rem;
     }
     
-    /* === TEMPLATE PILLS === */
-    .template-pills {
+    /* === TEMPLATES === */
+    .templates {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 16px;
     }
     
-    .template-pill {
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      border-radius: 20px;
+    .template-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
       padding: 6px 14px;
-      font-size: 0.8rem;
-      color: var(--slate-600);
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      color: var(--text-light);
       cursor: pointer;
       transition: all 0.15s;
     }
     
-    .template-pill:hover {
-      background: var(--info-bg);
-      border-color: var(--info);
-      color: var(--info);
+    .template-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
     }
     
     /* === HOMEWORK LIST === */
@@ -788,10 +671,13 @@
       align-items: flex-start;
       gap: 12px;
       padding: 16px;
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 6px;
+      background: var(--bg);
+      border-radius: 8px;
       margin-bottom: 8px;
+    }
+    
+    .homework-item:last-child {
+      margin-bottom: 0;
     }
     
     .homework-status {
@@ -810,8 +696,8 @@
     }
     
     .homework-status.completed {
-      background: var(--stable-bg);
-      color: var(--stable);
+      background: var(--success-bg);
+      color: var(--success);
     }
     
     .homework-status svg {
@@ -824,74 +710,83 @@
     }
     
     .homework-type {
+      font-size: 0.875rem;
       font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--slate-800);
       margin-bottom: 4px;
     }
     
-    .homework-description {
-      font-size: 0.85rem;
-      color: var(--slate-600);
+    .homework-desc {
+      font-size: 0.8125rem;
+      color: var(--text-light);
     }
     
     .homework-meta {
       font-size: 0.75rem;
-      color: var(--slate-400);
+      color: var(--text-muted);
       margin-top: 6px;
     }
     
-    /* === TOAST === */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--stable);
-      color: white;
-      padding: 14px 20px;
+    /* === NOTES === */
+    .note-card {
+      background: var(--bg);
       border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      display: none;
-      z-index: 1000;
-      animation: toastIn 0.3s ease;
+      padding: 16px;
+      margin-bottom: 12px;
     }
     
-    .toast.show {
+    .note-card:last-child {
+      margin-bottom: 0;
+    }
+    
+    .note-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      margin-bottom: 12px;
     }
     
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .note-date {
+      font-size: 0.875rem;
+      font-weight: 600;
     }
     
-    /* === COPY BUTTON === */
+    .note-content p {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .note-content p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .note-content strong {
+      color: var(--text);
+    }
+    
     .copy-btn {
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      padding: 6px 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
       border-radius: 4px;
       font-size: 0.75rem;
-      color: var(--slate-600);
+      color: var(--text-light);
       cursor: pointer;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 4px;
       transition: all 0.15s;
     }
     
     .copy-btn:hover {
-      background: var(--slate-200);
+      background: var(--bg);
     }
     
     .copy-btn.copied {
-      background: var(--stable-bg);
-      border-color: var(--stable);
-      color: var(--stable);
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
     }
     
     .copy-btn svg {
@@ -899,21 +794,54 @@
       height: 12px;
     }
     
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .toast.show {
+      display: flex;
+    }
+    
+    .toast svg {
+      width: 18px;
+      height: 18px;
+      color: var(--success);
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     /* === LOADING === */
     .loading {
       text-align: center;
-      padding: 40px;
-      color: var(--slate-500);
+      padding: 32px;
+      color: var(--text-muted);
     }
     
-    .loading-spinner {
+    .spinner {
       width: 24px;
       height: 24px;
-      border: 2px solid var(--slate-200);
-      border-top-color: var(--info);
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
+      margin: 0 auto 8px;
     }
     
     @keyframes spin {
@@ -922,263 +850,244 @@
     
     /* === RESPONSIVE === */
     @media (max-width: 900px) {
-      .app {
+      .layout {
         grid-template-columns: 1fr;
       }
       
       .sidebar {
-        display: none;
-      }
-      
-      .main {
-        margin-left: 0;
+        position: static;
+        order: -1;
       }
       
       .form-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .stats-row {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">Alo</div>
-        <div class="logo-subtitle">Clinical Dashboard</div>
-      </div>
-      
-      <div class="nav-section">
-        <div class="nav-item active" onclick="showHome()">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="home-link" onclick="showHomePage(); return false;">
+        <div class="home-icon">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          Clinical Triage
-          <span class="nav-badge" id="alertBadge" style="display: none;">0</span>
         </div>
-      </div>
-      
-      <div class="client-list-header">
-        <span class="client-list-title">Clients</span>
-        <span class="client-list-count" id="clientCount">0</span>
-      </div>
-      
-      <div class="client-list" id="clientList">
-        <div class="loading">
-          <div class="loading-spinner"></div>
-        </div>
-      </div>
-      
-      <div class="sidebar-footer">
-        <div class="therapist-info">
-          <div class="therapist-avatar">D</div>
-          <div>
-            <div class="therapist-name">Dr. Dupree</div>
-            <div class="therapist-role">LMFT</div>
+        <span class="logo-text">Alo</span>
+      </a>
+    </div>
+    <div class="header-right">
+      <span class="user-name">Dr. Dupree</span>
+      <div class="user-avatar">D</div>
+    </div>
+  </header>
+  
+  <!-- Homepage -->
+  <div class="layout" id="homePage">
+    <div class="main">
+      <!-- Alerts Section -->
+      <div class="section" id="alertsSection">
+        <div class="section-header">
+          <div class="section-icon danger">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
+          <span class="section-title">Alerts</span>
+          <span class="section-count" id="alertsCount">0</span>
+        </div>
+        <div class="section-body" id="alertsList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
         </div>
       </div>
-    </aside>
+      
+      <!-- Triage Section -->
+      <div class="section" id="triageSection">
+        <div class="section-header">
+          <div class="section-icon warning">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <span class="section-title">Clinical Triage</span>
+          <span class="section-count" id="triageCount">0</span>
+        </div>
+        <div class="section-body" id="triageList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
     
-    <!-- Main Content -->
-    <main class="main">
-      <!-- Home / Triage Page -->
-      <div class="page active" id="page-home">
-        <div class="page-header">
-          <h1>Clinical Triage</h1>
-          <p id="currentDate"></p>
-          <div class="page-header-meta">
-            <div class="meta-stat">
-              <span class="meta-stat-value" id="statTotal">-</span>
-              <span class="meta-stat-label">Total Clients</span>
-            </div>
-            <div class="meta-stat">
-              <span class="meta-stat-value" id="statActive">-</span>
-              <span class="meta-stat-label">Active This Week</span>
-            </div>
-            <div class="meta-stat">
-              <span class="meta-stat-value" id="statHomework">-</span>
-              <span class="meta-stat-label">Open Homework</span>
-            </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Clients</span>
+          <button class="sidebar-sort" onclick="toggleSort()">
+            <span id="sortLabel">A-Z</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+        <div class="sidebar-list" id="clientsList">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Client Page -->
+  <div class="layout client-page" id="clientPage">
+    <div class="main">
+      <div class="page-header">
+        <h1 class="page-title" id="clientName">Client Name</h1>
+        <p class="page-meta" id="clientMeta">Loading...</p>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+        <button class="tab" onclick="switchTab('notes', this)">Session Notes</button>
+        <button class="tab" onclick="switchTab('homework', this)">Homework</button>
+        <button class="tab" onclick="switchTab('activity', this)">Alo Activity</button>
+      </div>
+      
+      <!-- Session Prep Tab -->
+      <div class="tab-content active" id="tab-prep">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Since Last Session</span>
+          </div>
+          <div class="card-body" id="prepSummary">
+            <div class="loading"><div class="spinner"></div></div>
           </div>
         </div>
         
-        <!-- Crisis Alerts -->
-        <div class="alerts-section" id="crisisSection" style="display: none;">
-          <div class="section-title">
-            <span class="section-title-dot critical"></span>
-            Crisis Signals
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Open Items</span>
           </div>
-          <div id="crisisAlerts"></div>
-        </div>
-        
-        <!-- Action Items -->
-        <div class="alerts-section" id="actionsSection">
-          <div class="section-title">
-            <span class="section-title-dot warning"></span>
-            Action Items
-          </div>
-          <div id="actionItems">
-            <div class="loading">
-              <div class="loading-spinner"></div>
-              Loading...
-            </div>
+          <div class="card-body" id="prepOpenItems">
+            <p style="color: var(--text-muted);">No open items</p>
           </div>
         </div>
       </div>
       
-      <!-- Client Page (dynamic) -->
-      <div class="page" id="page-client">
-        <div class="client-page-header">
-          <div>
-            <div class="client-page-title" id="clientPageTitle">Client</div>
-            <div class="client-page-meta" id="clientPageMeta">Loading...</div>
-          </div>
-          <div class="client-page-actions">
-            <button class="btn btn-secondary" onclick="showHome()">
+      <!-- Session Notes Tab -->
+      <div class="tab-content" id="tab-notes">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Session Notes</span>
+            <button class="btn btn-sm btn-primary" onclick="showNoteForm()">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
               </svg>
-              Back
+              Add Note
             </button>
           </div>
-        </div>
-        
-        <!-- Client Stats -->
-        <div class="stats-row" id="clientStats">
-          <div class="stat-card">
-            <div class="stat-value" id="clientMessages">-</div>
-            <div class="stat-label">Messages This Week</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="clientHomework">-</div>
-            <div class="stat-label">Active Homework</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="clientTrend">-</div>
-            <div class="stat-label">Trend</div>
-          </div>
-        </div>
-        
-        <!-- Client Tabs -->
-        <div class="tabs">
-          <button class="tab active" onclick="switchClientTab('prep', this)">Session Prep</button>
-          <button class="tab" onclick="switchClientTab('notes', this)">Session Notes</button>
-          <button class="tab" onclick="switchClientTab('homework', this)">Homework</button>
-        </div>
-        
-        <!-- Session Prep Tab -->
-        <div class="tab-content active" id="tab-prep">
-          <div class="content-card">
-            <div class="content-card-header">
-              <span class="content-card-title">Since Last Session</span>
-            </div>
-            <div class="content-card-body" id="prepSummary">
-              <div class="loading"><div class="loading-spinner"></div></div>
-            </div>
-          </div>
-          
-          <div class="content-card">
-            <div class="content-card-header">
-              <span class="content-card-title">Recent Excerpts</span>
-            </div>
-            <div class="content-card-body">
-              <div class="excerpt-list" id="prepExcerpts">
-                <div class="loading"><div class="loading-spinner"></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Session Notes Tab -->
-        <div class="tab-content" id="tab-notes">
-          <div class="content-card">
-            <div class="content-card-header">
-              <span class="content-card-title">Session Notes</span>
-              <button class="btn btn-sm btn-primary" onclick="showNoteForm()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Note
-              </button>
-            </div>
-            <div class="content-card-body" id="notesContainer">
-              <!-- Notes list or form will be injected here -->
-            </div>
-          </div>
-        </div>
-        
-        <!-- Homework Tab -->
-        <div class="tab-content" id="tab-homework">
-          <div class="content-card">
-            <div class="content-card-header">
-              <span class="content-card-title">Assign New Homework</span>
-            </div>
-            <div class="content-card-body">
-              <div class="template-pills">
-                <span class="template-pill" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</span>
-                <span class="template-pill" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</span>
-                <span class="template-pill" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning about current concerns')">Journaling</span>
-                <span class="template-pill" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation this week')">Behavioral</span>
-                <span class="template-pill" onclick="useTemplate('breathing', 'Practice 4-7-8 breathing technique twice daily')">Breathing</span>
-              </div>
-              
-              <form id="homeworkForm" onsubmit="submitHomework(event)">
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label>Type</label>
-                    <select id="hwType" required>
-                      <option value="grounding">Grounding Technique</option>
-                      <option value="noticing">Noticing Practice</option>
-                      <option value="journaling">Journaling Prompt</option>
-                      <option value="behavioral">Behavioral Experiment</option>
-                      <option value="cognitive">Cognitive Exercise</option>
-                      <option value="breathing">Breathing Exercise</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>Due (optional)</label>
-                    <input type="date" id="hwDue">
-                  </div>
-                  <div class="form-group full-width">
-                    <label>Instructions</label>
-                    <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
-                  </div>
-                  <div class="form-group full-width">
-                    <label>Clinical Rationale (private)</label>
-                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                    <span class="form-hint">For your records only</span>
-                  </div>
-                </div>
-                <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Assign Homework</button>
-                </div>
-              </form>
-            </div>
-          </div>
-          
-          <div class="content-card">
-            <div class="content-card-header">
-              <span class="content-card-title">Homework History</span>
-            </div>
-            <div class="content-card-body" id="homeworkHistory">
-              <div class="loading"><div class="loading-spinner"></div></div>
-            </div>
+          <div class="card-body" id="notesContainer">
+            <p style="color: var(--text-muted); text-align: center;">No session notes yet</p>
           </div>
         </div>
       </div>
-    </main>
+      
+      <!-- Homework Tab -->
+      <div class="tab-content" id="tab-homework">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Assign Homework</span>
+          </div>
+          <div class="card-body">
+            <div class="templates">
+              <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</button>
+              <button class="template-btn" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</button>
+              <button class="template-btn" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning')">Journaling</button>
+              <button class="template-btn" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation')">Behavioral</button>
+              <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 breathing technique twice daily')">Breathing</button>
+            </div>
+            
+            <form id="homeworkForm" onsubmit="submitHomework(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Type</label>
+                  <select id="hwType" required>
+                    <option value="grounding">Grounding Technique</option>
+                    <option value="noticing">Noticing Practice</option>
+                    <option value="journaling">Journaling Prompt</option>
+                    <option value="behavioral">Behavioral Experiment</option>
+                    <option value="cognitive">Cognitive Exercise</option>
+                    <option value="breathing">Breathing Exercise</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Due Date (optional)</label>
+                  <input type="date" id="hwDue">
+                </div>
+                <div class="form-group full">
+                  <label>Instructions</label>
+                  <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Clinical Rationale (private)</label>
+                  <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                  <span class="form-hint">For your records only</span>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Assign Homework</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Homework History</span>
+          </div>
+          <div class="card-body" id="homeworkHistory">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Alo Activity Tab -->
+      <div class="tab-content" id="tab-activity">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Conversations</span>
+          </div>
+          <div class="card-body" id="activityExcerpts">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar (same as homepage) -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Clients</span>
+          <button class="sidebar-sort" onclick="toggleSort()">
+            <span id="sortLabel2">A-Z</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+        <div class="sidebar-list" id="clientsList2">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- Toast -->
   <div class="toast" id="toast">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
     </svg>
     <span id="toastMessage">Success</span>
@@ -1186,7 +1095,7 @@
 
   <script>
     // =====================================================
-    // CONFIGURATION
+    // CONFIG
     // =====================================================
     const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
@@ -1194,23 +1103,19 @@
     
     let currentClient = null;
     let allClients = [];
-    let clientNotes = {}; // In-memory for demo
+    let clientNotes = {};
+    let sortBy = 'alpha'; // 'alpha' or 'schedule'
     
     // =====================================================
     // INIT
     // =====================================================
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
-      loadDashboard();
-    });
+    document.addEventListener('DOMContentLoaded', loadDashboard);
     
     // =====================================================
     // API
     // =====================================================
-    async function supabaseCall(endpoint, options = {}) {
-      const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+    async function api(endpoint, options = {}) {
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
         ...options,
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -1219,9 +1124,8 @@
           ...options.headers
         }
       });
-      
-      if (!response.ok) throw new Error(`API Error: ${response.status}`);
-      const text = await response.text();
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      const text = await res.text();
       return text ? JSON.parse(text) : null;
     }
     
@@ -1230,37 +1134,12 @@
     // =====================================================
     async function loadDashboard() {
       try {
-        // Stats
-        const stats = await supabaseCall('/rest/v1/rpc/get_therapist_dashboard', {
-          method: 'POST',
-          body: JSON.stringify({ therapist_id_input: THERAPIST_ID })
-        });
-        
-        if (stats?.[0]) {
-          document.getElementById('statTotal').textContent = stats[0].total_clients || 0;
-          document.getElementById('statActive').textContent = stats[0].active_clients || 0;
-          document.getElementById('statHomework').textContent = stats[0].pending_homework || 0;
-        }
-        
-        await loadClients();
-        
-      } catch (error) {
-        console.error('Dashboard error:', error);
-      }
-    }
-    
-    // =====================================================
-    // LOAD CLIENTS
-    // =====================================================
-    async function loadClients() {
-      try {
-        const links = await supabaseCall(
-          `/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`
-        );
+        const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
         
         if (!links?.length) {
-          document.getElementById('clientList').innerHTML = '<div style="padding: 20px; text-align: center; color: var(--slate-500); font-size: 0.85rem;">No clients yet</div>';
-          document.getElementById('actionItems').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>No action items</p></div>';
+          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No alerts</div>';
+          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items requiring attention</div>';
+          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet</div>';
           return;
         }
         
@@ -1268,235 +1147,277 @@
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
         
-        const enriched = await Promise.all(links.map(async (client) => {
-          const [recentTurns, prevTurns, homework] = await Promise.all([
-            supabaseCall(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,intention_chosen`),
-            supabaseCall(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`),
-            supabaseCall(`/rest/v1/homework?client_code=eq.${client.client_code}&status=eq.active&select=id`)
+        allClients = await Promise.all(links.map(async (client) => {
+          const [recent, prev, hw] = await Promise.all([
+            api(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,intention_chosen,created_at`),
+            api(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`),
+            api(`/rest/v1/homework?client_code=eq.${client.client_code}&status=eq.active&select=id`)
           ]);
           
-          const current = recentTurns?.length || 0;
-          const prev = prevTurns?.length || 0;
-          const hasCrisis = recentTurns?.some(t => t.intention_chosen === 'CRISIS');
+          const hasCrisis = recent?.some(t => t.intention_chosen === 'CRISIS');
+          const current = recent?.length || 0;
+          const previous = prev?.length || 0;
           
           let trend = 'stable';
-          if (current > prev + 2) trend = 'up';
-          else if (current < prev - 2) trend = 'down';
-          
-          const needsAttention = hasCrisis || trend === 'down' || (homework?.length > 0 && current === 0);
+          if (current > previous + 2) trend = 'up';
+          else if (current < previous - 2) trend = 'down';
           
           return {
             ...client,
-            messageCount: current,
-            homeworkCount: homework?.length || 0,
-            trend,
+            messages: current,
+            homework: hw?.length || 0,
             hasCrisis,
-            needsAttention
+            trend,
+            lastActivity: recent?.[0]?.created_at || null
           };
         }));
         
-        allClients = enriched;
-        document.getElementById('clientCount').textContent = enriched.length;
+        renderAlerts();
+        renderTriage();
+        renderClientsList();
         
-        // Render sidebar client list
-        renderClientList(enriched);
-        
-        // Render action items
-        renderActionItems(enriched);
-        
-        // Render crisis alerts
-        renderCrisisAlerts(enriched);
-        
-      } catch (error) {
-        console.error('Error loading clients:', error);
+      } catch (err) {
+        console.error('Dashboard error:', err);
       }
     }
     
-    function renderClientList(clients) {
-      const html = clients.map(c => {
-        const avatarClass = c.hasCrisis ? 'alert' : (c.trend === 'down' ? 'warning' : '');
-        const statusClass = c.hasCrisis ? 'critical' : (c.trend === 'down' ? 'warning' : 'stable');
-        const initials = c.client_code.substring(0, 2).toUpperCase();
+    // =====================================================
+    // RENDER ALERTS
+    // =====================================================
+    function renderAlerts() {
+      const alerts = allClients.filter(c => c.hasCrisis);
+      document.getElementById('alertsCount').textContent = alerts.length;
+      
+      if (!alerts.length) {
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        return;
+      }
+      
+      document.getElementById('alertsList').innerHTML = alerts.map(c => `
+        <div class="list-item" onclick="showClient('${c.client_code}')">
+          <div class="list-item-indicator danger"></div>
+          <div class="list-item-content">
+            <div class="list-item-title">${c.client_code}</div>
+            <div class="list-item-description">Crisis signal detected</div>
+          </div>
+          <span class="list-item-meta">${c.lastActivity ? timeAgo(new Date(c.lastActivity)) : ''}</span>
+          <button class="list-item-action">View</button>
+        </div>
+      `).join('');
+    }
+    
+    // =====================================================
+    // RENDER TRIAGE
+    // =====================================================
+    function renderTriage() {
+      const triage = allClients.filter(c => !c.hasCrisis && (c.trend === 'down' || (c.homework > 0 && c.messages === 0)));
+      document.getElementById('triageCount').textContent = triage.length;
+      
+      if (!triage.length) {
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable — no action needed</div>';
+        return;
+      }
+      
+      document.getElementById('triageList').innerHTML = triage.map(c => {
+        let desc = '';
+        if (c.trend === 'down') desc = 'Engagement declining';
+        else if (c.homework > 0 && c.messages === 0) desc = 'Homework stalled — no Alo activity';
         
         return `
-          <div class="client-list-item" onclick="showClient('${c.client_code}')">
-            <div class="client-avatar ${avatarClass}">${initials}</div>
-            <div class="client-list-info">
-              <div class="client-list-name">${c.client_code}</div>
-              <div class="client-list-meta">${c.messageCount} messages this week</div>
+          <div class="list-item" onclick="showClient('${c.client_code}')">
+            <div class="list-item-indicator warning"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${c.client_code}</div>
+              <div class="list-item-description">${desc}</div>
             </div>
-            <div class="client-status-dot ${statusClass}"></div>
+            <span class="list-item-meta">${c.messages} msgs this week</span>
+            <button class="list-item-action">Review</button>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // =====================================================
+    // RENDER CLIENTS LIST
+    // =====================================================
+    function renderClientsList() {
+      let sorted = [...allClients];
+      
+      if (sortBy === 'alpha') {
+        sorted.sort((a, b) => a.client_code.localeCompare(b.client_code));
+      } else {
+        sorted.sort((a, b) => {
+          if (!a.lastActivity) return 1;
+          if (!b.lastActivity) return -1;
+          return new Date(b.lastActivity) - new Date(a.lastActivity);
+        });
+      }
+      
+      const html = sorted.map(c => {
+        const statusClass = c.hasCrisis ? 'danger' : (c.trend === 'down' ? 'warning' : 'success');
+        const initials = c.client_code.substring(0, 2).toUpperCase();
+        const isActive = currentClient === c.client_code;
+        
+        return `
+          <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${c.client_code}')">
+            <div class="client-avatar">${initials}</div>
+            <div class="client-info">
+              <div class="client-name">${c.client_code}</div>
+              <div class="client-meta">${c.messages} msgs · ${c.homework} hw</div>
+            </div>
+            <div class="client-status ${statusClass}"></div>
           </div>
         `;
       }).join('');
       
-      document.getElementById('clientList').innerHTML = html;
+      document.getElementById('clientsList').innerHTML = html;
+      document.getElementById('clientsList2').innerHTML = html;
     }
     
-    function renderActionItems(clients) {
-      const items = [];
-      
-      clients.forEach(c => {
-        if (c.trend === 'down') {
-          items.push({
-            type: 'warning',
-            client: c.client_code,
-            title: `${c.client_code} — Engagement Declining`,
-            description: 'Activity dropped compared to last week',
-            action: 'Review'
-          });
-        }
-        if (c.homeworkCount > 0 && c.messageCount === 0) {
-          items.push({
-            type: 'warning',
-            client: c.client_code,
-            title: `${c.client_code} — Homework Stalled`,
-            description: `${c.homeworkCount} active homework, no Alo activity`,
-            action: 'Check In'
-          });
-        }
-      });
-      
-      if (items.length === 0) {
-        document.getElementById('actionItems').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>All clients stable — no action items</p></div>';
-        return;
-      }
-      
-      document.getElementById('actionItems').innerHTML = items.map(item => `
-        <div class="alert-card ${item.type}" onclick="showClient('${item.client}')">
-          <div class="alert-icon ${item.type}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">${item.title}</div>
-            <div class="alert-description">${item.description}</div>
-          </div>
-          <button class="alert-action">${item.action}</button>
-        </div>
-      `).join('');
-    }
-    
-    function renderCrisisAlerts(clients) {
-      const crisis = clients.filter(c => c.hasCrisis);
-      
-      if (crisis.length === 0) {
-        document.getElementById('crisisSection').style.display = 'none';
-        document.getElementById('alertBadge').style.display = 'none';
-        return;
-      }
-      
-      document.getElementById('crisisSection').style.display = 'block';
-      document.getElementById('alertBadge').style.display = 'block';
-      document.getElementById('alertBadge').textContent = crisis.length;
-      
-      document.getElementById('crisisAlerts').innerHTML = crisis.map(c => `
-        <div class="alert-card critical" onclick="showClient('${c.client_code}')">
-          <div class="alert-icon critical">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">${c.client_code} — Crisis Signal</div>
-            <div class="alert-description">Client triggered crisis response this week</div>
-          </div>
-          <button class="alert-action">Review Now</button>
-        </div>
-      `).join('');
+    function toggleSort() {
+      sortBy = sortBy === 'alpha' ? 'recent' : 'alpha';
+      document.getElementById('sortLabel').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
+      document.getElementById('sortLabel2').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
+      renderClientsList();
     }
     
     // =====================================================
     // SHOW CLIENT PAGE
     // =====================================================
-    async function showClient(clientCode) {
-      currentClient = clientCode;
+    async function showClient(code) {
+      currentClient = code;
       
-      // Update sidebar active state
-      document.querySelectorAll('.client-list-item').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      event?.target?.closest('.client-list-item')?.classList.add('active');
+      // Switch pages
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('clientPage').classList.add('active');
       
-      // Show client page
-      document.getElementById('page-home').classList.remove('active');
-      document.getElementById('page-client').classList.add('active');
-      
-      // Update header
-      document.getElementById('clientPageTitle').textContent = clientCode;
-      
-      // Find client data
-      const client = allClients.find(c => c.client_code === clientCode);
-      if (client) {
-        document.getElementById('clientPageMeta').textContent = 
-          `${client.messageCount} messages this week · ${client.homeworkCount} active homework · Trend: ${client.trend}`;
-        document.getElementById('clientMessages').textContent = client.messageCount;
-        document.getElementById('clientHomework').textContent = client.homeworkCount;
-        document.getElementById('clientTrend').textContent = client.trend === 'up' ? '↑ Up' : (client.trend === 'down' ? '↓ Down' : '→ Stable');
-      }
+      // Update client list highlight
+      renderClientsList();
       
       // Reset to prep tab
-      switchClientTab('prep', document.querySelector('.tab'));
+      switchTab('prep', document.querySelector('.tab'));
+      
+      // Update header
+      const client = allClients.find(c => c.client_code === code);
+      document.getElementById('clientName').textContent = code;
+      document.getElementById('clientMeta').textContent = client 
+        ? `${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+        : 'Loading...';
       
       // Load data
-      await loadClientPrep(clientCode);
-      loadClientNotes(clientCode);
-      await loadClientHomework(clientCode);
+      await loadClientData(code);
     }
     
-    async function loadClientPrep(clientCode) {
+    async function loadClientData(code) {
       try {
-        const turns = await supabaseCall(
-          `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=10`
-        );
+        const [turns, homework] = await Promise.all([
+          api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
+          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`)
+        ]);
         
-        // Summary
+        // Prep Summary
         const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
         let summary = '';
         
         if (!turns?.length) {
           summary = '<p>No Alo interactions this week.</p>';
         } else if (hasCrisis) {
-          summary = `<p><strong>${turns.length} interactions</strong> with Alo.</p><p style="color: var(--critical);">⚠️ Client triggered a crisis response. Review recommended before session.</p>`;
-          document.getElementById('prepSummary').parentElement.classList.add('highlight');
-        } else if (turns.length > 10) {
-          summary = `<p><strong>${turns.length} interactions</strong> with Alo. High engagement — client may have significant material to process.</p>`;
+          summary = `
+            <div class="highlight-box">⚠️ Client triggered a crisis response. Review before session.</div>
+            <p><strong>${turns.length} interactions</strong> with Alo this week.</p>
+          `;
         } else {
           summary = `<p><strong>${turns.length} interactions</strong> with Alo this week.</p>`;
         }
-        
         document.getElementById('prepSummary').innerHTML = summary;
         
-        // Excerpts
+        // Open Items
+        const activeHw = homework?.filter(h => h.status === 'active') || [];
+        if (activeHw.length) {
+          document.getElementById('prepOpenItems').innerHTML = activeHw.map(h => `
+            <p>• <strong>${h.homework_type}:</strong> ${h.description}</p>
+          `).join('');
+        } else {
+          document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
+        }
+        
+        // Activity Excerpts
         if (turns?.length) {
-          document.getElementById('prepExcerpts').innerHTML = turns.slice(0, 5).map(t => `
-            <div class="excerpt-item">
-              <div class="excerpt-time">${formatTimeAgo(new Date(t.created_at))}</div>
-              <div class="excerpt-text">"${truncate(t.user_message, 150)}"</div>
+          document.getElementById('activityExcerpts').innerHTML = turns.slice(0, 10).map(t => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(t.created_at))}</div>
+              <div class="excerpt-text">"${truncate(t.user_message, 200)}"</div>
             </div>
           `).join('');
         } else {
-          document.getElementById('prepExcerpts').innerHTML = '<p style="color: var(--slate-500);">No recent conversations</p>';
+          document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
         }
         
-      } catch (error) {
-        console.error('Error loading prep:', error);
+        // Homework History
+        if (homework?.length) {
+          document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
+            <div class="homework-item">
+              <div class="homework-status ${h.status === 'active' ? 'active' : 'completed'}">
+                ${h.status === 'active' 
+                  ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                  : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+                }
+              </div>
+              <div class="homework-content">
+                <div class="homework-type">${h.homework_type}</div>
+                <div class="homework-desc">${h.description}</div>
+                <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
+        }
+        
+        // Notes
+        loadNotes();
+        
+      } catch (err) {
+        console.error('Error loading client:', err);
       }
     }
     
-    function loadClientNotes(clientCode) {
-      const notes = clientNotes[clientCode] || [];
+    // =====================================================
+    // SHOW HOME PAGE
+    // =====================================================
+    function showHomePage() {
+      currentClient = null;
+      document.getElementById('clientPage').classList.remove('active');
+      document.getElementById('homePage').style.display = 'grid';
+      renderClientsList();
+    }
+    
+    // =====================================================
+    // TABS
+    // =====================================================
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+    
+    // =====================================================
+    // NOTES
+    // =====================================================
+    function loadNotes() {
+      const notes = clientNotes[currentClient] || [];
       const container = document.getElementById('notesContainer');
       
       if (!notes.length) {
-        container.innerHTML = '<p style="color: var(--slate-500); text-align: center; padding: 20px;">No session notes yet. Click "Add Note" to create one.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Click "Add Note" to create one.</p>';
         return;
       }
       
-      container.innerHTML = notes.map((note, i) => `
+      container.innerHTML = notes.map((n, i) => `
         <div class="note-card">
           <div class="note-header">
-            <span class="note-date">${new Date(note.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${note.type}</span>
+            <span class="note-date">${new Date(n.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${n.type}</span>
             <button class="copy-btn" onclick="copyNote(${i}, this)">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -1505,57 +1426,18 @@
             </button>
           </div>
           <div class="note-content">
-            ${note.themes ? `<p><strong>Themes:</strong> ${note.themes}</p>` : ''}
-            ${note.interventions ? `<p><strong>Interventions:</strong> ${note.interventions}</p>` : ''}
-            ${note.observations ? `<p><strong>Observations:</strong> ${note.observations}</p>` : ''}
-            ${note.plan ? `<p><strong>Plan:</strong> ${note.plan}</p>` : ''}
+            ${n.themes ? `<p><strong>Themes:</strong> ${n.themes}</p>` : ''}
+            ${n.interventions ? `<p><strong>Interventions:</strong> ${n.interventions}</p>` : ''}
+            ${n.observations ? `<p><strong>Observations:</strong> ${n.observations}</p>` : ''}
+            ${n.plan ? `<p><strong>Plan:</strong> ${n.plan}</p>` : ''}
           </div>
         </div>
       `).join('');
     }
     
-    async function loadClientHomework(clientCode) {
-      try {
-        const homework = await supabaseCall(
-          `/rest/v1/homework?client_code=eq.${clientCode}&order=created_at.desc`
-        );
-        
-        const container = document.getElementById('homeworkHistory');
-        
-        if (!homework?.length) {
-          container.innerHTML = '<p style="color: var(--slate-500); text-align: center; padding: 20px;">No homework assigned yet</p>';
-          return;
-        }
-        
-        container.innerHTML = homework.map(hw => `
-          <div class="homework-item">
-            <div class="homework-status ${hw.status === 'active' ? 'active' : 'completed'}">
-              ${hw.status === 'active' 
-                ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
-                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
-              }
-            </div>
-            <div class="homework-content">
-              <div class="homework-type">${hw.homework_type}</div>
-              <div class="homework-description">${hw.description}</div>
-              <div class="homework-meta">Assigned ${formatTimeAgo(new Date(hw.created_at))}${hw.therapist_notes ? ` · ${hw.therapist_notes}` : ''}</div>
-            </div>
-          </div>
-        `).join('');
-        
-      } catch (error) {
-        console.error('Error loading homework:', error);
-      }
-    }
-    
-    // =====================================================
-    // NOTES
-    // =====================================================
     function showNoteForm() {
-      const container = document.getElementById('notesContainer');
       const today = new Date().toISOString().split('T')[0];
-      
-      container.innerHTML = `
+      document.getElementById('notesContainer').innerHTML = `
         <div class="form-grid">
           <div class="form-group">
             <label>Session Date</label>
@@ -1569,25 +1451,25 @@
               <option value="Family">Family</option>
             </select>
           </div>
-          <div class="form-group full-width">
+          <div class="form-group full">
             <label>Themes Discussed</label>
-            <textarea id="noteThemes" placeholder="Main topics covered..."></textarea>
+            <textarea id="noteThemes" placeholder="Main topics..."></textarea>
           </div>
-          <div class="form-group full-width">
+          <div class="form-group full">
             <label>Interventions Used</label>
-            <textarea id="noteInterventions" placeholder="Techniques or approaches..."></textarea>
+            <textarea id="noteInterventions" placeholder="Techniques used..."></textarea>
           </div>
-          <div class="form-group full-width">
+          <div class="form-group full">
             <label>Clinical Observations</label>
             <textarea id="noteObservations" placeholder="Affect, engagement, progress..."></textarea>
           </div>
-          <div class="form-group full-width">
+          <div class="form-group full">
             <label>Plan / Next Steps</label>
             <textarea id="notePlan" placeholder="Goals for next session..."></textarea>
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-secondary" onclick="loadClientNotes('${currentClient}')">Cancel</button>
+          <button class="btn btn-secondary" onclick="loadNotes()">Cancel</button>
           <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
         </div>
       `;
@@ -1606,28 +1488,25 @@
       if (!clientNotes[currentClient]) clientNotes[currentClient] = [];
       clientNotes[currentClient].unshift(note);
       
-      loadClientNotes(currentClient);
-      showToast('Session note saved');
+      loadNotes();
+      toast('Note saved');
     }
     
-    function copyNote(index, btn) {
-      const note = clientNotes[currentClient][index];
-      const text = `Session: ${new Date(note.date).toLocaleDateString()} (${note.type})
+    function copyNote(i, btn) {
+      const n = clientNotes[currentClient][i];
+      const text = `Session: ${new Date(n.date).toLocaleDateString()} (${n.type})
 
-Themes: ${note.themes || 'N/A'}
-
-Interventions: ${note.interventions || 'N/A'}
-
-Observations: ${note.observations || 'N/A'}
-
-Plan: ${note.plan || 'N/A'}`;
+Themes: ${n.themes || 'N/A'}
+Interventions: ${n.interventions || 'N/A'}
+Observations: ${n.observations || 'N/A'}
+Plan: ${n.plan || 'N/A'}`;
       
       navigator.clipboard.writeText(text).then(() => {
         btn.classList.add('copied');
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
         setTimeout(() => {
           btn.classList.remove('copied');
-          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
         }, 2000);
       });
     }
@@ -1635,13 +1514,13 @@ Plan: ${note.plan || 'N/A'}`;
     // =====================================================
     // HOMEWORK
     // =====================================================
-    function useTemplate(type, description) {
+    function useTemplate(type, desc) {
       document.getElementById('hwType').value = type;
-      document.getElementById('hwDescription').value = description;
+      document.getElementById('hwDescription').value = desc;
     }
     
-    async function submitHomework(event) {
-      event.preventDefault();
+    async function submitHomework(e) {
+      e.preventDefault();
       
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
@@ -1662,55 +1541,37 @@ Plan: ${note.plan || 'N/A'}`;
         });
         
         document.getElementById('homeworkForm').reset();
-        await loadClientHomework(currentClient);
-        showToast('Homework assigned');
+        await loadClientData(currentClient);
+        toast('Homework assigned');
         
-      } catch (error) {
-        console.error('Error:', error);
+      } catch (err) {
+        console.error('Error:', err);
         alert('Error assigning homework');
       }
     }
     
     // =====================================================
-    // NAVIGATION
+    // UTILS
     // =====================================================
-    function showHome() {
-      document.getElementById('page-client').classList.remove('active');
-      document.getElementById('page-home').classList.add('active');
-      document.querySelectorAll('.client-list-item').forEach(el => el.classList.remove('active'));
-      document.querySelector('.nav-item').classList.add('active');
-      currentClient = null;
-    }
-    
-    function switchClientTab(tabName, btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
-    
-    // =====================================================
-    // UI HELPERS
-    // =====================================================
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
-    function formatTimeAgo(date) {
-      const seconds = Math.floor((new Date() - date) / 1000);
-      if (seconds < 60) return 'Just now';
-      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-      if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    function timeAgo(date) {
+      const s = Math.floor((new Date() - date) / 1000);
+      if (s < 60) return 'Just now';
+      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+      if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+      if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     
     function truncate(str, len) {
       if (!str) return '';
       return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+    
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
   </script>
 </body>
