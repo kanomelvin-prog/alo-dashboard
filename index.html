@@ -39,7 +39,6 @@
       padding: 20px;
     }
     
-    /* === HEADER === */
     header {
       background: white;
       padding: 24px;
@@ -90,7 +89,6 @@
       cursor: not-allowed;
     }
     
-    /* === STATS GRID === */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -125,7 +123,6 @@
       color: var(--danger);
     }
     
-    /* === TABS === */
     .tabs {
       display: flex;
       gap: 8px;
@@ -154,7 +151,6 @@
       color: white;
     }
     
-    /* === PANELS === */
     .panel {
       display: none;
       background: white;
@@ -173,7 +169,6 @@
       color: var(--gray-900);
     }
     
-    /* === CLIENT LIST === */
     .client-list {
       display: flex;
       flex-direction: column;
@@ -249,7 +244,6 @@
       color: #991B1B;
     }
     
-    /* === HOMEWORK FORM === */
     .form-group {
       margin-bottom: 20px;
     }
@@ -307,7 +301,6 @@
       cursor: not-allowed;
     }
     
-    /* === ALERTS === */
     .alert-item {
       padding: 16px;
       background: #FEF2F2;
@@ -343,7 +336,6 @@
       font-style: italic;
     }
     
-    /* === CLIENT DETAIL MODAL === */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -408,7 +400,6 @@
       font-size: 15px;
     }
     
-    /* === SUCCESS MESSAGE === */
     .success-message {
       display: none;
       background: #D1FAE5;
@@ -423,14 +414,12 @@
       display: block;
     }
     
-    /* === LOADING === */
     .loading {
       text-align: center;
       padding: 40px;
       color: var(--gray-600);
     }
     
-    /* === EMPTY STATE === */
     .empty-state {
       text-align: center;
       padding: 40px;
@@ -441,7 +430,6 @@
       margin-bottom: 8px;
     }
 
-    /* === HOMEWORK LIST === */
     .homework-item {
       padding: 16px;
       background: var(--gray-50);
@@ -492,7 +480,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header>
       <div>
         <h1>Alo Therapist Dashboard</h1>
@@ -506,7 +493,6 @@
       </div>
     </header>
     
-    <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-value" id="statTotalClients">-</div>
@@ -526,7 +512,6 @@
       </div>
     </div>
     
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab active" onclick="switchTab('clients')">Clients</button>
       <button class="tab" onclick="switchTab('homework')">Assign Homework</button>
@@ -534,7 +519,6 @@
       <button class="tab" onclick="switchTab('settings')">Settings</button>
     </div>
     
-    <!-- Clients Panel -->
     <div class="panel active" id="panel-clients">
       <h2>Your Clients</h2>
       <div class="client-list" id="clientList">
@@ -542,7 +526,6 @@
       </div>
     </div>
     
-    <!-- Homework Panel -->
     <div class="panel" id="panel-homework">
       <h2>Assign New Homework</h2>
       <div class="success-message" id="homeworkSuccess">
@@ -583,7 +566,6 @@
       </div>
     </div>
     
-    <!-- Alerts Panel -->
     <div class="panel" id="panel-alerts">
       <h2>Recent Alerts</h2>
       <p class="subtitle" style="margin-bottom: 20px;">Crisis signals detected in the past 7 days</p>
@@ -592,7 +574,6 @@
       </div>
     </div>
     
-    <!-- Settings Panel -->
     <div class="panel" id="panel-settings">
       <h2>Dashboard Settings</h2>
       <div class="form-group">
@@ -608,7 +589,6 @@
     </div>
   </div>
   
-  <!-- Client Detail Modal -->
   <div class="modal-overlay" id="clientModal">
     <div class="modal">
       <div class="modal-header">
@@ -623,15 +603,12 @@
 
   <script>
     // =====================================================
-    // CONFIGURATION - YOUR SUPABASE CREDENTIALS
+    // CONFIGURATION
     // =====================================================
     const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
     const THERAPIST_ID = '94ebfe1c-57d1-48d8-a165-a9152ded65db';
     
-    // =====================================================
-    // STATE
-    // =====================================================
     let clients = [];
     let showBarriers = false;
     
@@ -645,7 +622,7 @@
     });
     
     // =====================================================
-    // API HELPERS
+    // API HELPER
     // =====================================================
     async function supabaseCall(endpoint, options = {}) {
       const url = `${SUPABASE_URL}${endpoint}`;
@@ -663,15 +640,15 @@
         throw new Error(`API Error: ${response.status} - ${error}`);
       }
       
-      return response.json();
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
     }
     
     // =====================================================
-    // LOAD DASHBOARD DATA
+    // LOAD DASHBOARD
     // =====================================================
     async function loadDashboard() {
       try {
-        // Load stats
         const stats = await supabaseCall(`/rest/v1/rpc/get_therapist_dashboard`, {
           method: 'POST',
           body: JSON.stringify({ therapist_id_input: THERAPIST_ID })
@@ -687,21 +664,10 @@
             document.getElementById('alertCard').style.display = 'block';
             document.getElementById('statAlerts').textContent = s.recent_alerts;
           }
-          
-          if (s.last_reviewed) {
-            const date = new Date(s.last_reviewed);
-            document.getElementById('lastReviewed').textContent = 
-              `Last reviewed: ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
-          }
         }
         
-        // Load clients
         await loadClients();
-        
-        // Load homework
         await loadActiveHomework();
-        
-        // Load alerts
         await loadAlerts();
         
       } catch (error) {
@@ -716,7 +682,6 @@
     // =====================================================
     async function loadClients() {
       try {
-        // Get clients linked to this therapist
         const links = await supabaseCall(
           `/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`
         );
@@ -725,16 +690,14 @@
           document.getElementById('clientList').innerHTML = 
             `<div class="empty-state">
               <p>No clients linked yet.</p>
-              <p>Clients will appear here once they connect using your therapist code.</p>
+              <p>Clients will appear here once they connect.</p>
             </div>`;
           return;
         }
         
         clients = links;
         
-        // Get conversation stats for each client
         const clientHtml = await Promise.all(links.map(async (client) => {
-          // Get last activity
           const turns = await supabaseCall(
             `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&order=created_at.desc&limit=1`
           );
@@ -743,7 +706,6 @@
             ? formatTimeAgo(new Date(turns[0].created_at))
             : 'Never';
           
-          // Get conversation count (last 7 days)
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
           const recentTurns = await supabaseCall(
             `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id`
@@ -751,7 +713,6 @@
           
           const turnCount = recentTurns ? recentTurns.length : 0;
           
-          // Determine engagement level
           let engagementClass, engagementText;
           if (turnCount >= 10) {
             engagementClass = 'active';
@@ -783,7 +744,6 @@
         
         document.getElementById('clientList').innerHTML = clientHtml.join('');
         
-        // Populate client dropdown for homework
         const select = document.getElementById('clientSelect');
         select.innerHTML = '<option value="">Select a client...</option>' + 
           links.map(c => `<option value="${c.client_code}">${c.client_code}</option>`).join('');
@@ -830,13 +790,12 @@
     }
     
     // =====================================================
-    // LOAD ALERTS (CRISIS INTENTIONS)
+    // LOAD ALERTS
     // =====================================================
     async function loadAlerts() {
       try {
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         
-        // Get turns with CRISIS intention_chosen
         const alerts = await supabaseCall(
           `/rest/v1/conversation_turns?intention_chosen=eq.CRISIS&created_at=gte.${weekAgo}&order=created_at.desc&limit=20`
         );
@@ -866,7 +825,7 @@
     }
     
     // =====================================================
-    // ASSIGN HOMEWORK
+    // ASSIGN HOMEWORK (FIXED)
     // =====================================================
     async function assignHomework(event) {
       event.preventDefault();
@@ -881,22 +840,31 @@
           client_code: document.getElementById('clientSelect').value,
           homework_type: document.getElementById('homeworkType').value,
           description: document.getElementById('homeworkDescription').value,
-          therapist_notes: document.getElementById('therapistNotes').value || null,
-          status: 'active'
+          therapist_notes: document.getElementById('therapistNotes').value || null
         };
         
-        await supabaseCall('/rest/v1/homework', {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
           method: 'POST',
-          body: JSON.stringify(homework),
-          headers: { 'Prefer': 'return=minimal' }
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(homework)
         });
         
-        // Show success
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error);
+        }
+        
+        // Success - show message and reset form
         const successMsg = document.getElementById('homeworkSuccess');
         successMsg.classList.add('show');
         document.getElementById('homeworkForm').reset();
         
-        // Refresh
+        // Refresh data
         setTimeout(async () => {
           await loadActiveHomework();
           await loadDashboard();
@@ -921,17 +889,14 @@
       document.getElementById('modalContent').innerHTML = '<div class="loading">Loading...</div>';
       
       try {
-        // Get recent conversation summary
         const recentTurns = await supabaseCall(
           `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=10`
         );
         
-        // Get homework for this client
         const homework = await supabaseCall(
           `/rest/v1/homework?client_code=eq.${clientCode}&status=eq.active`
         );
         
-        // Build session prep content
         let html = `
           <div class="session-prep">
             <h4>Session Prep Brief</h4>
@@ -984,7 +949,6 @@
       document.getElementById('clientModal').classList.remove('active');
     }
     
-    // Close modal on overlay click
     document.getElementById('clientModal').addEventListener('click', (e) => {
       if (e.target.id === 'clientModal') closeModal();
     });
@@ -997,7 +961,6 @@
       btn.disabled = true;
       btn.textContent = 'Marking...';
       
-      // Just update the UI for now (no backend function needed)
       const now = new Date();
       document.getElementById('lastReviewed').textContent = 
         `Last reviewed: ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
@@ -1013,11 +976,8 @@
     // TAB SWITCHING
     // =====================================================
     function switchTab(tabName) {
-      // Update tab buttons
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       event.target.classList.add('active');
-      
-      // Update panels
       document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
       document.getElementById(`panel-${tabName}`).classList.add('active');
     }
@@ -1041,12 +1001,10 @@
     // =====================================================
     function formatTimeAgo(date) {
       const seconds = Math.floor((new Date() - date) / 1000);
-      
       if (seconds < 60) return 'Just now';
       if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
       if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
       if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-      
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     
