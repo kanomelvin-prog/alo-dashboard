@@ -42,16 +42,7 @@
       --font-display: 'Source Serif 4', Georgia, serif;
       --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
       
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 32px;
-      --space-2xl: 48px;
-      
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-      --shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
-      --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.12);
+      --sidebar-width: 280px;
     }
     
     html {
@@ -67,84 +58,75 @@
       min-height: 100vh;
     }
     
+    /* === LAYOUT === */
     .app {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: var(--sidebar-width) 1fr;
       min-height: 100vh;
     }
     
     /* === SIDEBAR === */
     .sidebar {
-      background: var(--slate-900);
-      color: var(--slate-300);
-      padding: var(--space-lg);
+      background: white;
+      border-right: 1px solid var(--slate-200);
       display: flex;
       flex-direction: column;
       position: fixed;
-      width: 260px;
+      width: var(--sidebar-width);
       height: 100vh;
-      overflow-y: auto;
+      overflow: hidden;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--slate-200);
     }
     
     .logo {
       font-family: var(--font-display);
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
-      color: white;
-      margin-bottom: var(--space-xs);
+      color: var(--slate-900);
       letter-spacing: -0.02em;
     }
     
     .logo-subtitle {
       font-size: 0.75rem;
       color: var(--slate-500);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--space-2xl);
+      margin-top: 2px;
     }
     
+    /* === NAV === */
     .nav-section {
-      margin-bottom: var(--space-xl);
-    }
-    
-    .nav-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--slate-500);
-      margin-bottom: var(--space-sm);
-      padding-left: var(--space-sm);
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--slate-200);
     }
     
     .nav-item {
       display: flex;
       align-items: center;
-      gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-md);
+      gap: 10px;
+      padding: 10px 12px;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
       font-size: 0.9rem;
-      margin-bottom: 2px;
+      color: var(--slate-700);
     }
     
     .nav-item:hover {
-      background: rgba(255,255,255,0.05);
+      background: var(--slate-100);
     }
     
     .nav-item.active {
-      background: rgba(255,255,255,0.1);
-      color: white;
+      background: var(--info-bg);
+      color: var(--info);
     }
     
     .nav-item svg {
       width: 18px;
       height: 18px;
-      opacity: 0.7;
-    }
-    
-    .nav-item.active svg {
-      opacity: 1;
+      flex-shrink: 0;
     }
     
     .nav-badge {
@@ -153,27 +135,128 @@
       color: white;
       font-size: 0.7rem;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 10px;
     }
     
+    /* === CLIENT LIST === */
+    .client-list-header {
+      padding: 16px 16px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .client-list-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--slate-500);
+    }
+    
+    .client-list-count {
+      font-size: 0.7rem;
+      color: var(--slate-400);
+    }
+    
+    .client-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 12px 12px;
+    }
+    
+    .client-list-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+    
+    .client-list-item:hover {
+      background: var(--slate-100);
+    }
+    
+    .client-list-item.active {
+      background: var(--slate-200);
+    }
+    
+    .client-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--slate-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--slate-600);
+      flex-shrink: 0;
+    }
+    
+    .client-avatar.alert {
+      background: var(--critical-bg);
+      color: var(--critical);
+    }
+    
+    .client-avatar.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .client-list-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .client-list-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--slate-800);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .client-list-meta {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+    
+    .client-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .client-status-dot.critical { background: var(--critical); }
+    .client-status-dot.warning { background: var(--warning); }
+    .client-status-dot.stable { background: var(--stable); }
+    
+    /* === SIDEBAR FOOTER === */
     .sidebar-footer {
-      margin-top: auto;
-      padding-top: var(--space-lg);
-      border-top: 1px solid var(--slate-800);
+      padding: 16px;
+      border-top: 1px solid var(--slate-200);
+      background: var(--slate-50);
     }
     
     .therapist-info {
       display: flex;
       align-items: center;
-      gap: var(--space-sm);
+      gap: 10px;
     }
     
     .therapist-avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: var(--slate-700);
+      background: var(--slate-900);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -183,8 +266,9 @@
     }
     
     .therapist-name {
-      font-size: 0.9rem;
-      color: white;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--slate-800);
     }
     
     .therapist-role {
@@ -194,138 +278,77 @@
     
     /* === MAIN CONTENT === */
     .main {
-      margin-left: 260px;
-      padding: var(--space-xl);
-      max-width: 1200px;
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
     }
     
-    /* === PRIORITY HEADER === */
-    .priority-header {
-      background: var(--critical-bg);
-      border: 1px solid var(--critical-border);
-      border-radius: 8px;
-      padding: var(--space-md) var(--space-lg);
-      margin-bottom: var(--space-lg);
+    .page {
       display: none;
+      padding: 32px;
+      max-width: 1000px;
     }
     
-    .priority-header.visible {
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-    }
-    
-    .priority-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--critical);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .priority-icon svg {
-      width: 20px;
-      height: 20px;
-      color: white;
-    }
-    
-    .priority-content h3 {
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--critical);
-      margin-bottom: 2px;
-    }
-    
-    .priority-content p {
-      font-size: 0.85rem;
-      color: var(--slate-700);
-    }
-    
-    .priority-action {
-      margin-left: auto;
-      background: var(--critical);
-      color: white;
-      border: none;
-      padding: var(--space-sm) var(--space-md);
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    
-    .priority-action:hover {
-      background: #b91c1c;
+    .page.active {
+      display: block;
     }
     
     /* === PAGE HEADER === */
     .page-header {
-      margin-bottom: var(--space-xl);
+      margin-bottom: 24px;
     }
     
     .page-header h1 {
       font-family: var(--font-display);
-      font-size: 1.75rem;
+      font-size: 1.6rem;
       font-weight: 600;
       color: var(--slate-900);
       letter-spacing: -0.02em;
-      margin-bottom: var(--space-xs);
     }
     
     .page-header p {
-      color: var(--slate-600);
-      font-size: 0.95rem;
+      color: var(--slate-500);
+      font-size: 0.9rem;
+      margin-top: 4px;
     }
     
-    .header-meta {
+    .page-header-meta {
       display: flex;
-      align-items: center;
-      gap: var(--space-lg);
-      margin-top: var(--space-md);
+      gap: 24px;
+      margin-top: 16px;
     }
     
-    .header-stat {
+    .meta-stat {
       display: flex;
       align-items: baseline;
-      gap: var(--space-xs);
+      gap: 6px;
     }
     
-    .header-stat-value {
+    .meta-stat-value {
       font-size: 1.5rem;
       font-weight: 600;
       color: var(--slate-900);
     }
     
-    .header-stat-label {
-      font-size: 0.85rem;
+    .meta-stat-label {
+      font-size: 0.8rem;
       color: var(--slate-500);
     }
     
-    /* === TRIAGE SECTIONS === */
-    .triage-section {
-      margin-bottom: var(--space-xl);
-    }
-    
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: var(--space-md);
+    /* === ALERT CARDS === */
+    .alerts-section {
+      margin-bottom: 32px;
     }
     
     .section-title {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--slate-600);
+      letter-spacing: 0.08em;
+      color: var(--slate-500);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .section-title-dot {
@@ -336,296 +359,169 @@
     
     .section-title-dot.critical { background: var(--critical); }
     .section-title-dot.warning { background: var(--warning); }
-    .section-title-dot.stable { background: var(--stable); }
     
-    .section-count {
-      font-size: 0.75rem;
-      color: var(--slate-500);
-      background: var(--slate-200);
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    
-    .section-toggle {
-      background: none;
-      border: none;
-      color: var(--slate-500);
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: var(--space-xs);
-    }
-    
-    .section-toggle:hover {
-      color: var(--slate-700);
-    }
-    
-    /* === CLIENT CARDS === */
-    .client-grid {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-    
-    .client-card {
+    .alert-card {
       background: white;
       border: 1px solid var(--slate-200);
       border-radius: 8px;
-      padding: var(--space-md) var(--space-lg);
-      display: grid;
-      grid-template-columns: 1fr auto auto;
+      padding: 16px;
+      margin-bottom: 8px;
+      display: flex;
       align-items: center;
-      gap: var(--space-lg);
+      gap: 16px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
     }
     
-    .client-card:hover {
+    .alert-card:hover {
       border-color: var(--slate-300);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     
-    .client-card.critical-border {
+    .alert-card.critical {
       border-left: 3px solid var(--critical);
     }
     
-    .client-card.warning-border {
+    .alert-card.warning {
       border-left: 3px solid var(--warning);
     }
     
-    .client-primary {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    
-    .client-name {
-      font-weight: 600;
-      color: var(--slate-900);
-      font-size: 0.95rem;
-    }
-    
-    .client-context {
-      font-size: 0.8rem;
-      color: var(--slate-500);
-    }
-    
-    .client-signal {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-    }
-    
-    .signal-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--slate-500);
-    }
-    
-    .signal-value {
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    
-    .signal-value.critical { color: var(--critical); }
-    .signal-value.warning { color: var(--warning); }
-    .signal-value.stable { color: var(--stable); }
-    
-    .client-trend {
+    .alert-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: var(--space-xs);
-      padding: var(--space-xs) var(--space-sm);
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 500;
+      justify-content: center;
+      flex-shrink: 0;
     }
     
-    .client-trend.down {
+    .alert-icon.critical {
       background: var(--critical-bg);
       color: var(--critical);
     }
     
-    .client-trend.up {
-      background: var(--stable-bg);
-      color: var(--stable);
+    .alert-icon.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
     }
     
-    .client-trend.flat {
-      background: var(--slate-200);
-      color: var(--slate-600);
-    }
-    
-    .client-trend svg {
-      width: 14px;
-      height: 14px;
-    }
-    
-    /* === STABLE SECTION === */
-    .stable-section .client-grid {
-      display: none;
-    }
-    
-    .stable-section.expanded .client-grid {
-      display: flex;
-    }
-    
-    .stable-summary {
-      background: var(--stable-bg);
-      border: 1px solid var(--stable-border);
-      border-radius: 8px;
-      padding: var(--space-md) var(--space-lg);
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-      cursor: pointer;
-    }
-    
-    .stable-section.expanded .stable-summary {
-      display: none;
-    }
-    
-    .stable-summary svg {
+    .alert-icon svg {
       width: 20px;
       height: 20px;
-      color: var(--stable);
     }
     
-    .stable-summary-text {
-      font-size: 0.9rem;
-      color: var(--slate-700);
+    .alert-content {
+      flex: 1;
     }
     
-    .stable-summary-text strong {
-      color: var(--stable);
-    }
-    
-    /* === MODALS === */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      z-index: 1000;
-      justify-content: center;
-      align-items: flex-start;
-      padding: var(--space-2xl);
-      overflow-y: auto;
-    }
-    
-    .modal-overlay.active {
-      display: flex;
-    }
-    
-    .modal {
-      background: white;
-      border-radius: 12px;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: var(--shadow-lg);
-      animation: modalIn 0.2s ease;
-    }
-    
-    .modal.wide {
-      max-width: 900px;
-    }
-    
-    @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .modal-header {
-      padding: var(--space-lg);
-      border-bottom: 1px solid var(--slate-200);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    
-    .modal-title {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
+    .alert-title {
       font-weight: 600;
+      font-size: 0.9rem;
       color: var(--slate-900);
       margin-bottom: 2px;
     }
     
-    .modal-subtitle {
-      font-size: 0.85rem;
+    .alert-description {
+      font-size: 0.8rem;
       color: var(--slate-500);
     }
     
-    .modal-close {
-      background: none;
-      border: none;
+    .alert-time {
+      font-size: 0.75rem;
       color: var(--slate-400);
-      cursor: pointer;
-      padding: var(--space-xs);
+      flex-shrink: 0;
     }
     
-    .modal-close:hover {
-      color: var(--slate-600);
-    }
-    
-    .modal-body {
-      padding: var(--space-lg);
-    }
-    
-    .modal-footer {
-      padding: var(--space-md) var(--space-lg);
-      border-top: 1px solid var(--slate-200);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--slate-50);
-      border-radius: 0 0 12px 12px;
-    }
-    
-    .modal-actions {
-      display: flex;
-      gap: var(--space-sm);
-    }
-    
-    /* === TABS IN MODAL === */
-    .modal-tabs {
-      display: flex;
-      gap: var(--space-xs);
-      padding: 0 var(--space-lg);
-      border-bottom: 1px solid var(--slate-200);
-      background: var(--slate-50);
-    }
-    
-    .modal-tab {
-      padding: var(--space-md) var(--space-lg);
-      font-size: 0.85rem;
+    .alert-action {
+      background: var(--slate-100);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
       font-weight: 500;
       color: var(--slate-600);
-      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    
+    .alert-action:hover {
+      background: var(--slate-200);
+    }
+    
+    /* === EMPTY STATE === */
+    .empty-state {
+      background: var(--stable-bg);
+      border: 1px solid var(--stable-border);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      color: var(--stable);
+    }
+    
+    .empty-state svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+    
+    /* === CLIENT PAGE === */
+    .client-page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    
+    .client-page-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--slate-900);
+    }
+    
+    .client-page-meta {
+      font-size: 0.9rem;
+      color: var(--slate-500);
+      margin-top: 4px;
+    }
+    
+    .client-page-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    /* === TABS === */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--slate-200);
+      margin-bottom: 24px;
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--slate-500);
       background: none;
+      border: none;
       cursor: pointer;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
       transition: all 0.15s;
     }
     
-    .modal-tab:hover {
-      color: var(--slate-900);
+    .tab:hover {
+      color: var(--slate-700);
     }
     
-    .modal-tab.active {
+    .tab.active {
       color: var(--info);
       border-bottom-color: var(--info);
     }
@@ -638,188 +534,141 @@
       display: block;
     }
     
-    /* === PREP SECTIONS === */
-    .prep-section {
-      margin-bottom: var(--space-lg);
-    }
-    
-    .prep-section:last-child {
-      margin-bottom: 0;
-    }
-    
-    .prep-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--slate-500);
-      margin-bottom: var(--space-sm);
-    }
-    
-    .prep-content {
-      background: var(--slate-50);
+    /* === CONTENT CARDS === */
+    .content-card {
+      background: white;
       border: 1px solid var(--slate-200);
-      border-radius: 6px;
-      padding: var(--space-md);
+      border-radius: 8px;
+      margin-bottom: 16px;
     }
     
-    .prep-content p {
+    .content-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .content-card-title {
       font-size: 0.9rem;
-      color: var(--slate-700);
-      line-height: 1.6;
+      font-weight: 600;
+      color: var(--slate-800);
     }
     
-    .prep-content p + p {
-      margin-top: var(--space-sm);
+    .content-card-body {
+      padding: 20px;
     }
     
-    .prep-highlight {
+    .content-card-body.highlight {
       background: var(--warning-bg);
-      border-color: var(--warning-border);
     }
     
-    /* === OPEN LOOPS === */
-    .open-loops {
+    /* === STATS ROW === */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--slate-900);
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--slate-500);
+      margin-top: 4px;
+    }
+    
+    /* === EXCERPT LIST === */
+    .excerpt-list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-sm);
+      gap: 12px;
     }
     
-    .loop-item {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-md);
+    .excerpt-item {
+      padding: 12px 16px;
       background: var(--slate-50);
-      border: 1px solid var(--slate-200);
       border-radius: 6px;
     }
     
-    .loop-icon {
-      width: 18px;
-      height: 18px;
-      color: var(--warning);
-      flex-shrink: 0;
-      margin-top: 2px;
+    .excerpt-time {
+      font-size: 0.75rem;
+      color: var(--slate-400);
+      margin-bottom: 4px;
     }
     
-    .loop-text {
+    .excerpt-text {
       font-size: 0.85rem;
       color: var(--slate-700);
+      font-style: italic;
     }
     
-    .loop-meta {
-      font-size: 0.75rem;
-      color: var(--slate-500);
-      margin-top: 2px;
-    }
-    
-    /* === SESSION NOTES === */
-    .notes-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-    }
-    
+    /* === NOTES === */
     .note-card {
       background: var(--slate-50);
       border: 1px solid var(--slate-200);
       border-radius: 6px;
-      padding: var(--space-md);
+      padding: 16px;
+      margin-bottom: 12px;
     }
     
     .note-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--space-sm);
+      margin-bottom: 12px;
     }
     
     .note-date {
-      font-size: 0.8rem;
       font-weight: 600;
+      font-size: 0.85rem;
       color: var(--slate-700);
     }
     
-    .note-actions {
-      display: flex;
-      gap: var(--space-xs);
-    }
-    
-    .note-action-btn {
-      background: none;
-      border: none;
-      color: var(--slate-400);
-      cursor: pointer;
-      padding: 2px;
-    }
-    
-    .note-action-btn:hover {
-      color: var(--slate-600);
-    }
-    
-    .note-content {
+    .note-content p {
       font-size: 0.85rem;
       color: var(--slate-600);
+      margin-bottom: 8px;
       line-height: 1.6;
+    }
+    
+    .note-content p:last-child {
+      margin-bottom: 0;
     }
     
     .note-content strong {
       color: var(--slate-700);
     }
     
-    .add-note-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-sm);
-      padding: var(--space-md);
-      border: 2px dashed var(--slate-300);
-      border-radius: 6px;
-      background: none;
-      color: var(--slate-500);
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      width: 100%;
-    }
-    
-    .add-note-btn:hover {
-      border-color: var(--info);
-      color: var(--info);
-    }
-    
-    /* === NOTE FORM === */
-    .note-form {
-      background: white;
-      border: 1px solid var(--slate-200);
-      border-radius: 6px;
-      padding: var(--space-md);
-    }
-    
-    .note-form-grid {
+    /* === FORMS === */
+    .form-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-md);
-      margin-bottom: var(--space-md);
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
     }
     
-    .note-form-full {
+    .form-grid .full-width {
       grid-column: 1 / -1;
     }
     
-    .note-form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-sm);
-      padding-top: var(--space-md);
-      border-top: 1px solid var(--slate-200);
-    }
-    
-    /* === FORMS === */
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: var(--space-xs);
+      gap: 6px;
     }
     
     .form-group label {
@@ -831,7 +680,7 @@
     .form-group input,
     .form-group select,
     .form-group textarea {
-      padding: var(--space-sm) var(--space-md);
+      padding: 10px 12px;
       border: 1px solid var(--slate-300);
       border-radius: 6px;
       font-size: 0.9rem;
@@ -856,40 +705,32 @@
       color: var(--slate-500);
     }
     
-    /* === TEMPLATE PILLS === */
-    .template-pills {
+    .form-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-xs);
-      margin-top: var(--space-xs);
-    }
-    
-    .template-pill {
-      background: var(--slate-100);
-      border: 1px solid var(--slate-200);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 0.75rem;
-      color: var(--slate-600);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    
-    .template-pill:hover {
-      background: var(--info-bg);
-      border-color: var(--info);
-      color: var(--info);
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--slate-200);
     }
     
     /* === BUTTONS === */
     .btn {
-      padding: var(--space-sm) var(--space-md);
+      padding: 10px 16px;
       border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
       border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn svg {
+      width: 16px;
+      height: 16px;
     }
     
     .btn-secondary {
@@ -912,22 +753,134 @@
     }
     
     .btn-sm {
-      padding: var(--space-xs) var(--space-sm);
+      padding: 6px 10px;
       font-size: 0.8rem;
+    }
+    
+    /* === TEMPLATE PILLS === */
+    .template-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    
+    .template-pill {
+      background: var(--slate-100);
+      border: 1px solid var(--slate-200);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--slate-600);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .template-pill:hover {
+      background: var(--info-bg);
+      border-color: var(--info);
+      color: var(--info);
+    }
+    
+    /* === HOMEWORK LIST === */
+    .homework-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .homework-status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .homework-status.active {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .homework-status.completed {
+      background: var(--stable-bg);
+      color: var(--stable);
+    }
+    
+    .homework-status svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .homework-content {
+      flex: 1;
+    }
+    
+    .homework-type {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--slate-800);
+      margin-bottom: 4px;
+    }
+    
+    .homework-description {
+      font-size: 0.85rem;
+      color: var(--slate-600);
+    }
+    
+    .homework-meta {
+      font-size: 0.75rem;
+      color: var(--slate-400);
+      margin-top: 6px;
+    }
+    
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--stable);
+      color: white;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      z-index: 1000;
+      animation: toastIn 0.3s ease;
+    }
+    
+    .toast.show {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     /* === COPY BUTTON === */
     .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-xs);
       background: var(--slate-100);
       border: 1px solid var(--slate-200);
+      padding: 6px 10px;
       border-radius: 4px;
-      padding: var(--space-xs) var(--space-sm);
       font-size: 0.75rem;
       color: var(--slate-600);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       transition: all 0.15s;
     }
     
@@ -941,28 +894,15 @@
       color: var(--stable);
     }
     
-    /* === EMPTY STATE === */
-    .empty-state {
-      text-align: center;
-      padding: var(--space-2xl);
-      color: var(--slate-500);
-    }
-    
-    .empty-state svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: var(--space-md);
-      opacity: 0.5;
-    }
-    
-    .empty-state p {
-      font-size: 0.9rem;
+    .copy-btn svg {
+      width: 12px;
+      height: 12px;
     }
     
     /* === LOADING === */
     .loading {
       text-align: center;
-      padding: var(--space-2xl);
+      padding: 40px;
       color: var(--slate-500);
     }
     
@@ -973,43 +913,11 @@
       border-top-color: var(--info);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto var(--space-md);
+      margin: 0 auto 12px;
     }
     
     @keyframes spin {
       to { transform: rotate(360deg); }
-    }
-    
-    /* === TOAST === */
-    .toast {
-      position: fixed;
-      bottom: var(--space-lg);
-      right: var(--space-lg);
-      background: var(--stable);
-      color: white;
-      padding: var(--space-md) var(--space-lg);
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      display: none;
-      animation: toastIn 0.3s ease;
-      z-index: 2000;
-    }
-    
-    .toast.show {
-      display: block;
-    }
-    
-    @keyframes toastIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
     
     /* === RESPONSIVE === */
@@ -1026,64 +934,43 @@
         margin-left: 0;
       }
       
-      .client-card {
+      .form-grid {
         grid-template-columns: 1fr;
-        gap: var(--space-md);
       }
       
-      .note-form-grid {
+      .stats-row {
         grid-template-columns: 1fr;
       }
-    }
-
-    /* === VIEW TOGGLE === */
-    .view {
-      display: none;
-    }
-    
-    .view.active {
-      display: block;
     }
   </style>
 </head>
 <body>
   <div class="app">
     <!-- Sidebar -->
-    <nav class="sidebar">
-      <div class="logo">Alo</div>
-      <div class="logo-subtitle">Clinical Dashboard</div>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">Alo</div>
+        <div class="logo-subtitle">Clinical Dashboard</div>
+      </div>
       
       <div class="nav-section">
-        <div class="nav-label">Triage</div>
-        <div class="nav-item active" onclick="showView('triage', this)">
+        <div class="nav-item active" onclick="showHome()">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
           Clinical Triage
-        </div>
-        <div class="nav-item" onclick="showView('alerts', this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          Alerts
           <span class="nav-badge" id="alertBadge" style="display: none;">0</span>
         </div>
       </div>
       
-      <div class="nav-section">
-        <div class="nav-label">Tools</div>
-        <div class="nav-item" onclick="showView('homework', this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Homework Library
-        </div>
-        <div class="nav-item" onclick="showView('settings', this)">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Settings
+      <div class="client-list-header">
+        <span class="client-list-title">Clients</span>
+        <span class="client-list-count" id="clientCount">0</span>
+      </div>
+      
+      <div class="client-list" id="clientList">
+        <div class="loading">
+          <div class="loading-spinner"></div>
         </div>
       </div>
       
@@ -1096,295 +983,206 @@
           </div>
         </div>
       </div>
-    </nav>
+    </aside>
     
     <!-- Main Content -->
     <main class="main">
-      <!-- Priority Header -->
-      <div class="priority-header" id="priorityHeader">
-        <div class="priority-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <div class="priority-content">
-          <h3>Crisis Signal Detected</h3>
-          <p id="priorityMessage">1 client triggered a crisis response</p>
-        </div>
-        <button class="priority-action" onclick="showView('alerts', document.querySelector('.nav-item:nth-child(2)'))">Review Now</button>
-      </div>
-      
-      <!-- Triage View -->
-      <div class="view active" id="view-triage">
+      <!-- Home / Triage Page -->
+      <div class="page active" id="page-home">
         <div class="page-header">
           <h1>Clinical Triage</h1>
           <p id="currentDate"></p>
-          <div class="header-meta">
-            <div class="header-stat">
-              <span class="header-stat-value" id="totalClients">-</span>
-              <span class="header-stat-label">Total Clients</span>
+          <div class="page-header-meta">
+            <div class="meta-stat">
+              <span class="meta-stat-value" id="statTotal">-</span>
+              <span class="meta-stat-label">Total Clients</span>
             </div>
-            <div class="header-stat">
-              <span class="header-stat-value" id="activeClients">-</span>
-              <span class="header-stat-label">Active This Week</span>
+            <div class="meta-stat">
+              <span class="meta-stat-value" id="statActive">-</span>
+              <span class="meta-stat-label">Active This Week</span>
             </div>
-            <div class="header-stat">
-              <span class="header-stat-value" id="pendingHomework">-</span>
-              <span class="header-stat-label">Open Homework</span>
+            <div class="meta-stat">
+              <span class="meta-stat-value" id="statHomework">-</span>
+              <span class="meta-stat-label">Open Homework</span>
             </div>
           </div>
         </div>
         
-        <!-- Needs Attention -->
-        <div class="triage-section" id="needsAttentionSection">
-          <div class="section-header">
-            <div class="section-title">
-              <span class="section-title-dot warning"></span>
-              Needs Attention
-              <span class="section-count" id="needsAttentionCount">0</span>
-            </div>
+        <!-- Crisis Alerts -->
+        <div class="alerts-section" id="crisisSection" style="display: none;">
+          <div class="section-title">
+            <span class="section-title-dot critical"></span>
+            Crisis Signals
           </div>
-          <div class="client-grid" id="needsAttentionList">
+          <div id="crisisAlerts"></div>
+        </div>
+        
+        <!-- Action Items -->
+        <div class="alerts-section" id="actionsSection">
+          <div class="section-title">
+            <span class="section-title-dot warning"></span>
+            Action Items
+          </div>
+          <div id="actionItems">
             <div class="loading">
               <div class="loading-spinner"></div>
-              Loading clients...
+              Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Client Page (dynamic) -->
+      <div class="page" id="page-client">
+        <div class="client-page-header">
+          <div>
+            <div class="client-page-title" id="clientPageTitle">Client</div>
+            <div class="client-page-meta" id="clientPageMeta">Loading...</div>
+          </div>
+          <div class="client-page-actions">
+            <button class="btn btn-secondary" onclick="showHome()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back
+            </button>
+          </div>
+        </div>
+        
+        <!-- Client Stats -->
+        <div class="stats-row" id="clientStats">
+          <div class="stat-card">
+            <div class="stat-value" id="clientMessages">-</div>
+            <div class="stat-label">Messages This Week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="clientHomework">-</div>
+            <div class="stat-label">Active Homework</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="clientTrend">-</div>
+            <div class="stat-label">Trend</div>
+          </div>
+        </div>
+        
+        <!-- Client Tabs -->
+        <div class="tabs">
+          <button class="tab active" onclick="switchClientTab('prep', this)">Session Prep</button>
+          <button class="tab" onclick="switchClientTab('notes', this)">Session Notes</button>
+          <button class="tab" onclick="switchClientTab('homework', this)">Homework</button>
+        </div>
+        
+        <!-- Session Prep Tab -->
+        <div class="tab-content active" id="tab-prep">
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="content-card-title">Since Last Session</span>
+            </div>
+            <div class="content-card-body" id="prepSummary">
+              <div class="loading"><div class="loading-spinner"></div></div>
+            </div>
+          </div>
+          
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="content-card-title">Recent Excerpts</span>
+            </div>
+            <div class="content-card-body">
+              <div class="excerpt-list" id="prepExcerpts">
+                <div class="loading"><div class="loading-spinner"></div></div>
+              </div>
             </div>
           </div>
         </div>
         
-        <!-- Stable -->
-        <div class="triage-section stable-section" id="stableSection">
-          <div class="section-header">
-            <div class="section-title">
-              <span class="section-title-dot stable"></span>
-              Stable / No Action Needed
-              <span class="section-count" id="stableCount">0</span>
+        <!-- Session Notes Tab -->
+        <div class="tab-content" id="tab-notes">
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="content-card-title">Session Notes</span>
+              <button class="btn btn-sm btn-primary" onclick="showNoteForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Note
+              </button>
             </div>
-            <button class="section-toggle" onclick="toggleStableSection()">
-              <span id="stableToggleText">Show all</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-          <div class="stable-summary" onclick="toggleStableSection()">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="stable-summary-text">
-              <strong id="stableSummaryCount">0</strong> clients are stable with no action required
-            </span>
-          </div>
-          <div class="client-grid" id="stableList"></div>
-        </div>
-      </div>
-      
-      <!-- Alerts View -->
-      <div class="view" id="view-alerts">
-        <div class="page-header">
-          <h1>Crisis Alerts</h1>
-          <p>Signals requiring immediate clinical review</p>
-        </div>
-        <div id="alertsList">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            Loading alerts...
+            <div class="content-card-body" id="notesContainer">
+              <!-- Notes list or form will be injected here -->
+            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Homework View -->
-      <div class="view" id="view-homework">
-        <div class="page-header">
-          <h1>Homework Library</h1>
-          <p>Assign and track inter-session exercises</p>
-        </div>
-        <div id="homeworkList">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            Loading homework...
+        
+        <!-- Homework Tab -->
+        <div class="tab-content" id="tab-homework">
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="content-card-title">Assign New Homework</span>
+            </div>
+            <div class="content-card-body">
+              <div class="template-pills">
+                <span class="template-pill" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</span>
+                <span class="template-pill" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</span>
+                <span class="template-pill" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning about current concerns')">Journaling</span>
+                <span class="template-pill" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation this week')">Behavioral</span>
+                <span class="template-pill" onclick="useTemplate('breathing', 'Practice 4-7-8 breathing technique twice daily')">Breathing</span>
+              </div>
+              
+              <form id="homeworkForm" onsubmit="submitHomework(event)">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select id="hwType" required>
+                      <option value="grounding">Grounding Technique</option>
+                      <option value="noticing">Noticing Practice</option>
+                      <option value="journaling">Journaling Prompt</option>
+                      <option value="behavioral">Behavioral Experiment</option>
+                      <option value="cognitive">Cognitive Exercise</option>
+                      <option value="breathing">Breathing Exercise</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Due (optional)</label>
+                    <input type="date" id="hwDue">
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Instructions</label>
+                    <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
+                  </div>
+                  <div class="form-group full-width">
+                    <label>Clinical Rationale (private)</label>
+                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                    <span class="form-hint">For your records only</span>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Assign Homework</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- Settings View -->
-      <div class="view" id="view-settings">
-        <div class="page-header">
-          <h1>Settings</h1>
-          <p>Dashboard configuration</p>
-        </div>
-        <div class="prep-section">
-          <div class="prep-label">Therapist ID</div>
-          <div class="prep-content">
-            <p id="therapistIdDisplay" style="font-family: monospace; font-size: 0.8rem;"></p>
+          
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="content-card-title">Homework History</span>
+            </div>
+            <div class="content-card-body" id="homeworkHistory">
+              <div class="loading"><div class="loading-spinner"></div></div>
+            </div>
           </div>
         </div>
       </div>
     </main>
   </div>
   
-  <!-- Client Detail Modal (with tabs) -->
-  <div class="modal-overlay" id="clientModal">
-    <div class="modal wide">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title" id="clientModalTitle">Client Record</div>
-          <div class="modal-subtitle" id="clientModalSubtitle">Client ID</div>
-        </div>
-        <button class="modal-close" onclick="closeModal('clientModal')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      
-      <div class="modal-tabs">
-        <button class="modal-tab active" onclick="switchModalTab('prep', this)">Session Prep</button>
-        <button class="modal-tab" onclick="switchModalTab('notes', this)">Session Notes</button>
-        <button class="modal-tab" onclick="switchModalTab('history', this)">Homework History</button>
-      </div>
-      
-      <div class="modal-body">
-        <!-- Session Prep Tab -->
-        <div class="tab-content active" id="tab-prep">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            Loading session prep...
-          </div>
-        </div>
-        
-        <!-- Session Notes Tab -->
-        <div class="tab-content" id="tab-notes">
-          <div class="notes-list" id="notesList"></div>
-          <button class="add-note-btn" id="addNoteBtn" onclick="showNoteForm()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Session Note
-          </button>
-          
-          <!-- Note Form (hidden by default) -->
-          <div class="note-form" id="noteForm" style="display: none;">
-            <div class="note-form-grid">
-              <div class="form-group">
-                <label>Session Date</label>
-                <input type="date" id="noteDate">
-              </div>
-              <div class="form-group">
-                <label>Session Type</label>
-                <select id="noteType">
-                  <option value="individual">Individual</option>
-                  <option value="couples">Couples</option>
-                  <option value="family">Family</option>
-                  <option value="group">Group</option>
-                </select>
-              </div>
-              <div class="form-group note-form-full">
-                <label>Themes Discussed</label>
-                <textarea id="noteThemes" placeholder="Main topics and themes from session..."></textarea>
-              </div>
-              <div class="form-group note-form-full">
-                <label>Interventions Used</label>
-                <textarea id="noteInterventions" placeholder="Techniques, exercises, or approaches used..."></textarea>
-              </div>
-              <div class="form-group note-form-full">
-                <label>Clinical Observations</label>
-                <textarea id="noteObservations" placeholder="Affect, engagement, progress, concerns..."></textarea>
-              </div>
-              <div class="form-group note-form-full">
-                <label>Plan / Next Steps</label>
-                <textarea id="notePlan" placeholder="Goals for next session, homework assigned..."></textarea>
-              </div>
-            </div>
-            <div class="note-form-actions">
-              <button class="btn btn-secondary" onclick="hideNoteForm()">Cancel</button>
-              <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Homework History Tab -->
-        <div class="tab-content" id="tab-history">
-          <div id="homeworkHistory">
-            <div class="loading">
-              <div class="loading-spinner"></div>
-              Loading homework history...
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="modal-footer">
-        <div></div>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" onclick="closeModal('clientModal')">Close</button>
-          <button class="btn btn-primary" onclick="openHomeworkModal()">Assign Homework</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Homework Modal -->
-  <div class="modal-overlay" id="homeworkModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title">Assign Homework</div>
-          <div class="modal-subtitle" id="homeworkModalSubtitle">Client ID</div>
-        </div>
-        <button class="modal-close" onclick="closeModal('homeworkModal')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form class="homework-form" id="homeworkForm" onsubmit="submitHomework(event)">
-          <div class="form-group">
-            <label>Quick Templates</label>
-            <div class="template-pills">
-              <span class="template-pill" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</span>
-              <span class="template-pill" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</span>
-              <span class="template-pill" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning about current concerns')">Journaling</span>
-              <span class="template-pill" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation this week')">Behavioral</span>
-              <span class="template-pill" onclick="useTemplate('breathing', 'Practice 4-7-8 breathing technique twice daily')">Breathing</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="hwType">Type</label>
-            <select id="hwType" required>
-              <option value="grounding">Grounding Technique</option>
-              <option value="noticing">Noticing Practice</option>
-              <option value="journaling">Journaling Prompt</option>
-              <option value="behavioral">Behavioral Experiment</option>
-              <option value="cognitive">Cognitive Exercise</option>
-              <option value="breathing">Breathing Exercise</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="hwDescription">Instructions</label>
-            <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="hwRationale">Clinical Rationale (private)</label>
-            <textarea id="hwRationale" placeholder="Why this exercise for this client at this time..."></textarea>
-            <span class="form-hint">This note is for your records only.</span>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <div></div>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" onclick="closeModal('homeworkModal')">Cancel</button>
-          <button class="btn btn-primary" onclick="submitHomework(event)">Assign Homework</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
   <!-- Toast -->
-  <div class="toast" id="toast">✓ Action completed</div>
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toastMessage">Success</span>
+  </div>
 
   <script>
     // =====================================================
@@ -1396,38 +1194,33 @@
     
     let currentClient = null;
     let allClients = [];
-    let clientNotes = {}; // In-memory storage for demo (would be database in production)
+    let clientNotes = {}; // In-memory for demo
     
     // =====================================================
-    // INITIALIZATION
+    // INIT
     // =====================================================
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('therapistIdDisplay').textContent = THERAPIST_ID;
-      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
       });
-      document.getElementById('noteDate').valueAsDate = new Date();
       loadDashboard();
     });
     
     // =====================================================
-    // API HELPER
+    // API
     // =====================================================
     async function supabaseCall(endpoint, options = {}) {
-      const url = `${SUPABASE_URL}${endpoint}`;
-      const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        ...options.headers
-      };
+      const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
       
-      const response = await fetch(url, { ...options, headers });
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
       const text = await response.text();
       return text ? JSON.parse(text) : null;
     }
@@ -1437,32 +1230,22 @@
     // =====================================================
     async function loadDashboard() {
       try {
-        const stats = await supabaseCall(`/rest/v1/rpc/get_therapist_dashboard`, {
+        // Stats
+        const stats = await supabaseCall('/rest/v1/rpc/get_therapist_dashboard', {
           method: 'POST',
           body: JSON.stringify({ therapist_id_input: THERAPIST_ID })
         });
         
-        if (stats && stats.length > 0) {
-          const s = stats[0];
-          document.getElementById('totalClients').textContent = s.total_clients || 0;
-          document.getElementById('activeClients').textContent = s.active_clients || 0;
-          document.getElementById('pendingHomework').textContent = s.pending_homework || 0;
-          
-          if (s.recent_alerts > 0) {
-            document.getElementById('priorityHeader').classList.add('visible');
-            document.getElementById('priorityMessage').textContent = 
-              `${s.recent_alerts} client${s.recent_alerts > 1 ? 's' : ''} triggered a crisis response in the past 7 days`;
-            document.getElementById('alertBadge').style.display = 'block';
-            document.getElementById('alertBadge').textContent = s.recent_alerts;
-          }
+        if (stats?.[0]) {
+          document.getElementById('statTotal').textContent = stats[0].total_clients || 0;
+          document.getElementById('statActive').textContent = stats[0].active_clients || 0;
+          document.getElementById('statHomework').textContent = stats[0].pending_homework || 0;
         }
         
         await loadClients();
-        await loadAlerts();
-        await loadHomework();
         
       } catch (error) {
-        console.error('Dashboard load error:', error);
+        console.error('Dashboard error:', error);
       }
     }
     
@@ -1475,166 +1258,287 @@
           `/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`
         );
         
-        if (!links || links.length === 0) {
-          document.getElementById('needsAttentionList').innerHTML = 
-            '<div class="empty-state"><p>No clients linked yet.</p></div>';
+        if (!links?.length) {
+          document.getElementById('clientList').innerHTML = '<div style="padding: 20px; text-align: center; color: var(--slate-500); font-size: 0.85rem;">No clients yet</div>';
+          document.getElementById('actionItems').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>No action items</p></div>';
           return;
         }
         
-        const clientsWithData = await Promise.all(links.map(async (client) => {
-          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+        // Enrich client data
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+        
+        const enriched = await Promise.all(links.map(async (client) => {
+          const [recentTurns, prevTurns, homework] = await Promise.all([
+            supabaseCall(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,intention_chosen`),
+            supabaseCall(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`),
+            supabaseCall(`/rest/v1/homework?client_code=eq.${client.client_code}&status=eq.active&select=id`)
+          ]);
           
-          const recentTurns = await supabaseCall(
-            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,created_at,intention_chosen`
-          );
-          
-          const prevTurns = await supabaseCall(
-            `/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`
-          );
-          
-          const homework = await supabaseCall(
-            `/rest/v1/homework?client_code=eq.${client.client_code}&status=eq.active&select=id`
-          );
-          
+          const current = recentTurns?.length || 0;
+          const prev = prevTurns?.length || 0;
           const hasCrisis = recentTurns?.some(t => t.intention_chosen === 'CRISIS');
-          const currentCount = recentTurns?.length || 0;
-          const prevCount = prevTurns?.length || 0;
-          const homeworkCount = homework?.length || 0;
           
-          let trend = 'flat';
-          if (currentCount > prevCount + 2) trend = 'up';
-          else if (currentCount < prevCount - 2) trend = 'down';
+          let trend = 'stable';
+          if (current > prev + 2) trend = 'up';
+          else if (current < prev - 2) trend = 'down';
           
-          const needsAttention = hasCrisis || trend === 'down' || (homeworkCount > 0 && currentCount === 0);
+          const needsAttention = hasCrisis || trend === 'down' || (homework?.length > 0 && current === 0);
           
           return {
             ...client,
-            messageCount: currentCount,
-            prevMessageCount: prevCount,
-            homeworkCount,
+            messageCount: current,
+            homeworkCount: homework?.length || 0,
             trend,
             hasCrisis,
             needsAttention
           };
         }));
         
-        allClients = clientsWithData;
+        allClients = enriched;
+        document.getElementById('clientCount').textContent = enriched.length;
         
-        const attention = clientsWithData.filter(c => c.needsAttention);
-        const stable = clientsWithData.filter(c => !c.needsAttention);
+        // Render sidebar client list
+        renderClientList(enriched);
         
-        document.getElementById('needsAttentionCount').textContent = attention.length;
-        if (attention.length === 0) {
-          document.getElementById('needsAttentionList').innerHTML = 
-            '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>All clients are stable. Nice work!</p></div>';
-        } else {
-          document.getElementById('needsAttentionList').innerHTML = attention.map(c => renderClientCard(c)).join('');
-        }
+        // Render action items
+        renderActionItems(enriched);
         
-        document.getElementById('stableCount').textContent = stable.length;
-        document.getElementById('stableSummaryCount').textContent = stable.length;
-        document.getElementById('stableList').innerHTML = stable.map(c => renderClientCard(c)).join('');
+        // Render crisis alerts
+        renderCrisisAlerts(enriched);
         
       } catch (error) {
         console.error('Error loading clients:', error);
-        document.getElementById('needsAttentionList').innerHTML = 
-          `<div class="empty-state"><p>Error loading clients</p></div>`;
       }
     }
     
-    function renderClientCard(client) {
-      const borderClass = client.hasCrisis ? 'critical-border' : (client.trend === 'down' ? 'warning-border' : '');
-      const trendClass = client.trend === 'down' ? 'down' : (client.trend === 'up' ? 'up' : 'flat');
-      const trendIcon = client.trend === 'down' 
-        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>'
-        : client.trend === 'up'
-        ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg>';
+    function renderClientList(clients) {
+      const html = clients.map(c => {
+        const avatarClass = c.hasCrisis ? 'alert' : (c.trend === 'down' ? 'warning' : '');
+        const statusClass = c.hasCrisis ? 'critical' : (c.trend === 'down' ? 'warning' : 'stable');
+        const initials = c.client_code.substring(0, 2).toUpperCase();
+        
+        return `
+          <div class="client-list-item" onclick="showClient('${c.client_code}')">
+            <div class="client-avatar ${avatarClass}">${initials}</div>
+            <div class="client-list-info">
+              <div class="client-list-name">${c.client_code}</div>
+              <div class="client-list-meta">${c.messageCount} messages this week</div>
+            </div>
+            <div class="client-status-dot ${statusClass}"></div>
+          </div>
+        `;
+      }).join('');
       
-      let context = [];
-      if (client.hasCrisis) context.push('Crisis signal detected');
-      else if (client.trend === 'down') context.push('Engagement declining');
-      if (client.homeworkCount > 0) context.push(`${client.homeworkCount} active homework`);
+      document.getElementById('clientList').innerHTML = html;
+    }
+    
+    function renderActionItems(clients) {
+      const items = [];
       
-      return `
-        <div class="client-card ${borderClass}" onclick="openClientModal('${client.client_code}')">
-          <div class="client-primary">
-            <div class="client-name">${client.client_code}</div>
-            <div class="client-context">${context.join(' · ') || 'No recent activity'}</div>
+      clients.forEach(c => {
+        if (c.trend === 'down') {
+          items.push({
+            type: 'warning',
+            client: c.client_code,
+            title: `${c.client_code} — Engagement Declining`,
+            description: 'Activity dropped compared to last week',
+            action: 'Review'
+          });
+        }
+        if (c.homeworkCount > 0 && c.messageCount === 0) {
+          items.push({
+            type: 'warning',
+            client: c.client_code,
+            title: `${c.client_code} — Homework Stalled`,
+            description: `${c.homeworkCount} active homework, no Alo activity`,
+            action: 'Check In'
+          });
+        }
+      });
+      
+      if (items.length === 0) {
+        document.getElementById('actionItems').innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>All clients stable — no action items</p></div>';
+        return;
+      }
+      
+      document.getElementById('actionItems').innerHTML = items.map(item => `
+        <div class="alert-card ${item.type}" onclick="showClient('${item.client}')">
+          <div class="alert-icon ${item.type}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
-          <div class="client-signal">
-            <div class="signal-label">This week</div>
-            <div class="signal-value ${client.messageCount > 5 ? 'stable' : (client.messageCount > 0 ? 'warning' : 'critical')}">${client.messageCount} messages</div>
+          <div class="alert-content">
+            <div class="alert-title">${item.title}</div>
+            <div class="alert-description">${item.description}</div>
           </div>
-          <div class="client-trend ${trendClass}">
-            ${trendIcon}
-            ${client.trend === 'down' ? 'Declining' : (client.trend === 'up' ? 'Increasing' : 'Stable')}
-          </div>
+          <button class="alert-action">${item.action}</button>
         </div>
-      `;
+      `).join('');
+    }
+    
+    function renderCrisisAlerts(clients) {
+      const crisis = clients.filter(c => c.hasCrisis);
+      
+      if (crisis.length === 0) {
+        document.getElementById('crisisSection').style.display = 'none';
+        document.getElementById('alertBadge').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('crisisSection').style.display = 'block';
+      document.getElementById('alertBadge').style.display = 'block';
+      document.getElementById('alertBadge').textContent = crisis.length;
+      
+      document.getElementById('crisisAlerts').innerHTML = crisis.map(c => `
+        <div class="alert-card critical" onclick="showClient('${c.client_code}')">
+          <div class="alert-icon critical">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="alert-content">
+            <div class="alert-title">${c.client_code} — Crisis Signal</div>
+            <div class="alert-description">Client triggered crisis response this week</div>
+          </div>
+          <button class="alert-action">Review Now</button>
+        </div>
+      `).join('');
     }
     
     // =====================================================
-    // LOAD ALERTS
+    // SHOW CLIENT PAGE
     // =====================================================
-    async function loadAlerts() {
+    async function showClient(clientCode) {
+      currentClient = clientCode;
+      
+      // Update sidebar active state
+      document.querySelectorAll('.client-list-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event?.target?.closest('.client-list-item')?.classList.add('active');
+      
+      // Show client page
+      document.getElementById('page-home').classList.remove('active');
+      document.getElementById('page-client').classList.add('active');
+      
+      // Update header
+      document.getElementById('clientPageTitle').textContent = clientCode;
+      
+      // Find client data
+      const client = allClients.find(c => c.client_code === clientCode);
+      if (client) {
+        document.getElementById('clientPageMeta').textContent = 
+          `${client.messageCount} messages this week · ${client.homeworkCount} active homework · Trend: ${client.trend}`;
+        document.getElementById('clientMessages').textContent = client.messageCount;
+        document.getElementById('clientHomework').textContent = client.homeworkCount;
+        document.getElementById('clientTrend').textContent = client.trend === 'up' ? '↑ Up' : (client.trend === 'down' ? '↓ Down' : '→ Stable');
+      }
+      
+      // Reset to prep tab
+      switchClientTab('prep', document.querySelector('.tab'));
+      
+      // Load data
+      await loadClientPrep(clientCode);
+      loadClientNotes(clientCode);
+      await loadClientHomework(clientCode);
+    }
+    
+    async function loadClientPrep(clientCode) {
       try {
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        const alerts = await supabaseCall(
-          `/rest/v1/conversation_turns?intention_chosen=eq.CRISIS&created_at=gte.${weekAgo}&order=created_at.desc&limit=20`
+        const turns = await supabaseCall(
+          `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=10`
         );
         
-        const container = document.getElementById('alertsList');
+        // Summary
+        const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
+        let summary = '';
         
-        if (!alerts || alerts.length === 0) {
-          container.innerHTML = '<div class="empty-state"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><p>No crisis alerts in the past 7 days</p></div>';
-          return;
+        if (!turns?.length) {
+          summary = '<p>No Alo interactions this week.</p>';
+        } else if (hasCrisis) {
+          summary = `<p><strong>${turns.length} interactions</strong> with Alo.</p><p style="color: var(--critical);">⚠️ Client triggered a crisis response. Review recommended before session.</p>`;
+          document.getElementById('prepSummary').parentElement.classList.add('highlight');
+        } else if (turns.length > 10) {
+          summary = `<p><strong>${turns.length} interactions</strong> with Alo. High engagement — client may have significant material to process.</p>`;
+        } else {
+          summary = `<p><strong>${turns.length} interactions</strong> with Alo this week.</p>`;
         }
         
-        container.innerHTML = alerts.map(alert => `
-          <div class="client-card critical-border">
-            <div class="client-primary">
-              <div class="client-name">${alert.user_id || 'Unknown'}</div>
-              <div class="client-context">"${truncate(alert.user_message, 100)}"</div>
+        document.getElementById('prepSummary').innerHTML = summary;
+        
+        // Excerpts
+        if (turns?.length) {
+          document.getElementById('prepExcerpts').innerHTML = turns.slice(0, 5).map(t => `
+            <div class="excerpt-item">
+              <div class="excerpt-time">${formatTimeAgo(new Date(t.created_at))}</div>
+              <div class="excerpt-text">"${truncate(t.user_message, 150)}"</div>
             </div>
-            <div class="client-signal">
-              <div class="signal-label">Detected</div>
-              <div class="signal-value critical">${formatTimeAgo(new Date(alert.created_at))}</div>
-            </div>
-          </div>
-        `).join('');
+          `).join('');
+        } else {
+          document.getElementById('prepExcerpts').innerHTML = '<p style="color: var(--slate-500);">No recent conversations</p>';
+        }
         
       } catch (error) {
-        console.error('Error loading alerts:', error);
+        console.error('Error loading prep:', error);
       }
     }
     
-    // =====================================================
-    // LOAD HOMEWORK
-    // =====================================================
-    async function loadHomework() {
+    function loadClientNotes(clientCode) {
+      const notes = clientNotes[clientCode] || [];
+      const container = document.getElementById('notesContainer');
+      
+      if (!notes.length) {
+        container.innerHTML = '<p style="color: var(--slate-500); text-align: center; padding: 20px;">No session notes yet. Click "Add Note" to create one.</p>';
+        return;
+      }
+      
+      container.innerHTML = notes.map((note, i) => `
+        <div class="note-card">
+          <div class="note-header">
+            <span class="note-date">${new Date(note.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${note.type}</span>
+            <button class="copy-btn" onclick="copyNote(${i}, this)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy for EHR
+            </button>
+          </div>
+          <div class="note-content">
+            ${note.themes ? `<p><strong>Themes:</strong> ${note.themes}</p>` : ''}
+            ${note.interventions ? `<p><strong>Interventions:</strong> ${note.interventions}</p>` : ''}
+            ${note.observations ? `<p><strong>Observations:</strong> ${note.observations}</p>` : ''}
+            ${note.plan ? `<p><strong>Plan:</strong> ${note.plan}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    async function loadClientHomework(clientCode) {
       try {
         const homework = await supabaseCall(
-          `/rest/v1/homework?therapist_id=eq.${THERAPIST_ID}&status=eq.active&order=created_at.desc`
+          `/rest/v1/homework?client_code=eq.${clientCode}&order=created_at.desc`
         );
         
-        const container = document.getElementById('homeworkList');
+        const container = document.getElementById('homeworkHistory');
         
-        if (!homework || homework.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No active homework assignments</p></div>';
+        if (!homework?.length) {
+          container.innerHTML = '<p style="color: var(--slate-500); text-align: center; padding: 20px;">No homework assigned yet</p>';
           return;
         }
         
         container.innerHTML = homework.map(hw => `
-          <div class="client-card" onclick="openClientModal('${hw.client_code}')">
-            <div class="client-primary">
-              <div class="client-name">${hw.client_code}</div>
-              <div class="client-context">${hw.homework_type}: ${truncate(hw.description, 60)}</div>
+          <div class="homework-item">
+            <div class="homework-status ${hw.status === 'active' ? 'active' : 'completed'}">
+              ${hw.status === 'active' 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+              }
             </div>
-            <div class="client-signal">
-              <div class="signal-label">Assigned</div>
-              <div class="signal-value">${formatTimeAgo(new Date(hw.created_at))}</div>
+            <div class="homework-content">
+              <div class="homework-type">${hw.homework_type}</div>
+              <div class="homework-description">${hw.description}</div>
+              <div class="homework-meta">Assigned ${formatTimeAgo(new Date(hw.created_at))}${hw.therapist_notes ? ` · ${hw.therapist_notes}` : ''}</div>
             </div>
           </div>
         `).join('');
@@ -1645,216 +1549,48 @@
     }
     
     // =====================================================
-    // CLIENT MODAL
-    // =====================================================
-    async function openClientModal(clientCode) {
-      currentClient = clientCode;
-      document.getElementById('clientModalTitle').textContent = 'Client Record';
-      document.getElementById('clientModalSubtitle').textContent = clientCode;
-      document.getElementById('clientModal').classList.add('active');
-      
-      // Reset to prep tab
-      switchModalTab('prep', document.querySelector('.modal-tab'));
-      
-      await loadPrepTab(clientCode);
-      loadNotesTab(clientCode);
-      await loadHistoryTab(clientCode);
-    }
-    
-    async function loadPrepTab(clientCode) {
-      const container = document.getElementById('tab-prep');
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading session prep...</div>';
-      
-      try {
-        const turns = await supabaseCall(
-          `/rest/v1/conversation_turns?user_id=eq.${clientCode}&order=created_at.desc&limit=15`
-        );
-        
-        const homework = await supabaseCall(
-          `/rest/v1/homework?client_code=eq.${clientCode}&status=eq.active`
-        );
-        
-        let html = '';
-        
-        // Since Last Session
-        if (turns && turns.length > 0) {
-          const themes = extractThemes(turns);
-          html += `
-            <div class="prep-section">
-              <div class="prep-label">Since Last Session</div>
-              <div class="prep-content ${themes.hasConcern ? 'prep-highlight' : ''}">
-                <p><strong>${turns.length} interactions</strong> with Alo in the past week.</p>
-                ${themes.summary ? `<p>${themes.summary}</p>` : ''}
-              </div>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="prep-section">
-              <div class="prep-label">Since Last Session</div>
-              <div class="prep-content">
-                <p>No interactions with Alo this week.</p>
-              </div>
-            </div>
-          `;
-        }
-        
-        // Open Loops
-        let openLoops = [];
-        if (homework && homework.length > 0) {
-          homework.forEach(hw => {
-            openLoops.push({
-              text: `Homework: ${hw.homework_type} — "${truncate(hw.description, 50)}"`,
-              meta: `Assigned ${formatTimeAgo(new Date(hw.created_at))}`
-            });
-          });
-        }
-        
-        if (openLoops.length > 0) {
-          html += `
-            <div class="prep-section">
-              <div class="prep-label">Open Loops</div>
-              <div class="open-loops">
-                ${openLoops.map(loop => `
-                  <div class="loop-item">
-                    <svg class="loop-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div>
-                      <div class="loop-text">${loop.text}</div>
-                      <div class="loop-meta">${loop.meta}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        }
-        
-        // Recent Excerpts
-        if (turns && turns.length > 0) {
-          html += `
-            <div class="prep-section">
-              <div class="prep-label">Recent Excerpts</div>
-              <div class="prep-content">
-                ${turns.slice(0, 3).map(t => `
-                  <p style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--slate-200);">
-                    <span style="font-size: 0.75rem; color: var(--slate-500);">${formatTimeAgo(new Date(t.created_at))}</span><br>
-                    "${truncate(t.user_message, 120)}"
-                  </p>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        }
-        
-        container.innerHTML = html || '<div class="empty-state"><p>No data available</p></div>';
-        
-      } catch (error) {
-        console.error('Error loading prep:', error);
-        container.innerHTML = '<div class="empty-state"><p>Error loading session prep</p></div>';
-      }
-    }
-    
-    function loadNotesTab(clientCode) {
-      const notes = clientNotes[clientCode] || [];
-      const container = document.getElementById('notesList');
-      
-      if (notes.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No session notes yet</p></div>';
-      } else {
-        container.innerHTML = notes.map((note, index) => `
-          <div class="note-card">
-            <div class="note-header">
-              <span class="note-date">${new Date(note.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} — ${note.type}</span>
-              <div class="note-actions">
-                <button class="copy-btn" onclick="copyNoteToClipboard(${index}, this)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  Copy for EHR
-                </button>
-              </div>
-            </div>
-            <div class="note-content">
-              ${note.themes ? `<p><strong>Themes:</strong> ${note.themes}</p>` : ''}
-              ${note.interventions ? `<p><strong>Interventions:</strong> ${note.interventions}</p>` : ''}
-              ${note.observations ? `<p><strong>Observations:</strong> ${note.observations}</p>` : ''}
-              ${note.plan ? `<p><strong>Plan:</strong> ${note.plan}</p>` : ''}
-            </div>
-          </div>
-        `).join('');
-      }
-      
-      document.getElementById('addNoteBtn').style.display = 'flex';
-      document.getElementById('noteForm').style.display = 'none';
-    }
-    
-    async function loadHistoryTab(clientCode) {
-      const container = document.getElementById('homeworkHistory');
-      
-      try {
-        const homework = await supabaseCall(
-          `/rest/v1/homework?client_code=eq.${clientCode}&order=created_at.desc`
-        );
-        
-        if (!homework || homework.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No homework history</p></div>';
-          return;
-        }
-        
-        container.innerHTML = homework.map(hw => `
-          <div class="note-card">
-            <div class="note-header">
-              <span class="note-date">${hw.homework_type} — ${new Date(hw.created_at).toLocaleDateString()}</span>
-              <span class="btn btn-sm btn-secondary">${hw.status}</span>
-            </div>
-            <div class="note-content">
-              <p>${hw.description}</p>
-              ${hw.therapist_notes ? `<p style="margin-top: 8px; font-style: italic; color: var(--slate-500);">Rationale: ${hw.therapist_notes}</p>` : ''}
-            </div>
-          </div>
-        `).join('');
-        
-      } catch (error) {
-        console.error('Error loading homework history:', error);
-        container.innerHTML = '<div class="empty-state"><p>Error loading history</p></div>';
-      }
-    }
-    
-    function extractThemes(turns) {
-      const hasCrisis = turns.some(t => t.intention_chosen === 'CRISIS');
-      const messageCount = turns.length;
-      
-      let summary = '';
-      if (hasCrisis) {
-        summary = 'Client triggered a crisis response during this period. Review recommended before session.';
-      } else if (messageCount > 10) {
-        summary = 'High engagement this week. Client may have significant material to process.';
-      } else if (messageCount > 5) {
-        summary = 'Moderate engagement. Client appears to be actively working between sessions.';
-      }
-      
-      return { hasConcern: hasCrisis, summary };
-    }
-    
-    // =====================================================
-    // SESSION NOTES
+    // NOTES
     // =====================================================
     function showNoteForm() {
-      document.getElementById('addNoteBtn').style.display = 'none';
-      document.getElementById('noteForm').style.display = 'block';
-      document.getElementById('noteDate').valueAsDate = new Date();
-    }
-    
-    function hideNoteForm() {
-      document.getElementById('addNoteBtn').style.display = 'flex';
-      document.getElementById('noteForm').style.display = 'none';
-      // Clear form
-      document.getElementById('noteThemes').value = '';
-      document.getElementById('noteInterventions').value = '';
-      document.getElementById('noteObservations').value = '';
-      document.getElementById('notePlan').value = '';
+      const container = document.getElementById('notesContainer');
+      const today = new Date().toISOString().split('T')[0];
+      
+      container.innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Session Date</label>
+            <input type="date" id="noteDate" value="${today}">
+          </div>
+          <div class="form-group">
+            <label>Session Type</label>
+            <select id="noteType">
+              <option value="Individual">Individual</option>
+              <option value="Couples">Couples</option>
+              <option value="Family">Family</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>Themes Discussed</label>
+            <textarea id="noteThemes" placeholder="Main topics covered..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label>Interventions Used</label>
+            <textarea id="noteInterventions" placeholder="Techniques or approaches..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label>Clinical Observations</label>
+            <textarea id="noteObservations" placeholder="Affect, engagement, progress..."></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label>Plan / Next Steps</label>
+            <textarea id="notePlan" placeholder="Goals for next session..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="loadClientNotes('${currentClient}')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+        </div>
+      `;
     }
     
     function saveNote() {
@@ -1864,38 +1600,27 @@
         themes: document.getElementById('noteThemes').value,
         interventions: document.getElementById('noteInterventions').value,
         observations: document.getElementById('noteObservations').value,
-        plan: document.getElementById('notePlan').value,
-        createdAt: new Date().toISOString()
+        plan: document.getElementById('notePlan').value
       };
       
-      if (!clientNotes[currentClient]) {
-        clientNotes[currentClient] = [];
-      }
+      if (!clientNotes[currentClient]) clientNotes[currentClient] = [];
       clientNotes[currentClient].unshift(note);
       
-      hideNoteForm();
-      loadNotesTab(currentClient);
+      loadClientNotes(currentClient);
       showToast('Session note saved');
     }
     
-    function copyNoteToClipboard(noteIndex, btn) {
-      const notes = clientNotes[currentClient];
-      const note = notes[noteIndex];
-      
-      const text = `Session Date: ${new Date(note.date).toLocaleDateString()}
-Type: ${note.type}
+    function copyNote(index, btn) {
+      const note = clientNotes[currentClient][index];
+      const text = `Session: ${new Date(note.date).toLocaleDateString()} (${note.type})
 
-Themes Discussed:
-${note.themes || 'N/A'}
+Themes: ${note.themes || 'N/A'}
 
-Interventions Used:
-${note.interventions || 'N/A'}
+Interventions: ${note.interventions || 'N/A'}
 
-Clinical Observations:
-${note.observations || 'N/A'}
+Observations: ${note.observations || 'N/A'}
 
-Plan/Next Steps:
-${note.plan || 'N/A'}`;
+Plan: ${note.plan || 'N/A'}`;
       
       navigator.clipboard.writeText(text).then(() => {
         btn.classList.add('copied');
@@ -1910,11 +1635,6 @@ ${note.plan || 'N/A'}`;
     // =====================================================
     // HOMEWORK
     // =====================================================
-    function openHomeworkModal() {
-      document.getElementById('homeworkModalSubtitle').textContent = currentClient;
-      document.getElementById('homeworkModal').classList.add('active');
-    }
-    
     function useTemplate(type, description) {
       document.getElementById('hwType').value = type;
       document.getElementById('hwDescription').value = description;
@@ -1923,16 +1643,8 @@ ${note.plan || 'N/A'}`;
     async function submitHomework(event) {
       event.preventDefault();
       
-      const homework = {
-        therapist_id: THERAPIST_ID,
-        client_code: currentClient,
-        homework_type: document.getElementById('hwType').value,
-        description: document.getElementById('hwDescription').value,
-        therapist_notes: document.getElementById('hwRationale').value || null
-      };
-      
       try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
+        await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -1940,18 +1652,18 @@ ${note.plan || 'N/A'}`;
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify(homework)
+          body: JSON.stringify({
+            therapist_id: THERAPIST_ID,
+            client_code: currentClient,
+            homework_type: document.getElementById('hwType').value,
+            description: document.getElementById('hwDescription').value,
+            therapist_notes: document.getElementById('hwRationale').value || null
+          })
         });
         
-        if (!response.ok) throw new Error('Failed');
-        
-        closeModal('homeworkModal');
-        showToast('Homework assigned successfully');
-        
-        // Refresh
-        await loadPrepTab(currentClient);
-        await loadHistoryTab(currentClient);
-        await loadDashboard();
+        document.getElementById('homeworkForm').reset();
+        await loadClientHomework(currentClient);
+        showToast('Homework assigned');
         
       } catch (error) {
         console.error('Error:', error);
@@ -1960,52 +1672,33 @@ ${note.plan || 'N/A'}`;
     }
     
     // =====================================================
-    // UI HELPERS
+    // NAVIGATION
     // =====================================================
-    function showView(viewName, navItem) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      
-      document.getElementById(`view-${viewName}`).classList.add('active');
-      if (navItem) navItem.classList.add('active');
+    function showHome() {
+      document.getElementById('page-client').classList.remove('active');
+      document.getElementById('page-home').classList.add('active');
+      document.querySelectorAll('.client-list-item').forEach(el => el.classList.remove('active'));
+      document.querySelector('.nav-item').classList.add('active');
+      currentClient = null;
     }
     
-    function switchModalTab(tabName, tabBtn) {
-      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+    function switchClientTab(tabName, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      
-      tabBtn.classList.add('active');
+      btn.classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
     }
     
-    function toggleStableSection() {
-      const section = document.getElementById('stableSection');
-      const toggleText = document.getElementById('stableToggleText');
-      section.classList.toggle('expanded');
-      toggleText.textContent = section.classList.contains('expanded') ? 'Hide' : 'Show all';
-    }
-    
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-    
+    // =====================================================
+    // UI HELPERS
+    // =====================================================
     function showToast(message) {
       const toast = document.getElementById('toast');
-      toast.textContent = '✓ ' + message;
+      document.getElementById('toastMessage').textContent = message;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // Close modals on overlay click
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) overlay.classList.remove('active');
-      });
-    });
-    
-    // =====================================================
-    // UTILITIES
-    // =====================================================
     function formatTimeAgo(date) {
       const seconds = Math.floor((new Date() - date) / 1000);
       if (seconds < 60) return 'Just now';
@@ -2015,9 +1708,9 @@ ${note.plan || 'N/A'}`;
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     
-    function truncate(str, length) {
+    function truncate(str, len) {
       if (!str) return '';
-      return str.length > length ? str.substring(0, length) + '...' : str;
+      return str.length > len ? str.substring(0, len) + '...' : str;
     }
   </script>
 </body>
