@@ -1695,8 +1695,11 @@
           document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
         }
         
-        // Notes
-        loadNotes();
+        // Notes - load from database
+        await loadNotes();
+        
+        // Update preview after notes are loaded
+        loadLastSessionsPreview(code);
         
       } catch (err) {
         console.error('Error loading client:', err);
@@ -1725,8 +1728,8 @@
       container.innerHTML = preview.map((n, i) => `
         <div class="session-preview ${i > 0 ? 'session-preview-border' : ''}">
           <div class="session-preview-header">
-            <span class="session-preview-date">${new Date(n.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-            <span class="session-preview-type">${n.type || 'Session'}</span>
+            <span class="session-preview-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <span class="session-preview-type">${n.session_type || 'Session'}</span>
           </div>
           ${n.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${truncate(n.themes, 100)}</p>` : ''}
           ${n.plan ? `<p class="session-preview-text"><strong>Plan:</strong> ${truncate(n.plan, 100)}</p>` : ''}
@@ -1756,36 +1759,53 @@
     }
     
     // =====================================================
-    // NOTES
+    // NOTES - Now persisted to database
     // =====================================================
-    function loadNotes() {
-      const notes = clientNotes[currentClient] || [];
+    async function loadNotes() {
       const container = document.getElementById('notesContainer');
       
-      if (!notes.length) {
-        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Click "Add Note" to create one.</p>';
-        return;
+      try {
+        const notes = await api(`/rest/v1/session_notes?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}&order=session_date.desc,created_at.desc`);
+        
+        // Also update local cache for preview
+        clientNotes[currentClient] = notes || [];
+        
+        if (!notes?.length) {
+          container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Click "Add Note" to create one.</p>';
+          return;
+        }
+        
+        container.innerHTML = notes.map((n) => `
+          <div class="note-card">
+            <div class="note-header">
+              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${n.session_type || 'Session'}</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="copy-btn" onclick="copyNoteFromDb('${n.id}', this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy for EHR
+                </button>
+                <button class="copy-btn" onclick="deleteNote('${n.id}')" title="Delete note">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="note-content">
+              ${n.themes ? `<p><strong>Themes:</strong> ${n.themes}</p>` : ''}
+              ${n.interventions ? `<p><strong>Interventions:</strong> ${n.interventions}</p>` : ''}
+              ${n.observations ? `<p><strong>Observations:</strong> ${n.observations}</p>` : ''}
+              ${n.plan ? `<p><strong>Plan:</strong> ${n.plan}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (err) {
+        console.error('Error loading notes:', err);
+        container.innerHTML = '<p style="color: var(--danger);">Error loading notes</p>';
       }
-      
-      container.innerHTML = notes.map((n, i) => `
-        <div class="note-card">
-          <div class="note-header">
-            <span class="note-date">${new Date(n.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${n.type}</span>
-            <button class="copy-btn" onclick="copyNote(${i}, this)">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy for EHR
-            </button>
-          </div>
-          <div class="note-content">
-            ${n.themes ? `<p><strong>Themes:</strong> ${n.themes}</p>` : ''}
-            ${n.interventions ? `<p><strong>Interventions:</strong> ${n.interventions}</p>` : ''}
-            ${n.observations ? `<p><strong>Observations:</strong> ${n.observations}</p>` : ''}
-            ${n.plan ? `<p><strong>Plan:</strong> ${n.plan}</p>` : ''}
-          </div>
-        </div>
-      `).join('');
     }
     
     function showNoteForm() {
@@ -1828,29 +1848,50 @@
       `;
     }
     
-    function saveNote() {
-      const note = {
-        date: document.getElementById('noteDate').value,
-        type: document.getElementById('noteType').value,
-        themes: document.getElementById('noteThemes').value,
-        interventions: document.getElementById('noteInterventions').value,
-        observations: document.getElementById('noteObservations').value,
-        plan: document.getElementById('notePlan').value
+    async function saveNote() {
+      const noteData = {
+        therapist_id: THERAPIST_ID,
+        client_code: currentClient,
+        session_date: document.getElementById('noteDate').value,
+        session_type: document.getElementById('noteType').value,
+        themes: document.getElementById('noteThemes').value || null,
+        interventions: document.getElementById('noteInterventions').value || null,
+        observations: document.getElementById('noteObservations').value || null,
+        plan: document.getElementById('notePlan').value || null
       };
       
-      if (!clientNotes[currentClient]) clientNotes[currentClient] = [];
-      clientNotes[currentClient].unshift(note);
-      
-      // Update last sessions preview
-      loadLastSessionsPreview(currentClient);
-      
-      loadNotes();
-      toast('Note saved');
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/session_notes`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(noteData)
+        });
+        
+        // Reload notes from database
+        await loadNotes();
+        
+        // Update last sessions preview
+        loadLastSessionsPreview(currentClient);
+        
+        toast('Note saved');
+        
+      } catch (err) {
+        console.error('Error saving note:', err);
+        alert('Error saving note');
+      }
     }
     
-    function copyNote(i, btn) {
-      const n = clientNotes[currentClient][i];
-      const text = `Session: ${new Date(n.date).toLocaleDateString()} (${n.type})
+    function copyNoteFromDb(noteId, btn) {
+      const notes = clientNotes[currentClient] || [];
+      const n = notes.find(note => note.id === noteId);
+      if (!n) return;
+      
+      const text = `Session: ${new Date(n.session_date).toLocaleDateString()} (${n.session_type || 'Session'})
 
 Themes: ${n.themes || 'N/A'}
 Interventions: ${n.interventions || 'N/A'}
@@ -1865,6 +1906,28 @@ Plan: ${n.plan || 'N/A'}`;
           btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
         }, 2000);
       });
+    }
+    
+    async function deleteNote(noteId) {
+      if (!confirm('Delete this session note?')) return;
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/session_notes?id=eq.${noteId}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          }
+        });
+        
+        await loadNotes();
+        loadLastSessionsPreview(currentClient);
+        toast('Note deleted');
+        
+      } catch (err) {
+        console.error('Error deleting note:', err);
+        alert('Error deleting note');
+      }
     }
     
     // =====================================================
