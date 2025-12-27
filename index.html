@@ -1104,8 +1104,18 @@
   <div class="layout client-page" id="clientPage">
     <div class="main">
       <div class="page-header">
-        <h1 class="page-title" id="clientName">Client Name</h1>
-        <p class="page-meta" id="clientMeta">Loading...</p>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h1 class="page-title" id="clientName">Client Name</h1>
+            <p class="page-meta" id="clientMeta">Loading...</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="showEditClientForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            Edit
+          </button>
+        </div>
       </div>
       
       <div class="tabs">
@@ -1283,6 +1293,32 @@
     </div>
   </div>
   
+  <!-- Edit Client Modal -->
+  <div class="modal-overlay" id="editClientModal" onclick="closeEditClientModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Client</h3>
+        <button class="modal-close" onclick="closeEditClientModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Client Code</label>
+          <input type="text" id="editClientCode" disabled style="background: var(--bg); color: var(--text-muted);">
+          <span class="form-hint">Client code cannot be changed</span>
+        </div>
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
+          <span class="form-hint">Friendly name visible only to you</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditClientModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClientEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Toast -->
   <div class="toast" id="toast">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1455,7 +1491,11 @@
       let sorted = [...allClients];
       
       if (sortBy === 'alpha') {
-        sorted.sort((a, b) => a.client_code.localeCompare(b.client_code));
+        sorted.sort((a, b) => {
+          const nameA = a.display_name || a.client_code;
+          const nameB = b.display_name || b.client_code;
+          return nameA.localeCompare(nameB);
+        });
       } else {
         sorted.sort((a, b) => {
           if (!a.lastActivity) return 1;
@@ -1465,7 +1505,8 @@
       }
       
       const html = sorted.map(c => {
-        const initials = c.client_code.substring(0, 2).toUpperCase();
+        const displayName = c.display_name || c.client_code;
+        const initials = displayName.substring(0, 2).toUpperCase();
         const isActive = currentClient === c.client_code;
         
         return `
@@ -1475,7 +1516,7 @@
               <div class="status-badge ${c.status}"></div>
             </div>
             <div class="client-info">
-              <div class="client-name">${c.client_code}</div>
+              <div class="client-name">${displayName}</div>
               <div class="client-meta">${c.messages} msgs · ${c.homework} hw</div>
             </div>
           </div>
@@ -1511,10 +1552,18 @@
       
       // Update header
       const client = allClients.find(c => c.client_code === code);
-      document.getElementById('clientName').textContent = code;
-      document.getElementById('clientMeta').textContent = client 
+      const displayName = client?.display_name || code;
+      document.getElementById('clientName').textContent = displayName;
+      
+      // Show client code in meta if display name is different
+      let metaText = '';
+      if (client?.display_name && client.display_name !== code) {
+        metaText = `${code} · `;
+      }
+      metaText += client 
         ? `${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
         : 'Loading...';
+      document.getElementById('clientMeta').textContent = metaText;
       
       // Load data
       await loadClientData(code);
@@ -1766,6 +1815,68 @@ Plan: ${n.plan || 'N/A'}`;
           btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
         }, 2000);
       });
+    }
+    
+    // =====================================================
+    // EDIT CLIENT
+    // =====================================================
+    function showEditClientForm() {
+      if (!currentClient) return;
+      
+      const client = allClients.find(c => c.client_code === currentClient);
+      document.getElementById('editClientCode').value = currentClient;
+      document.getElementById('editClientName').value = client?.display_name || '';
+      document.getElementById('editClientModal').classList.add('show');
+      document.getElementById('editClientName').focus();
+    }
+    
+    function closeEditClientModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('editClientModal').classList.remove('show');
+    }
+    
+    async function saveClientEdit() {
+      const name = document.getElementById('editClientName').value.trim();
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/therapist_client_links?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            display_name: name || null
+          })
+        });
+        
+        // Update local data
+        const client = allClients.find(c => c.client_code === currentClient);
+        if (client) client.display_name = name || null;
+        
+        // Update UI
+        const displayName = name || currentClient;
+        document.getElementById('clientName').textContent = displayName;
+        
+        let metaText = '';
+        if (name && name !== currentClient) {
+          metaText = `${currentClient} · `;
+        }
+        metaText += client 
+          ? `${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+          : '';
+        document.getElementById('clientMeta').textContent = metaText;
+        
+        renderClientsList();
+        closeEditClientModal();
+        toast('Client updated');
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error updating client');
+      }
     }
     
     // =====================================================
