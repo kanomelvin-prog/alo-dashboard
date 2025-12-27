@@ -1488,6 +1488,11 @@
                 <div class="homework-desc">${h.description}</div>
                 <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
               </div>
+              ${h.status === 'active' ? `
+                <button class="btn btn-sm btn-secondary" onclick="completeHomework('${h.id}')">
+                  Mark Complete
+                </button>
+              ` : ''}
             </div>
           `).join('');
         } else {
@@ -1671,6 +1676,28 @@ Plan: ${n.plan || 'N/A'}`;
     // =====================================================
     // HOMEWORK
     // =====================================================
+    async function completeHomework(id) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/homework?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        
+        await loadClientData(currentClient);
+        toast('Homework marked complete');
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error updating homework');
+      }
+    }
+    
     function useTemplate(type, desc) {
       document.getElementById('hwType').value = type;
       document.getElementById('hwDescription').value = desc;
