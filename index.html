@@ -31,6 +31,9 @@
       --warning-border: #fde68a;
       --success: #10b981;
       --success-bg: #ecfdf5;
+      --info-bg: #eff6ff;
+      --info-border: #bfdbfe;
+      --info-text: #1e40af;
     }
     
     body {
@@ -353,23 +356,62 @@
       color: rgba(255,255,255,0.8);
     }
     
+    /* === CLIENT AVATAR WITH STATUS BADGE === */
     .client-avatar {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       background: var(--bg);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-light);
       flex-shrink: 0;
+      position: relative;
     }
     
     .client-item.active .client-avatar {
       background: rgba(255,255,255,0.2);
       color: white;
+    }
+    
+    /* STATUS BADGE - Key improvement #1 */
+    .status-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+    }
+    
+    .client-item.active .status-badge {
+      border-color: var(--primary);
+    }
+    
+    .status-badge.crisis {
+      background: var(--danger);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-badge.needs-attention {
+      background: var(--warning);
+    }
+    
+    .status-badge.stable {
+      background: var(--success);
+    }
+    
+    .status-badge.dormant {
+      background: var(--text-muted);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
     }
     
     .client-info {
@@ -390,17 +432,6 @@
       font-size: 0.75rem;
       color: var(--text-muted);
     }
-    
-    .client-status {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    
-    .client-status.danger { background: var(--danger); }
-    .client-status.warning { background: var(--warning); }
-    .client-status.success { background: var(--success); }
     
     /* === CLIENT PAGE === */
     .client-page {
@@ -511,6 +542,62 @@
       font-size: 0.875rem;
       color: var(--text);
       margin-bottom: 16px;
+    }
+    
+    /* === LAST SESSION CARD - Key improvement #2 === */
+    .last-session-card {
+      background: var(--info-bg);
+      border: 1px solid var(--info-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    
+    .last-session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .last-session-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--info-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .last-session-date {
+      font-size: 0.75rem;
+      color: var(--info-text);
+      opacity: 0.8;
+    }
+    
+    .last-session-content {
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .last-session-content p {
+      margin-bottom: 8px;
+    }
+    
+    .last-session-content p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .last-session-label {
+      font-weight: 500;
+      color: var(--info-text);
+    }
+    
+    .last-session-empty {
+      color: var(--info-text);
+      opacity: 0.7;
+      font-style: italic;
     }
     
     /* === EXCERPTS === */
@@ -956,6 +1043,22 @@
       
       <!-- Session Prep Tab -->
       <div class="tab-content active" id="tab-prep">
+        <!-- Last Session Card - NEW -->
+        <div class="last-session-card" id="lastSessionCard">
+          <div class="last-session-header">
+            <span class="last-session-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Last Session
+            </span>
+            <span class="last-session-date" id="lastSessionDate">No previous notes</span>
+          </div>
+          <div class="last-session-content" id="lastSessionContent">
+            <p class="last-session-empty">No session notes yet. Add one in the Session Notes tab.</p>
+          </div>
+        </div>
+        
         <div class="card">
           <div class="card-header">
             <span class="card-title">Since Last Session</span>
@@ -1104,7 +1207,7 @@
     let currentClient = null;
     let allClients = [];
     let clientNotes = {};
-    let sortBy = 'alpha'; // 'alpha' or 'schedule'
+    let sortBy = 'alpha'; // 'alpha' or 'recent'
     
     // =====================================================
     // INIT
@@ -1162,12 +1265,25 @@
           if (current > previous + 2) trend = 'up';
           else if (current < previous - 2) trend = 'down';
           
+          // Determine client status for badge
+          let status = 'stable';
+          if (hasCrisis) {
+            status = 'crisis';
+          } else if (current === 0 && (hw?.length || 0) > 0) {
+            status = 'needs-attention';
+          } else if (trend === 'down') {
+            status = 'needs-attention';
+          } else if (current === 0 && (hw?.length || 0) === 0) {
+            status = 'dormant';
+          }
+          
           return {
             ...client,
             messages: current,
             homework: hw?.length || 0,
             hasCrisis,
             trend,
+            status,
             lastActivity: recent?.[0]?.created_at || null
           };
         }));
@@ -1238,7 +1354,7 @@
     }
     
     // =====================================================
-    // RENDER CLIENTS LIST
+    // RENDER CLIENTS LIST WITH STATUS BADGES
     // =====================================================
     function renderClientsList() {
       let sorted = [...allClients];
@@ -1254,18 +1370,19 @@
       }
       
       const html = sorted.map(c => {
-        const statusClass = c.hasCrisis ? 'danger' : (c.trend === 'down' ? 'warning' : 'success');
         const initials = c.client_code.substring(0, 2).toUpperCase();
         const isActive = currentClient === c.client_code;
         
         return `
           <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${c.client_code}')">
-            <div class="client-avatar">${initials}</div>
+            <div class="client-avatar">
+              ${initials}
+              <div class="status-badge ${c.status}"></div>
+            </div>
             <div class="client-info">
               <div class="client-name">${c.client_code}</div>
               <div class="client-meta">${c.messages} msgs · ${c.homework} hw</div>
             </div>
-            <div class="client-status ${statusClass}"></div>
           </div>
         `;
       }).join('');
@@ -1314,6 +1431,9 @@
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
           api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`)
         ]);
+        
+        // Load last session into the card
+        loadLastSession(code);
         
         // Prep Summary
         const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
@@ -1379,6 +1499,40 @@
         
       } catch (err) {
         console.error('Error loading client:', err);
+      }
+    }
+    
+    // =====================================================
+    // LAST SESSION CARD - NEW
+    // =====================================================
+    function loadLastSession(code) {
+      const notes = clientNotes[code] || [];
+      const lastNote = notes[0]; // Most recent note
+      
+      if (lastNote) {
+        document.getElementById('lastSessionDate').textContent = 
+          new Date(lastNote.date).toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        
+        let content = '';
+        if (lastNote.themes) {
+          content += `<p><span class="last-session-label">Themes:</span> ${lastNote.themes}</p>`;
+        }
+        if (lastNote.plan) {
+          content += `<p><span class="last-session-label">Plan:</span> ${lastNote.plan}</p>`;
+        }
+        if (!content) {
+          content = '<p class="last-session-empty">Note saved but no themes or plan recorded.</p>';
+        }
+        
+        document.getElementById('lastSessionContent').innerHTML = content;
+      } else {
+        document.getElementById('lastSessionDate').textContent = 'No previous notes';
+        document.getElementById('lastSessionContent').innerHTML = 
+          '<p class="last-session-empty">No session notes yet. Add one in the Session Notes tab.</p>';
       }
     }
     
@@ -1487,6 +1641,9 @@
       
       if (!clientNotes[currentClient]) clientNotes[currentClient] = [];
       clientNotes[currentClient].unshift(note);
+      
+      // Update last session card
+      loadLastSession(currentClient);
       
       loadNotes();
       toast('Note saved');
