@@ -1318,13 +1318,15 @@
           </div>
         </div>
         
-        <!-- Alo Conversations -->
+        <!-- Shared Conversations (client opted to share) -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">What They Talked About with Alo</span>
+            <span class="card-title">Conversations Client Shared</span>
           </div>
-          <div class="card-body" id="activityExcerpts">
-            <div class="loading"><div class="spinner"></div></div>
+          <div class="card-body" id="sharedConversations">
+            <p style="color: var(--text-muted); text-align: center; padding: 1rem;">
+              When clients choose to share a helpful conversation, it will appear here.
+            </p>
           </div>
         </div>
       </div>
@@ -1546,32 +1548,31 @@
     // =====================================================
     // RENDER TRIAGE
     // =====================================================
-    function renderTriage() {
+    async function renderTriage() {
       const triage = allClients.filter(c => !c.hasCrisis && (c.trend === 'down' || (c.homework > 0 && c.messages === 0)));
       document.getElementById('triageCount').textContent = triage.length;
       
       if (!triage.length) {
         document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable — no action needed</div>';
-        return;
-      }
-      
-      document.getElementById('triageList').innerHTML = triage.map(c => {
-        let desc = '';
-        if (c.trend === 'down') desc = 'Engagement declining';
-        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) — no Alo activity`;
-        
-        return `
-          <div class="list-item" onclick="showClient('${c.client_code}')">
-            <div class="list-item-indicator warning"></div>
-            <div class="list-item-content">
-              <div class="list-item-title">${c.client_code}</div>
-              <div class="list-item-description">${desc}</div>
+      } else {
+        document.getElementById('triageList').innerHTML = triage.map(c => {
+          let desc = '';
+          if (c.trend === 'down') desc = 'Engagement declining';
+          else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) — no Alo activity`;
+          
+          return `
+            <div class="list-item" onclick="showClient('${c.client_code}')">
+              <div class="list-item-indicator warning"></div>
+              <div class="list-item-content">
+                <div class="list-item-title">${c.client_code}</div>
+                <div class="list-item-description">${desc}</div>
+              </div>
+              <span class="list-item-meta">${c.messages} msgs this week</span>
+              <button class="list-item-action">Review</button>
             </div>
-            <span class="list-item-meta">${c.messages} msgs this week</span>
-            <button class="list-item-action">Review</button>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
       
       // Load client messages for home page
       await loadHomeMessages();
@@ -1755,18 +1756,6 @@
           `).join('');
         } else {
           document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
-        }
-        
-        // Activity Excerpts
-        if (turns?.length) {
-          document.getElementById('activityExcerpts').innerHTML = turns.slice(0, 10).map(t => `
-            <div class="excerpt">
-              <div class="excerpt-time">${timeAgo(new Date(t.created_at))}</div>
-              <div class="excerpt-text">"${truncate(t.user_message, 200)}"</div>
-            </div>
-          `).join('');
-        } else {
-          document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
         }
         
         // Client Messages
