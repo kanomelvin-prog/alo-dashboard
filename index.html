@@ -1092,8 +1092,8 @@
       </a>
     </div>
     <div class="header-right">
-      <span class="user-name">Dr. Dupree</span>
-      <div class="user-avatar">D</div>
+      <span class="user-name" id="therapistName" onclick="editTherapistName()" style="cursor: pointer;" title="Click to edit">Dr. Dupree</span>
+      <div class="user-avatar" id="therapistAvatar">D</div>
     </div>
   </header>
   
@@ -1438,6 +1438,9 @@
     // LOAD DASHBOARD
     // =====================================================
     async function loadDashboard() {
+      // Load therapist name
+      loadTherapistName();
+      
       try {
         const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
         
@@ -1959,6 +1962,25 @@ Plan: ${n.plan || 'N/A'}`;
       } catch (err) {
         console.error('Error deleting note:', err);
         alert('Error deleting note');
+      }
+    }
+    
+    // =====================================================
+    // THERAPIST NAME
+    // =====================================================
+    function loadTherapistName() {
+      const name = localStorage.getItem('aloTherapistName') || 'Dr. Dupree';
+      document.getElementById('therapistName').textContent = name;
+      document.getElementById('therapistAvatar').textContent = name.charAt(0).toUpperCase();
+    }
+    
+    function editTherapistName() {
+      const currentName = localStorage.getItem('aloTherapistName') || 'Dr. Dupree';
+      const newName = prompt('Enter your name:', currentName);
+      if (newName && newName.trim()) {
+        localStorage.setItem('aloTherapistName', newName.trim());
+        loadTherapistName();
+        toast('Name updated');
       }
     }
     
