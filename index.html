@@ -1092,8 +1092,8 @@
       </a>
     </div>
     <div class="header-right">
-      <span class="user-name" id="therapistName" onclick="editTherapistName()" style="cursor: pointer;" title="Click to edit">Dr. Dupree</span>
-      <div class="user-avatar" id="therapistAvatar">D</div>
+      <span class="user-name">Dr. Dupree</span>
+      <div class="user-avatar">D</div>
     </div>
   </header>
   
@@ -1292,20 +1292,9 @@
       
       <!-- Alo Activity Tab -->
       <div class="tab-content" id="tab-activity">
-        <!-- Client Messages -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Messages from Client</span>
-          </div>
-          <div class="card-body" id="clientMessages">
-            <div class="loading"><div class="spinner"></div></div>
-          </div>
-        </div>
-        
-        <!-- Alo Conversations -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Recent Alo Conversations</span>
+            <span class="card-title">Recent Conversations</span>
           </div>
           <div class="card-body" id="activityExcerpts">
             <div class="loading"><div class="spinner"></div></div>
@@ -1438,9 +1427,6 @@
     // LOAD DASHBOARD
     // =====================================================
     async function loadDashboard() {
-      // Load therapist name
-      loadTherapistName();
-      
       try {
         const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
         
@@ -1644,10 +1630,9 @@
     
     async function loadClientData(code) {
       try {
-        const [turns, homework, messages] = await Promise.all([
+        const [turns, homework] = await Promise.all([
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
-          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
-          api(`/rest/v1/client_messages?client_code=eq.${code}&order=created_at.desc&limit=10`)
+          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`)
         ]);
         
         // Load last sessions preview
@@ -1689,19 +1674,6 @@
           `).join('');
         } else {
           document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
-        }
-        
-        // Client Messages
-        if (messages?.length) {
-          document.getElementById('clientMessages').innerHTML = messages.map(m => `
-            <div class="excerpt" style="background: ${m.read_by_therapist ? 'var(--bg)' : 'var(--warning-bg)'}; border-left: 3px solid ${m.read_by_therapist ? 'var(--border)' : 'var(--warning)'};">
-              <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${!m.read_by_therapist ? '<span style="color: var(--warning); font-weight: 500;">• New</span>' : ''}</div>
-              <div class="excerpt-text" style="font-style: normal;">${escapeHtml(m.message)}</div>
-              ${!m.read_by_therapist ? `<button class="btn btn-sm btn-secondary" style="margin-top: 8px;" onclick="markMessageRead('${m.id}')">Mark as Read</button>` : ''}
-            </div>
-          `).join('');
-        } else {
-          document.getElementById('clientMessages').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No messages from client</p>';
         }
         
         // Homework History
@@ -1966,25 +1938,6 @@ Plan: ${n.plan || 'N/A'}`;
     }
     
     // =====================================================
-    // THERAPIST NAME
-    // =====================================================
-    function loadTherapistName() {
-      const name = localStorage.getItem('aloTherapistName') || 'Dr. Dupree';
-      document.getElementById('therapistName').textContent = name;
-      document.getElementById('therapistAvatar').textContent = name.charAt(0).toUpperCase();
-    }
-    
-    function editTherapistName() {
-      const currentName = localStorage.getItem('aloTherapistName') || 'Dr. Dupree';
-      const newName = prompt('Enter your name:', currentName);
-      if (newName && newName.trim()) {
-        localStorage.setItem('aloTherapistName', newName.trim());
-        loadTherapistName();
-        toast('Name updated');
-      }
-    }
-    
-    // =====================================================
     // COPY CLIENT CODE
     // =====================================================
     function copyClientCode() {
@@ -2223,33 +2176,6 @@ Plan: ${n.plan || 'N/A'}`;
     function truncate(str, len) {
       if (!str) return '';
       return str.length > len ? str.substring(0, len) + '...' : str;
-    }
-    
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    async function markMessageRead(id) {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/client_messages?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({ read_by_therapist: true })
-        });
-        
-        await loadClientData(currentClient);
-        toast('Marked as read');
-      } catch (err) {
-        console.error('Error:', err);
-      }
     }
     
     function toast(msg) {
