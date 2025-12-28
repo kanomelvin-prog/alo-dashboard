@@ -1398,16 +1398,10 @@
     let currentClient = null;
     let allClients = [];
     let clientNotes = {};
-    let sortBy = 'alpha'; // 'alpha' or 'recent'
+    let sortBy = 'alpha';
     
-    // =====================================================
-    // INIT
-    // =====================================================
     document.addEventListener('DOMContentLoaded', loadDashboard);
     
-    // =====================================================
-    // API
-    // =====================================================
     async function api(endpoint, options = {}) {
       const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
         ...options,
@@ -1423,9 +1417,6 @@
       return text ? JSON.parse(text) : null;
     }
     
-    // =====================================================
-    // LOAD DASHBOARD
-    // =====================================================
     async function loadDashboard() {
       try {
         const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
@@ -1437,7 +1428,6 @@
           return;
         }
         
-        // Enrich client data
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
         
@@ -1456,7 +1446,6 @@
           if (current > previous + 2) trend = 'up';
           else if (current < previous - 2) trend = 'down';
           
-          // Determine client status for badge
           let status = 'stable';
           if (hasCrisis) {
             status = 'crisis';
@@ -1488,9 +1477,6 @@
       }
     }
     
-    // =====================================================
-    // RENDER ALERTS
-    // =====================================================
     function renderAlerts() {
       const alerts = allClients.filter(c => c.hasCrisis);
       document.getElementById('alertsCount').textContent = alerts.length;
@@ -1513,9 +1499,6 @@
       `).join('');
     }
     
-    // =====================================================
-    // RENDER TRIAGE
-    // =====================================================
     function renderTriage() {
       const triage = allClients.filter(c => !c.hasCrisis && (c.trend === 'down' || (c.homework > 0 && c.messages === 0)));
       document.getElementById('triageCount').textContent = triage.length;
@@ -1544,9 +1527,6 @@
       }).join('');
     }
     
-    // =====================================================
-    // RENDER CLIENTS LIST WITH STATUS BADGES
-    // =====================================================
     function renderClientsList() {
       let sorted = [...allClients];
       
@@ -1589,42 +1569,26 @@
     
     function toggleSort() {
       sortBy = sortBy === 'alpha' ? 'recent' : 'alpha';
-      document.getElementById('sortLabel').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
-      document.getElementById('sortLabel2').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
       renderClientsList();
     }
     
-    // =====================================================
-    // SHOW CLIENT PAGE
-    // =====================================================
     async function showClient(code) {
       currentClient = code;
-      
-      // Switch pages
       document.getElementById('homePage').style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
-      
-      // Update client list highlight
       renderClientsList();
-      
-      // Reset to prep tab
       switchTab('prep', document.querySelector('.tab'));
       
-      // Update header
       const client = allClients.find(c => c.client_code === code);
       const displayName = client?.display_name || code;
       document.getElementById('clientName').textContent = displayName;
-      
-      // Show client code (clickable to copy)
       document.getElementById('clientCodeText').textContent = code;
       
-      // Show stats in meta
       const metaText = client 
         ? ` · ${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
         : '';
       document.getElementById('clientMeta').textContent = metaText;
       
-      // Load data
       await loadClientData(code);
     }
     
@@ -1635,10 +1599,8 @@
           api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`)
         ]);
         
-        // Load last sessions preview
         loadLastSessionsPreview(code);
         
-        // Prep Summary
         const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
         let summary = '';
         
@@ -1654,7 +1616,6 @@
         }
         document.getElementById('prepSummary').innerHTML = summary;
         
-        // Open Items
         const activeHw = homework?.filter(h => h.active === true) || [];
         if (activeHw.length) {
           document.getElementById('prepOpenItems').innerHTML = activeHw.map(h => `
@@ -1664,7 +1625,6 @@
           document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
         }
         
-        // Activity Excerpts
         if (turns?.length) {
           document.getElementById('activityExcerpts').innerHTML = turns.slice(0, 10).map(t => `
             <div class="excerpt">
@@ -1676,7 +1636,6 @@
           document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
         }
         
-        // Homework History
         if (homework?.length) {
           document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
             <div class="homework-item">
@@ -1702,10 +1661,7 @@
           document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
         }
         
-        // Notes - load from database
         await loadNotes();
-        
-        // Update preview after notes are loaded
         loadLastSessionsPreview(code);
         
       } catch (err) {
@@ -1713,12 +1669,9 @@
       }
     }
     
-    // =====================================================
-    // LAST SESSIONS PREVIEW - Shows up to 3 recent notes
-    // =====================================================
     function loadLastSessionsPreview(code) {
       const notes = clientNotes[code] || [];
-      const preview = notes.slice(0, 3); // Get first 3 (most recent)
+      const preview = notes.slice(0, 3);
       const container = document.getElementById('lastSessionsPreview');
       const viewAllBtn = document.getElementById('viewAllNotesBtn');
       
@@ -1728,7 +1681,6 @@
         return;
       }
       
-      // Show "View All" button if more than 3 notes
       viewAllBtn.style.display = notes.length > 3 ? 'inline-flex' : 'none';
       viewAllBtn.textContent = notes.length > 3 ? `View All (${notes.length})` : 'View All';
       
@@ -1745,9 +1697,6 @@
       `).join('');
     }
     
-    // =====================================================
-    // SHOW HOME PAGE
-    // =====================================================
     function showHomePage() {
       currentClient = null;
       document.getElementById('clientPage').classList.remove('active');
@@ -1755,9 +1704,6 @@
       renderClientsList();
     }
     
-    // =====================================================
-    // TABS
-    // =====================================================
     function switchTab(tab, btn) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1765,16 +1711,11 @@
       document.getElementById(`tab-${tab}`).classList.add('active');
     }
     
-    // =====================================================
-    // NOTES - Now persisted to database
-    // =====================================================
     async function loadNotes() {
       const container = document.getElementById('notesContainer');
       
       try {
         const notes = await api(`/rest/v1/session_notes?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}&order=session_date.desc,created_at.desc`);
-        
-        // Also update local cache for preview
         clientNotes[currentClient] = notes || [];
         
         if (!notes?.length) {
@@ -1879,12 +1820,8 @@
           body: JSON.stringify(noteData)
         });
         
-        // Reload notes from database
         await loadNotes();
-        
-        // Update last sessions preview
         loadLastSessionsPreview(currentClient);
-        
         toast('Note saved');
         
       } catch (err) {
@@ -1937,23 +1874,15 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // COPY CLIENT CODE
-    // =====================================================
     function copyClientCode() {
       if (!currentClient) return;
-      
       navigator.clipboard.writeText(currentClient).then(() => {
         toast(`Copied: ${currentClient}`);
       });
     }
     
-    // =====================================================
-    // EDIT CLIENT
-    // =====================================================
     function showEditClientForm() {
       if (!currentClient) return;
-      
       const client = allClients.find(c => c.client_code === currentClient);
       document.getElementById('editClientCode').value = currentClient;
       document.getElementById('editClientName').value = client?.display_name || '';
@@ -1978,16 +1907,12 @@ Plan: ${n.plan || 'N/A'}`;
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({
-            display_name: name || null
-          })
+          body: JSON.stringify({ display_name: name || null })
         });
         
-        // Update local data
         const client = allClients.find(c => c.client_code === currentClient);
         if (client) client.display_name = name || null;
         
-        // Update UI
         const displayName = name || currentClient;
         document.getElementById('clientName').textContent = displayName;
         
@@ -2032,8 +1957,6 @@ Plan: ${n.plan || 'N/A'}`;
         closeEditClientModal();
         showHomePage();
         toast('Client removed');
-        
-        // Reload dashboard
         await loadDashboard();
         
       } catch (err) {
@@ -2042,9 +1965,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // ADD CLIENT
-    // =====================================================
     function showAddClientForm() {
       document.getElementById('addClientModal').classList.add('show');
       document.getElementById('newClientCode').value = '';
@@ -2066,7 +1986,6 @@ Plan: ${n.plan || 'N/A'}`;
         return;
       }
       
-      // Check if already exists
       if (allClients.some(c => c.client_code === code)) {
         alert('This client code already exists');
         return;
@@ -2090,8 +2009,6 @@ Plan: ${n.plan || 'N/A'}`;
         
         closeAddClientModal();
         toast('Client added');
-        
-        // Reload dashboard to show new client
         await loadDashboard();
         
       } catch (err) {
@@ -2100,9 +2017,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // HOMEWORK
-    // =====================================================
     async function completeHomework(id) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/homework?id=eq.${id}`, {
@@ -2161,9 +2075,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // UTILS
-    // =====================================================
     function timeAgo(date) {
       const s = Math.floor((new Date() - date) / 1000);
       if (s < 60) return 'Just now';
