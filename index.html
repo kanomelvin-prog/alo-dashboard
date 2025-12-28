@@ -1210,6 +1210,16 @@
             <p style="color: var(--text-muted);">No open items</p>
           </div>
         </div>
+        
+        <!-- Client Messages Card - messages sent from client chat page -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Messages from Client</span>
+          </div>
+          <div class="card-body" id="clientMessagesContainer">
+            <p style="color: var(--text-muted);">No messages from client</p>
+          </div>
+        </div>
       </div>
       
       <!-- Session Notes Tab -->
@@ -1594,9 +1604,10 @@
     
     async function loadClientData(code) {
       try {
-        const [turns, homework] = await Promise.all([
+        const [turns, homework, clientMessages] = await Promise.all([
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
-          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`)
+          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
+          api(`/rest/v1/client_messages?client_code=eq.${code}&order=created_at.desc&limit=10`)
         ]);
         
         loadLastSessionsPreview(code);
@@ -1623,6 +1634,18 @@
           `).join('');
         } else {
           document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
+        }
+        
+        // Display client messages
+        if (clientMessages?.length) {
+          document.getElementById('clientMessagesContainer').innerHTML = clientMessages.map(m => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+              <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('clientMessagesContainer').innerHTML = '<p style="color: var(--text-muted);">No messages from client</p>';
         }
         
         if (turns?.length) {
