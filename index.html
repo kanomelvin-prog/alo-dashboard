@@ -1,247 +1,786 @@
 <!-- dashboard.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alo Therapist Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #FAF8F5; /* Warm White */
-            color: #2D2A26; /* Charcoal */
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-        header {
-            padding: 20px;
-            background-color: #FDFBF7; /* Cream */
-            border-bottom: 1px solid #9C9589; /* Stone */
-            text-align: center;
-        }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 500;
-            color: #8B9A7D; /* Sage */
-        }
-        #stats {
-            padding: 10px 20px;
-            background-color: #FDFBF7;
-            border-bottom: 1px solid #9C9589;
-            display: flex;
-            justify-content: space-around;
-            font-size: 14px;
-        }
-        #stats div {
-            text-align: center;
-        }
-        #stats strong {
-            display: block;
-            font-size: 18px;
-            color: #8B9A7D;
-        }
-        #content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-        #user-list {
-            width: 300px;
-            border-right: 1px solid #9C9589;
-            overflow-y: auto;
-            padding: 10px;
-            background-color: #FDFBF7;
-        }
-        .user-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #FAF8F5;
-            border: 1px solid #9C9589;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .user-item:hover {
-            background-color: #8B9A7D;
-            color: #FDFBF7;
-        }
-        .user-item strong {
-            display: block;
-        }
-        .user-item small {
-            display: block;
-            color: #9C9589;
-        }
-        #conversation-detail {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .turn {
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            position: relative;
-        }
-        .user-turn {
-            background-color: #8B9A7D;
-            color: #FDFBF7;
-            margin-left: 20%;
-        }
-        .alo-turn {
-            background-color: #FDFBF7;
-            border: 1px solid #9C9589;
-            margin-right: 20%;
-        }
-        .intention {
-            position: absolute;
-            top: -10px;
-            right: 10px;
-            background-color: #9C9589;
-            color: #FDFBF7;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .timestamp {
-            font-size: 12px;
-            color: #9C9589;
-            margin-bottom: 5px;
-        }
-        #no-selection {
-            text-align: center;
-            padding: 50px;
-            color: #9C9589;
-        }
-        @media (max-width: 900px) {
-            #content {
-                flex-direction: column;
-            }
-            #user-list {
-                width: 100%;
-                height: 200px;
-                border-right: none;
-                border-bottom: 1px solid #9C9589;
-            }
-            #conversation-detail {
-                flex: 1;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Alo • Therapist Dashboard</title>
+  <meta name="theme-color" content="#2D2A26" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --cream:#FDFBF7;
+      --warm:#FAF8F5;
+      --sage:#8B9A7D;
+      --stone:#9C9589;
+      --char:#2D2A26;
+
+      --bg: #FAF8F5;
+      --panel: #FDFBF7;
+      --border: rgba(45,42,38,.12);
+      --muted: rgba(45,42,38,.68);
+      --shadow: 0 14px 40px rgba(45,42,38,.10);
+      --radius: 16px;
+
+      --ok: rgba(139,154,125,.16);
+      --warn: rgba(156,149,137,.18);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--char);
+      background: linear-gradient(180deg, var(--bg), var(--warm));
+    }
+
+    .shell{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      min-height: 100vh;
+    }
+
+    header{
+      grid-column: 1 / -1;
+      position: sticky;
+      top:0;
+      z-index: 20;
+      background: rgba(250,248,245,.86);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(45,42,38,.10);
+    }
+
+    .topbar{
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 220px;
+    }
+    .mark{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(45,42,38,.90), rgba(156,149,137,.70));
+      box-shadow: 0 10px 26px rgba(45,42,38,.12);
+      position:relative;
+    }
+    .mark:after{
+      content:"";
+      position:absolute; inset:9px;
+      border-radius:10px;
+      border: 1.5px solid rgba(253,251,247,.86);
+      background: rgba(253,251,247,.10);
+    }
+    .brand h1{
+      margin:0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:3px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(253,251,247,.72);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--sage);
+      box-shadow: 0 0 0 3px rgba(139,154,125,.14);
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid var(--border);
+      background: rgba(253,251,247,.78);
+      color: rgba(45,42,38,.82);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease;
+    }
+    .btn:hover{ background: rgba(253,251,247,.96); }
+    .btn:active{ transform: translateY(1px); }
+
+    .side{
+      border-right: 1px solid rgba(45,42,38,.10);
+      padding: 14px;
+    }
+
+    .panel{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .panelHead{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(45,42,38,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .panelHead strong{
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .panelHead span{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .search{
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid rgba(45,42,38,.08);
+      background: rgba(250,248,245,.65);
+    }
+    .search input{
+      width:100%;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(45,42,38,.14);
+      background: rgba(253,251,247,.95);
+      font-size: 13px;
+      outline:none;
+    }
+    .search input:focus{
+      border-color: rgba(139,154,125,.50);
+      box-shadow: 0 0 0 4px rgba(139,154,125,.16);
+    }
+
+    .userList{
+      max-height: calc(100vh - 210px);
+      overflow:auto;
+    }
+
+    .userRow{
+      display:flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(45,42,38,.06);
+      cursor:pointer;
+      transition: background .12s ease;
+    }
+    .userRow:hover{ background: rgba(139,154,125,.06); }
+    .userRow.active{ background: rgba(139,154,125,.12); }
+
+    .avatar{
+      width:32px;height:32px;border-radius: 12px;
+      background: rgba(156,149,137,.18);
+      border: 1px solid rgba(45,42,38,.10);
+      display:flex;align-items:center;justify-content:center;
+      color: rgba(45,42,38,.70);
+      font-weight: 600;
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+
+    .uMeta{ min-width:0; flex:1; }
+    .uMeta .id{
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing:.15px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .uMeta .sub{
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+
+    .badge{
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(45,42,38,.12);
+      color: rgba(45,42,38,.75);
+      background: rgba(253,251,247,.85);
+    }
+
+    .main{
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      min-width:0;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat{
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(253,251,247,.80);
+      box-shadow: 0 10px 30px rgba(45,42,38,.08);
+    }
+    .stat .k{
+      font-size: 11px;
+      letter-spacing:.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .stat .v{
+      margin-top: 6px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .stat .s{
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .thread{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height: 420px;
+    }
+    .threadHead{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(45,42,38,.08);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      background: rgba(250,248,245,.62);
+    }
+    .threadHead strong{
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .threadHead div{
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .threadBody{
+      padding: 12px;
+      overflow:auto;
+      max-height: calc(100vh - 280px);
+    }
+
+    .turn{
+      border: 1px solid rgba(45,42,38,.10);
+      border-radius: 14px;
+      background: rgba(253,251,247,.94);
+      padding: 10px 10px 9px;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 24px rgba(45,42,38,.06);
+    }
+
+    .turnTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .when{
+      font-size: 11px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    .intent{
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(45,42,38,.12);
+      background: var(--ok);
+      color: rgba(45,42,38,.80);
+      font-weight: 600;
+      letter-spacing:.15px;
+    }
+    .intent[data-intent="LISTEN"]{ background: rgba(139,154,125,.18); }
+    .intent[data-intent="EXPLORE"]{ background: rgba(156,149,137,.18); }
+    .intent[data-intent="OFFER"]{ background: rgba(139,154,125,.14); }
+    .intent[data-intent="REPAIR"]{ background: rgba(156,149,137,.22); }
+    .intent[data-intent="CHALLENGE"]{ background: rgba(45,42,38,.10); }
+
+    .bubble{
+      display:grid;
+      gap: 8px;
+    }
+
+    .msg{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .who{
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(45,42,38,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 12px;
+      font-weight: 700;
+      flex: 0 0 auto;
+      color: rgba(45,42,38,.75);
+      background: rgba(156,149,137,.16);
+    }
+    .who.alo{
+      background: rgba(139,154,125,.18);
+    }
+    .text{
+      min-width:0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(45,42,38,.88);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .empty{
+      padding: 22px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      border: 1px dashed rgba(45,42,38,.16);
+      border-radius: 14px;
+      background: rgba(253,251,247,.70);
+    }
+
+    .err{
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(45,42,38,.12);
+      background: rgba(156,149,137,.14);
+      color: rgba(45,42,38,.80);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px){
+      .shell{ grid-template-columns: 1fr; }
+      .side{ border-right:0; border-bottom: 1px solid rgba(45,42,38,.10); }
+      .userList{ max-height: 340px; }
+      .threadBody{ max-height: unset; }
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <h1>Alo Therapist Dashboard</h1>
-    </header>
-    <div id="stats">
-        <div><strong id="total-users">0</strong> Users</div>
-        <div><strong id="total-turns">0</strong> Turns</div>
-        <div><strong id="total-sessions">0</strong> Sessions</div>
-    </div>
-    <div id="content">
-        <div id="user-list"></div>
-        <div id="conversation-detail">
-            <div id="no-selection">Select a user to view their conversation history.</div>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>Alo • Therapist Dashboard</h1>
+          <p>Read-only session review • auto-refresh every 30s</p>
         </div>
+      </div>
+
+      <div class="actions">
+        <span class="chip" id="statusChip" title="Connection status">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="statusText">Connecting…</span>
+        </span>
+        <button class="btn" id="refreshBtn" type="button">Refresh</button>
+      </div>
     </div>
-    <script>
-        const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
-        const SUPABASE_ANON_KEY = '[provided in actual deployment]';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </header>
 
-        let allTurns = [];
+  <div class="shell">
+    <aside class="side">
+      <div class="panel">
+        <div class="panelHead">
+          <div>
+            <strong>Clients</strong><br/>
+            <span>Grouped by user_id • click to open thread</span>
+          </div>
+          <span class="badge" id="userCountBadge">0</span>
+        </div>
 
-        async function fetchData() {
-            const { data, error } = await supabase
-                .from('conversation_turns')
-                .select('*')
-                .order('created_at', { ascending: true });
+        <div class="search">
+          <input id="searchInput" type="search" placeholder="Search user_id / session_id…" autocomplete="off" />
+        </div>
 
-            if (error) {
-                console.error('Error fetching data:', error);
-                return;
-            }
+        <div class="userList" id="userList"></div>
+      </div>
+    </aside>
 
-            allTurns = data;
-            renderDashboard();
+    <main class="main">
+      <section class="stats" aria-label="Statistics">
+        <div class="stat">
+          <div class="k">Total Users</div>
+          <div class="v" id="statUsers">—</div>
+          <div class="s">Unique user_id values</div>
+        </div>
+        <div class="stat">
+          <div class="k">Total Turns</div>
+          <div class="v" id="statTurns">—</div>
+          <div class="s">Rows in conversation_turns</div>
+        </div>
+        <div class="stat">
+          <div class="k">Active Sessions</div>
+          <div class="v" id="statSessions">—</div>
+          <div class="s">Distinct session_id (all-time)</div>
+        </div>
+      </section>
+
+      <section class="panel thread" aria-label="Conversation thread">
+        <div class="threadHead">
+          <div>
+            <strong id="threadTitle">Select a client</strong>
+            <div id="threadSub">You’ll see messages, Alo responses, timestamps, and the intention label for each turn.</div>
+          </div>
+          <div class="badge" id="threadCount">0 turns</div>
+        </div>
+        <div class="threadBody" id="threadBody">
+          <div class="empty">No client selected yet.</div>
+        </div>
+      </section>
+
+      <div id="errorBox" style="display:none" class="err" role="alert"></div>
+    </main>
+  </div>
+
+  <script>
+    // =========================
+    //  Supabase configuration
+    // =========================
+    const SUPABASE_URL = "https://lelsdezstbnzyxvsvbyx.supabase.co";
+
+    // IMPORTANT: Replace this in deployment. Keep read-only via RLS.
+    const SUPABASE_ANON_KEY = "[provided in actual deployment]";
+
+    // Table and refresh cadence
+    const TABLE = "conversation_turns";
+    const REFRESH_MS = 30_000;
+
+    // Pagination limits (keeps UI snappy on long threads)
+    const USERS_LIMIT = 2000;     // rows fetched for building sidebar groups
+    const THREAD_LIMIT = 300;     // most recent turns shown for a user_id
+
+    // Create client (no writes used here)
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // State
+    let allTurns = [];           // subset fetched for sidebar/stats
+    let groupedUsers = [];       // derived groups for sidebar
+    let selectedUserId = null;
+    let refreshTimer = null;
+
+    // Elements
+    const elStatusText = document.getElementById("statusText");
+    const elUserList = document.getElementById("userList");
+    const elUserCountBadge = document.getElementById("userCountBadge");
+    const elThreadTitle = document.getElementById("threadTitle");
+    const elThreadSub = document.getElementById("threadSub");
+    const elThreadBody = document.getElementById("threadBody");
+    const elThreadCount = document.getElementById("threadCount");
+    const elErr = document.getElementById("errorBox");
+
+    const elStatUsers = document.getElementById("statUsers");
+    const elStatTurns = document.getElementById("statTurns");
+    const elStatSessions = document.getElementById("statSessions");
+
+    // Utils
+    const fmtWhen = (ts) => {
+      try {
+        const d = new Date(ts);
+        return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+      } catch { return ts; }
+    };
+
+    const shortId = (id) => id ? (id.slice(0,8) + "…" + id.slice(-4)) : "—";
+
+    function setStatus(text) {
+      elStatusText.textContent = text;
+    }
+
+    function showError(msg) {
+      elErr.style.display = "block";
+      elErr.textContent = msg;
+    }
+
+    function clearError() {
+      elErr.style.display = "none";
+      elErr.textContent = "";
+    }
+
+    function escapeHTML(str) {
+      return (str ?? "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    // =========================
+    //  Data loading
+    // =========================
+    async function loadSidebarData() {
+      // Pull a recent slice (latest rows) to build user list + stats quickly.
+      // For “all-time” stats without server, you’d need count queries; we do both.
+      clearError();
+      setStatus("Loading…");
+
+      // Count queries (fast, server-side)
+      const turnsCountPromise = supabase
+        .from(TABLE)
+        .select("id", { count: "exact", head: true });
+
+      // Distinct counts for users and sessions require either RPC or client-side distinct.
+      // We'll compute them client-side from a recent slice, and label as "seen in fetched window"
+      // OR do a second query pulling only user_id/session_id with a larger limit.
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("id,user_id,session_id,intention_used,created_at,user_message,alo_response")
+        .order("created_at", { ascending: false })
+        .limit(USERS_LIMIT);
+
+      const turnsCountRes = await turnsCountPromise;
+
+      if (error) {
+        setStatus("Error");
+        showError("Supabase query failed. Check anon key + RLS for read access.\n\n" + error.message);
+        return;
+      }
+      if (turnsCountRes.error) {
+        setStatus("Error");
+        showError("Could not fetch total turn count.\n\n" + turnsCountRes.error.message);
+        return;
+      }
+
+      allTurns = data || [];
+
+      // Compute distinct users/sessions from fetched slice
+      const userSet = new Set(allTurns.map(t => t.user_id).filter(Boolean));
+      const sessionSet = new Set(allTurns.map(t => t.session_id).filter(Boolean));
+
+      // Sidebar group model: per user_id show last timestamp, last intention, turns seen (in slice)
+      const map = new Map();
+      for (const t of allTurns) {
+        if (!t.user_id) continue;
+        if (!map.has(t.user_id)) {
+          map.set(t.user_id, {
+            user_id: t.user_id,
+            last_at: t.created_at,
+            last_intent: t.intention_used || "—",
+            last_session: t.session_id || "—",
+            seen_turns: 0
+          });
         }
+        map.get(t.user_id).seen_turns += 1;
+      }
 
-        function renderDashboard() {
-            const users = {};
-            const sessions = new Set();
+      groupedUsers = Array.from(map.values())
+        .sort((a,b) => new Date(b.last_at) - new Date(a.last_at));
 
-            allTurns.forEach(turn => {
-                if (!users[turn.user_id]) {
-                    users[turn.user_id] = [];
-                }
-                users[turn.user_id].push(turn);
-                sessions.add(turn.session_id);
-            });
+      // Stats
+      elStatTurns.textContent = (turnsCountRes.count ?? "—");
+      elStatUsers.textContent = userSet.size;
+      elStatSessions.textContent = sessionSet.size;
 
-            document.getElementById('total-users').textContent = Object.keys(users).length;
-            document.getElementById('total-turns').textContent = allTurns.length;
-            document.getElementById('total-sessions').textContent = sessions.size;
+      elUserCountBadge.textContent = groupedUsers.length;
 
-            const userList = document.getElementById('user-list');
-            userList.innerHTML = '';
-            Object.keys(users).forEach(userId => {
-                const userData = users[userId];
-                const lastTurn = userData[userData.length - 1];
-                const item = document.createElement('div');
-                item.className = 'user-item';
-                item.innerHTML = `
-                    <strong>User: ${userId.slice(0, 8)}...</strong>
-                    <small>Turns: ${userData.length}</small>
-                    <small>Last: ${new Date(lastTurn.created_at).toLocaleString()}</small>
-                `;
-                item.onclick = () => showConversation(userData);
-                userList.appendChild(item);
-            });
-        }
+      // Render sidebar (respect current search filter)
+      renderUserList();
 
-        function showConversation(turns) {
-            const detail = document.getElementById('conversation-detail');
-            detail.innerHTML = '';
-            turns.forEach(turn => {
-                const turnDiv = document.createElement('div');
-                turnDiv.className = 'turn';
+      setStatus("Connected");
+    }
 
-                const timestamp = document.createElement('div');
-                timestamp.className = 'timestamp';
-                timestamp.textContent = new Date(turn.created_at).toLocaleString();
-                turnDiv.appendChild(timestamp);
+    async function loadThreadForUser(userId) {
+      clearError();
+      selectedUserId = userId;
+      elThreadTitle.textContent = "Client " + shortId(userId);
+      elThreadSub.textContent = "Loading full conversation history…";
 
-                const userMessage = document.createElement('div');
-                userMessage.className = 'user-turn';
-                userMessage.textContent = turn.user_message;
-                turnDiv.appendChild(userMessage);
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("id,user_id,session_id,user_message,alo_response,intention_used,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .limit(THREAD_LIMIT);
 
-                const aloResponse = document.createElement('div');
-                aloResponse.className = 'alo-turn';
-                aloResponse.textContent = turn.alo_response;
-                turnDiv.appendChild(aloResponse);
+      if (error) {
+        showError("Thread query failed for this user.\n\n" + error.message);
+        elThreadSub.textContent = "Couldn’t load conversation.";
+        return;
+      }
 
-                if (turn.intention_used) {
-                    const intention = document.createElement('div');
-                    intention.className = 'intention';
-                    intention.textContent = turn.intention_used;
-                    aloResponse.appendChild(intention);
-                }
+      const turns = data || [];
+      elThreadSub.textContent = `Showing up to ${THREAD_LIMIT} turns • oldest → newest`;
+      elThreadCount.textContent = `${turns.length} turns`;
 
-                detail.appendChild(turnDiv);
-            });
-        }
+      renderThread(turns);
+      highlightSelectedUser(userId);
+    }
 
-        fetchData();
-        setInterval(fetchData, 30000);
-    </script>
+    // =========================
+    //  Rendering
+    // =========================
+    function renderUserList() {
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      const list = groupedUsers.filter(u => {
+        if (!q) return true;
+        return (
+          (u.user_id && u.user_id.toLowerCase().includes(q)) ||
+          (u.last_session && u.last_session.toLowerCase().includes(q)) ||
+          (u.last_intent && u.last_intent.toLowerCase().includes(q))
+        );
+      });
+
+      elUserList.innerHTML = "";
+
+      if (list.length === 0) {
+        elUserList.innerHTML = `<div class="empty" style="margin:12px;">No matches.</div>`;
+        return;
+      }
+
+      for (const u of list) {
+        const row = document.createElement("div");
+        row.className = "userRow";
+        row.dataset.userId = u.user_id;
+
+        const initials = (u.user_id || "U").slice(0,2).toUpperCase();
+
+        row.innerHTML = `
+          <div class="avatar" aria-hidden="true">${escapeHTML(initials)}</div>
+          <div class="uMeta">
+            <div class="id">${escapeHTML(u.user_id)}</div>
+            <div class="sub">
+              <span class="badge">last: ${escapeHTML(fmtWhen(u.last_at))}</span>
+              <span class="badge">intent: ${escapeHTML(u.last_intent || "—")}</span>
+              <span class="badge">seen: ${escapeHTML(String(u.seen_turns))}</span>
+            </div>
+          </div>
+        `;
+
+        row.addEventListener("click", () => loadThreadForUser(u.user_id));
+        elUserList.appendChild(row);
+      }
+
+      // Keep highlight if selection still in list
+      if (selectedUserId) highlightSelectedUser(selectedUserId);
+    }
+
+    function highlightSelectedUser(userId) {
+      document.querySelectorAll(".userRow").forEach(r => {
+        r.classList.toggle("active", r.dataset.userId === userId);
+      });
+    }
+
+    function renderThread(turns) {
+      elThreadBody.innerHTML = "";
+
+      if (!turns || turns.length === 0) {
+        elThreadBody.innerHTML = `<div class="empty">No turns found for this user_id yet.</div>`;
+        return;
+      }
+
+      for (const t of turns) {
+        const turn = document.createElement("div");
+        turn.className = "turn";
+
+        const intent = (t.intention_used || "—").toUpperCase();
+
+        turn.innerHTML = `
+          <div class="turnTop">
+            <span class="when">${escapeHTML(fmtWhen(t.created_at))}</span>
+            <span class="intent" data-intent="${escapeHTML(intent)}">${escapeHTML(intent)}</span>
+          </div>
+
+          <div class="bubble">
+            <div class="msg">
+              <div class="who">U</div>
+              <div class="text">${escapeHTML(t.user_message || "")}</div>
+            </div>
+            <div class="msg">
+              <div class="who alo">A</div>
+              <div class="text">${escapeHTML(t.alo_response || "")}</div>
+            </div>
+          </div>
+        `;
+
+        elThreadBody.appendChild(turn);
+      }
+
+      // Keep user anchored near latest content on refresh
+      elThreadBody.scrollTop = elThreadBody.scrollHeight;
+    }
+
+    // =========================
+    //  Refresh logic
+    // =========================
+    async function refreshAll() {
+      await loadSidebarData();
+      if (selectedUserId) {
+        // Refresh the currently open thread too
+        await loadThreadForUser(selectedUserId);
+      }
+    }
+
+    function startAutoRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(refreshAll, REFRESH_MS);
+    }
+
+    // =========================
+    //  Events + init
+    // =========================
+    document.getElementById("refreshBtn").addEventListener("click", refreshAll);
+    document.getElementById("searchInput").addEventListener("input", renderUserList);
+
+    // Boot
+    (async function init() {
+      await refreshAll();
+      startAutoRefresh();
+    })();
+  </script>
 </body>
 </html>
