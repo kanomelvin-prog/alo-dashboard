@@ -1,74 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alo Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --cream: #FDFBF7; --sage: #8B9A7D; --stone: #9C9589; --charcoal: #2D2A26; --border: #E5E1DA; }
-        body { margin: 0; font-family: system-ui, sans-serif; background: #F4F2EE; display: flex; height: 100vh; }
-        aside { width: 300px; background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        header { padding: 20px; border-bottom: 1px solid var(--border); }
-        .stat-box { display: flex; gap: 10px; padding: 15px; background: var(--cream); border-bottom: 1px solid var(--border); }
-        .stat { flex: 1; text-align: center; }
-        .stat b { display: block; font-size: 1.2rem; color: var(--sage); }
-        .stat span { font-size: 0.7rem; text-transform: uppercase; color: var(--stone); }
-        #client-list { flex: 1; overflow-y: auto; }
-        .user-row { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-        .user-row:hover { background: var(--warm-white); }
-        .user-row.active { border-left: 4px solid var(--sage); background: var(--cream); }
-        main { flex: 1; background: white; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        .bubble { padding: 15px; border-radius: 10px; max-width: 80%; line-height: 1.5; }
-        .user-b { background: #F9F9F9; border: 1px solid var(--border); align-self: flex-start; }
-        .alo-b { background: var(--cream); border: 1px solid var(--sage); align-self: flex-end; }
-        .intent { background: var(--sage); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.6rem; font-weight: bold; margin-top: 5px; display: inline-block; }
-    </style>
+  <title>Therapist Dashboard</title>
+  <style>
+    :root {
+      --cream: #FDFBF7;
+      --warm-white: #FAF8F5;
+      --stone: #9C9589;
+      --charcoal: #2D2A26;
+      --sage: #8B9A7D;
+      --sage-light: #E8EDE4;
+      --border: rgba(156, 149, 137, 0.2);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--charcoal);
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--warm-white);
+      border-radius: 12px;
+      padding: 30px;
+    }
+    
+    .header {
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: var(--sage);
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    .client-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .client-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      transition: box-shadow 0.2s;
+    }
+    
+    .client-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .client-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      margin-bottom: 8px;
+    }
+    
+    .client-meta {
+      font-size: 0.875rem;
+      color: var(--stone);
+    }
+  </style>
 </head>
 <body>
-    <aside>
-        <header><h2 style="margin:0; color:var(--sage);">Alo Clinical</h2></header>
-        <div class="stat-box">
-            <div class="stat"><b id="count-u">0</b><span>Clients</span></div>
-            <div class="stat"><b id="count-t">0</b><span>Turns</span></div>
-        </div>
-        <div id="client-list"></div>
-    </aside>
-    <main id="history"><div style="color:var(--stone); text-align:center; margin-top:20%;">Select a client to view session logs</div></main>
-
-    <script>
-        const S_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
-        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
-        
-        const aloSupabase = window.supabase.createClient(S_URL, S_KEY);
-        let activeUser = null;
-
-        async function sync() {
-            const { data, error } = await aloSupabase.from('conversation_turns').select('*').order('created_at', { ascending: false });
-            if (error) return;
-
-            const users = [...new Set(data.map(i => i.user_id))];
-            document.getElementById('count-u').innerText = users.length;
-            document.getElementById('count-t').innerText = data.length;
-
-            document.getElementById('client-list').innerHTML = users.map(u => `
-                <div class="user-row ${u === activeUser ? 'active' : ''}" onclick="view('${u}')">
-                    <b>Client ...${u.slice(-6)}</b>
-                </div>
-            `).join('');
-
-            if (activeUser) {
-                const logs = data.filter(d => d.user_id === activeUser).reverse();
-                document.getElementById('history').innerHTML = logs.map(l => `
-                    <div class="bubble user-row user-b">${l.user_message}</div>
-                    <div class="bubble alo-b">${l.alo_response} <br> <span class="intent">${l.intention_used || 'IDLE'}</span></div>
-                `).join('');
-            }
-        }
-
-        function view(id) { activeUser = id; sync(); }
-        sync();
-        setInterval(sync, 30000);
-    </script>
+  <div class="container">
+    <div class="header">
+      <h1>Therapist Dashboard</h1>
+      <p style="color: var(--stone);">Manage your clients and sessions</p>
+    </div>
+    
+    <div class="client-grid">
+      <div class="client-card">
+        <div class="client-name">Sarah Johnson</div>
+        <div class="client-meta">Last session: 12/15/2024</div>
+        <div class="client-meta">Status: Active</div>
+      </div>
+      
+      <div class="client-card">
+        <div class="client-name">Michael Chen</div>
+        <div class="client-meta">Last session: 12/18/2024</div>
+        <div class="client-meta">Status: Active</div>
+      </div>
+      
+      <div class="client-card">
+        <div class="client-name">Emily Rodriguez</div>
+        <div class="client-meta">Last session: 12/10/2024</div>
+        <div class="client-meta">Status: Needs attention</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
