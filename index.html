@@ -811,9 +811,9 @@
           <div class="sidebar-section-title">Sort By</div>
         </div>
         <div class="sort-controls">
-          <button class="sort-btn active" onclick="sortClients('az')">A-Z</button>
-          <button class="sort-btn" onclick="sortClients('next')">Next</button>
-          <button class="sort-btn" onclick="sortClients('last')">Last</button>
+          <button class="sort-btn active" onclick="sortClients('az', event)">A-Z</button>
+          <button class="sort-btn" onclick="sortClients('next', event)">Next</button>
+          <button class="sort-btn" onclick="sortClients('last', event)">Last</button>
         </div>
       </div>
       
@@ -1069,11 +1069,11 @@
         
         <!-- Tab Navigation -->
         <div class="tabs">
-          <button class="tab active" onclick="switchTab('prep')">Session Prep</button>
-          <button class="tab" onclick="switchTab('notes')">Session Notes</button>
-          <button class="tab" onclick="switchTab('homework')">Homework</button>
-          <button class="tab" onclick="switchTab('messages')">Messages</button>
-          <button class="tab" onclick="switchTab('activity')">Alo Activity</button>
+          <button class="tab active" onclick="switchTab('prep', event)">Session Prep</button>
+          <button class="tab" onclick="switchTab('notes', event)">Session Notes</button>
+          <button class="tab" onclick="switchTab('homework', event)">Homework</button>
+          <button class="tab" onclick="switchTab('messages', event)">Messages</button>
+          <button class="tab" onclick="switchTab('activity', event)">Alo Activity</button>
         </div>
         
         <!-- Tab: Session Prep -->
@@ -1415,14 +1415,26 @@
     // SORTING FUNCTIONS
     // ============================================================
     
-    function sortClients(sortType) {
+    function sortClients(sortType, event) {
       APP_STATE.currentSort = sortType;
       
       // Update button states
       document.querySelectorAll('.sort-btn').forEach(btn => {
         btn.classList.remove('active');
       });
-      event.target.classList.add('active');
+      
+      // If event is passed, use it; otherwise find the button by sort type
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Find button by data attribute or content
+        const buttons = document.querySelectorAll('.sort-btn');
+        buttons.forEach(btn => {
+          if (btn.textContent.toLowerCase().includes(sortType)) {
+            btn.classList.add('active');
+          }
+        });
+      }
       
       // Sort clients
       let sorted = [...APP_STATE.clients];
@@ -1686,14 +1698,22 @@
     
     function viewClientMessages(clientId) {
       selectClient(clientId);
-      switchTab('messages');
+      // Wait a moment for client view to render, then switch to messages tab
+      setTimeout(() => {
+        const messagesTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
+          tab.textContent.includes('Messages')
+        );
+        if (messagesTab) {
+          messagesTab.click();
+        }
+      }, 50);
     }
     
     // ============================================================
     // TAB SWITCHING
     // ============================================================
     
-    function switchTab(tabName) {
+    function switchTab(tabName, event) {
       APP_STATE.currentTab = tabName;
       
       // Remove active class from all tabs and tab-content
@@ -1706,7 +1726,16 @@
       });
       
       // Add active class to current tab
-      event.target.classList.add('active');
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Fallback: find tab by checking which one matches
+        document.querySelectorAll('.tab').forEach(tab => {
+          if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+            tab.classList.add('active');
+          }
+        });
+      }
       
       // Show corresponding tab content
       document.getElementById('tab-' + tabName).classList.add('active');
