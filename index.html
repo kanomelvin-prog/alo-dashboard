@@ -237,7 +237,6 @@
       font-style: italic;
     }
 
-    /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -256,7 +255,6 @@
       background: var(--charcoal);
     }
 
-    /* Responsive */
     @media (max-width: 1024px) {
       .main-grid {
         grid-template-columns: 1fr;
@@ -346,15 +344,17 @@
 
   <script>
     // ============================================================
-    // CONFIGURATION - REPLACE WITH YOUR ACTUAL VALUES
+    // CONFIGURATION
     // ============================================================
     const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2MDk1NDUsImV4cCI6MjA1MTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
 
     // ============================================================
-    // INITIALIZE SUPABASE
+    // INITIALIZE SUPABASE (Fixed - no variable conflict)
     // ============================================================
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Initializing Supabase...');
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase initialized:', db);
 
     // ============================================================
     // STATE
@@ -367,29 +367,32 @@
     // ============================================================
     async function loadDashboard() {
       try {
+        console.log('Loading dashboard data...');
+        
         // Fetch all conversation turns
-        const { data: turns, error } = await supabase
+        const { data: turns, error } = await db
           .from('conversation_turns')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(500);
 
-        if (error) throw error;
+        console.log('Query result:', { turns, error });
+
+        if (error) {
+          throw new Error(`Supabase error: ${error.message}`);
+        }
 
         allTurns = turns || [];
+        console.log(`Loaded ${allTurns.length} conversation turns`);
 
-        // Calculate stats
+        // Update UI
         updateStats();
-
-        // Render sessions list
         renderSessionsList();
-
-        // Render all turns table
         renderAllTurnsTable();
 
       } catch (error) {
-        showError(error.message);
         console.error('Dashboard error:', error);
+        showError(error.message);
       }
     }
 
@@ -397,18 +400,14 @@
     // UPDATE STATS
     // ============================================================
     function updateStats() {
-      // Count unique users
       const uniqueUsers = new Set(allTurns.map(t => t.user_id));
       document.getElementById('stat-conversations').textContent = uniqueUsers.size;
 
-      // Count total turns
       document.getElementById('stat-turns').textContent = allTurns.length;
 
-      // Count unique sessions
       const uniqueSessions = new Set(allTurns.map(t => t.session_id));
       document.getElementById('stat-sessions').textContent = uniqueSessions.size;
 
-      // Last activity
       if (allTurns.length > 0) {
         const lastTime = new Date(allTurns[0].created_at);
         const now = new Date();
@@ -428,7 +427,6 @@
     // RENDER SESSIONS LIST
     // ============================================================
     function renderSessionsList() {
-      // Group turns by user_id
       const userSessions = {};
       
       allTurns.forEach(turn => {
@@ -449,12 +447,10 @@
         }
       });
 
-      // Convert to array and sort by last seen
       const sessions = Object.values(userSessions).sort((a, b) => 
         new Date(b.last_seen) - new Date(a.last_seen)
       );
 
-      // Render
       const html = sessions.map(session => {
         const shortId = session.user_id.length > 16 
           ? session.user_id.substring(0, 16) + '...'
@@ -485,7 +481,7 @@
     // ============================================================
     function selectUser(userId) {
       selectedUserId = userId;
-      renderSessionsList(); // Re-render to show active state
+      renderSessionsList();
       renderConversationDetail(userId);
     }
 
@@ -538,7 +534,7 @@
     // RENDER ALL TURNS TABLE
     // ============================================================
     function renderAllTurnsTable() {
-      const recentTurns = allTurns.slice(0, 100); // Show last 100
+      const recentTurns = allTurns.slice(0, 100);
 
       const html = `
         <table>
@@ -592,7 +588,7 @@
       const errorHtml = `
         <div class="error">
           <strong>Error:</strong> ${message}
-          <br><small>Check your Supabase configuration and RLS policies.</small>
+          <br><small>Check the browser console (F12) for details. Verify RLS policies are disabled or set to allow SELECT.</small>
         </div>
       `;
       document.getElementById('error-container').innerHTML = errorHtml;
@@ -605,12 +601,13 @@
       setInterval(() => {
         console.log('Auto-refreshing dashboard...');
         loadDashboard();
-      }, 30000); // 30 seconds
+      }, 30000);
     }
 
     // ============================================================
     // INITIALIZE
     // ============================================================
+    console.log('Starting dashboard initialization...');
     loadDashboard();
     startAutoRefresh();
   </script>
