@@ -1135,6 +1135,40 @@
   <!-- ============================================================ -->
   <script>
     // ============================================================
+    // SUPABASE CONFIGURATION
+    // ============================================================
+    
+    const SUPABASE_URL = 'https://wekvrjnbjpbvvpfuwzvz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indla3Zyam5ianBidnZwZnV3enZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzOTM4NzIsImV4cCI6MjA0OTk2OTg3Mn0.HTG4XJ-LoOJsn0rNF2APLpLEqYoPZ3NVLJ9c8HfOYMY';
+    const THERAPIST_ID = 'THERAPIST_001';
+    
+    // ============================================================
+    // API HELPER FUNCTION
+    // ============================================================
+    
+    async function supabaseQuery(endpoint) {
+      try {
+        const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        
+        if (!response.ok) {
+          console.error('Supabase error:', response.status);
+          return null;
+        }
+        
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+      } catch (error) {
+        console.error('API error:', error);
+        return null;
+      }
+    }
+    
+    // ============================================================
     // DATA - Mock client data with full details
     // ============================================================
     
@@ -1378,16 +1412,194 @@
     let APP_STATE = {
       currentClient: null,
       currentTab: 'prep',
-      currentSort: 'az',
-      clients: MOCK_CLIENTS
+      currentSort: 'status',
+      clients: []
     };
+    
+    // ============================================================
+    // LOAD DATA FROM SUPABASE
+    // ============================================================
+    
+    async function loadDashboardData() {
+      try {
+        console.log('Loading dashboard data from Supabase...');
+        
+        // Load therapist's client list
+        const clientList = await supabaseQuery(`/rest/v1/therapist_client_list?therapist_id=eq.${THERAPIST_ID}&select=*&order=last_activity.desc`);
+        
+        if (!clientList || clientList.length === 0) {
+          console.warn('No clients found for therapist');
+          APP_STATE.clients = [];
+          renderClientList();
+          return;
+        }
+        
+        console.log(`Found ${clientList.length} clients`);
+        
+        // Transform Supabase data to match our client structure
+        APP_STATE.clients = clientList.map(client => {
+          // Determine status based on severity and activity
+          let status = 'active-status';
+          if (client.conversation_count === 0 && client.active_homework_count > 0) {
+            status = 'needs-attention';
+          }
+          
+          // Generate initials from client_code or name
+          const initials = client.client_code.substring(0, 2).toUpperCase();
+          
+          return {
+            id: client.client_code,
+            name: client.client_code, // Will be enhanced if we have a names table
+            initials: initials,
+            clientCode: client.client_code,
+            status: status,
+            conversationCount: client.conversation_count || 0,
+            homeworkCount: client.active_homework_count || 0,
+            lastActivity: client.last_activity,
+            needsAttention: status === 'needs-attention',
+            messages: [],
+            homework: [],
+            notes: [],
+            alocActivity: [],
+            prepSummary: {
+              conversationCount: client.conversation_count || 0,
+              topics: [],
+              emotionalLoad: 'Unknown',
+              homeworkStatus: ''
+            }
+          };
+        });
+        
+        // Load crisis alerts
+        await loadCrisisAlerts();
+        
+        // Sort and render
+        sortClients('status');
+        
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        // Fall back to empty state
+        APP_STATE.clients = [];
+        renderClientList();
+      }
+    }
+    
+    async function loadCrisisAlerts() {
+      try {
+        const alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=*&order=alert_time.desc&limit=10`);
+        
+        if (alerts && alerts.length > 0) {
+          console.log(`Found ${alerts.length} crisis alerts`);
+          
+          // Mark clients with crisis status
+          alerts.forEach(alert => {
+            const client = APP_STATE.clients.find(c => c.clientCode === alert.client_code);
+            if (client && alert.severity === 'HIGH') {
+              client.status = 'crisis';
+              client.needsAttention = true;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error loading crisis alerts:', error);
+      }
+    }
+    
+    async function loadClientDetails(clientCode) {
+      try {
+        console.log(`Loading details for ${clientCode}...`);
+        
+        const client = APP_STATE.clients.find(c => c.clientCode === clientCode);
+        if (!client) return;
+        
+        // Load messages
+        const messages = await supabaseQuery(`/rest/v1/client_messages?client_code=eq.${clientCode}&select=*&order=created_at.desc&limit=10`);
+        if (messages) {
+          client.messages = messages.map(msg => ({
+            id: msg.id,
+            text: msg.message,
+            time: timeAgo(new Date(msg.created_at)),
+            timestamp: new Date(msg.created_at),
+            unread: !msg.read_by_therapist
+          }));
+        }
+        
+        // Load homework
+        const homework = await supabaseQuery(`/rest/v1/homework?client_code=eq.${clientCode}&active=eq.true&select=*&order=created_at.desc`);
+        if (homework) {
+          client.homework = homework.map(hw => ({
+            id: hw.id,
+            title: hw.homework_type,
+            description: hw.description,
+            assigned: new Date(hw.created_at).toLocaleDateString(),
+            status: hw.active ? 'In Progress' : 'Completed',
+            notes: hw.therapist_notes
+          }));
+        }
+        
+        // Load conversation traces for activity
+        const traces = await supabaseQuery(`/rest/v1/conversation_traces?user_id=eq.${clientCode}&select=*&order=execution_time_ms.desc&limit=20`);
+        if (traces) {
+          // Group by conversation_id to get distinct conversations
+          const conversations = {};
+          traces.forEach(trace => {
+            if (!conversations[trace.conversation_id]) {
+              conversations[trace.conversation_id] = {
+                id: trace.conversation_id,
+                traces: [],
+                firstTrace: trace
+              };
+            }
+            conversations[trace.conversation_id].traces.push(trace);
+          });
+          
+          client.alocActivity = Object.values(conversations).slice(0, 10).map(conv => {
+            const nodes = conv.traces.map(t => t.node_name).filter(Boolean);
+            const intentionFlow = nodes.join(' → ');
+            
+            return {
+              date: timeAgo(new Date(conv.firstTrace.execution_time_ms)),
+              title: 'Alo Conversation',
+              duration: `${conv.traces.length} turns`,
+              emotionalLoad: 'Moderate',
+              intentionFlow: intentionFlow || 'Unknown',
+              summary: 'Conversation with Alo'
+            };
+          });
+        }
+        
+        // Load notes
+        const notes = await supabaseQuery(`/rest/v1/client_notes?client_code=eq.${clientCode}&select=*&order=created_at.desc`);
+        if (notes) {
+          client.notes = notes.map(note => ({
+            date: new Date(note.created_at).toLocaleDateString(),
+            content: note.notes
+          }));
+        }
+        
+        console.log('Client details loaded:', client);
+        
+      } catch (error) {
+        console.error('Error loading client details:', error);
+      }
+    }
+    
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+      return date.toLocaleDateString();
+    }
     
     // ============================================================
     // INITIALIZATION
     // ============================================================
     
     document.addEventListener('DOMContentLoaded', function() {
-      sortClients('az');
+      console.log('Dashboard loading...');
+      loadDashboardData();
     });
     
     // ============================================================
@@ -1642,12 +1854,15 @@
     // VIEW SWITCHING
     // ============================================================
     
-    function selectClient(clientId) {
+    async function selectClient(clientId) {
       const client = APP_STATE.clients.find(c => c.id === clientId);
       if (!client) return;
       
       APP_STATE.currentClient = client;
       APP_STATE.currentTab = 'prep';
+      
+      // Load full client details from Supabase
+      await loadClientDetails(clientId);
       
       // Render client detail
       renderClientDetail(client);
