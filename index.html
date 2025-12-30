@@ -1433,9 +1433,10 @@
           clientList = await buildClientListFromSources();
         }
         
+        // If still no data, fall back to mock data
         if (!clientList || clientList.length === 0) {
-          console.warn('No clients found');
-          APP_STATE.clients = [];
+          console.warn('⚠️ Supabase unreachable or empty. Using MOCK DATA for demo.');
+          APP_STATE.clients = [...MOCK_CLIENTS];
           renderClientList();
           return;
         }
@@ -1484,9 +1485,8 @@
         sortClients('status');
         
       } catch (error) {
-        console.error('Error loading dashboard:', error);
-        // Fall back to empty state
-        APP_STATE.clients = [];
+        console.error('⚠️ Critical error loading dashboard. Using MOCK DATA:', error);
+        APP_STATE.clients = [...MOCK_CLIENTS];
         renderClientList();
       }
     }
