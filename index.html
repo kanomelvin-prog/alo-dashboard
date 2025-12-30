@@ -1156,22 +1156,6 @@
       
       <!-- Session Prep Tab -->
       <div class="tab-content active" id="tab-prep">
-        <!-- Crisis Alerts Card (NEW) -->
-        <div class="card" id="crisisAlertsCard" style="display: none;">
-          <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
-            <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              Crisis Alerts
-            </span>
-            <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
-          </div>
-          <div class="card-body" id="crisisAlertsList">
-            <div class="loading"><div class="spinner"></div></div>
-          </div>
-        </div>
-        
         <!-- Last Sessions Preview -->
         <div class="card" id="lastSessionsCard">
           <div class="card-header">
@@ -1292,6 +1276,22 @@
       
       <!-- Alo Activity Tab -->
       <div class="tab-content" id="tab-activity">
+        <!-- Crisis Alerts Card (MOVED HERE) -->
+        <div class="card" id="crisisAlertsCard" style="display: none;">
+          <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
+            <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Crisis Alerts
+            </span>
+            <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
+          </div>
+          <div class="card-body" id="crisisAlertsList">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
         <!-- Messages from Client (NEW) -->
         <div class="card">
           <div class="card-header">
@@ -1496,24 +1496,27 @@
           const hasCrisisInTurns = recent?.some(t => t.intention_chosen === 'CRISIS');
           
           // Check crisis_alerts table - compare against BOTH client_code AND user_id (case-insensitive)
-          const hasCrisisInAlerts = allCrisisAlerts?.some(a => {
+          const clientCrisisAlerts = allCrisisAlerts?.filter(a => {
             const cc = (client.client_code || '').toLowerCase();
             const alertClientCode = (a.client_code || '').toLowerCase();
             const alertUserId = (a.user_id || '').toLowerCase();
             return alertClientCode === cc || alertUserId === cc;
-          });
+          }) || [];
+          
+          const hasCrisisInAlerts = clientCrisisAlerts.length > 0;
+          
+          // Check if ALL alerts for this client are marked as read
+          const allAlertsRead = clientCrisisAlerts.length > 0 && 
+                                clientCrisisAlerts.every(a => a.read_by_therapist === true);
           
           const hasCrisis = hasCrisisInTurns || hasCrisisInAlerts;
           
           if (hasCrisisInAlerts) {
             console.log(`🚨 CRISIS MATCH for ${client.client_code}:`, {
               clientCode: client.client_code,
-              matchedAlert: allCrisisAlerts.find(a => {
-                const cc = (client.client_code || '').toLowerCase();
-                const alertClientCode = (a.client_code || '').toLowerCase();
-                const alertUserId = (a.user_id || '').toLowerCase();
-                return alertClientCode === cc || alertUserId === cc;
-              })
+              alertCount: clientCrisisAlerts.length,
+              unreadCount: clientCrisisAlerts.filter(a => !a.read_by_therapist).length,
+              allRead: allAlertsRead
             });
           }
           
@@ -1540,6 +1543,7 @@
             messages: current,
             homework: hw?.length || 0,
             hasCrisis,
+            allAlertsRead,
             trend,
             status,
             lastActivity: recent?.[0]?.created_at || null
@@ -1617,7 +1621,7 @@
     }
     
     function renderAlerts() {
-      const alerts = allClients.filter(c => c.hasCrisis);
+      const alerts = allClients.filter(c => c.hasCrisis && !c.allAlertsRead);
       document.getElementById('alertsCount').textContent = alerts.length;
       
       if (!alerts.length) {
@@ -1633,7 +1637,9 @@
             <div class="list-item-description">Crisis signal detected</div>
           </div>
           <span class="list-item-meta">${c.lastActivity ? timeAgo(new Date(c.lastActivity)) : ''}</span>
-          <button class="list-item-action">View</button>
+          <button class="btn btn-sm" onclick="markAlertsAsRead('${c.client_code}', event)" style="background: var(--danger); color: white; border: none;">
+            Mark as Read
+          </button>
         </div>
       `).join('');
     }
@@ -2249,6 +2255,44 @@ Plan: ${n.plan || 'N/A'}`;
       } catch (err) {
         console.error('Error:', err);
         alert('Error assigning homework');
+      }
+    }
+    
+    async function markAlertsAsRead(clientCode, event) {
+      // Stop propagation so clicking button doesn't trigger showClient
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      try {
+        // Mark all alerts for this client as read
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/crisis_alerts?client_code=eq.${clientCode}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ read_by_therapist: true })
+        });
+        
+        if (!response.ok) throw new Error('Failed to mark as read');
+        
+        // Update local state
+        const client = allClients.find(c => c.client_code === clientCode);
+        if (client) {
+          client.allAlertsRead = true;
+        }
+        
+        // Re-render alerts section
+        renderAlerts();
+        
+        toast('Crisis alerts marked as read');
+        
+      } catch (err) {
+        console.error('Error marking alerts as read:', err);
+        alert('Error marking alerts as read');
       }
     }
     
