@@ -1210,6 +1210,16 @@
             <p style="color: var(--text-muted);">No open items</p>
           </div>
         </div>
+        
+        <!-- Client Messages Card - messages sent from client chat page -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Messages from Client</span>
+          </div>
+          <div class="card-body" id="clientMessagesContainer">
+            <p style="color: var(--text-muted);">No messages from client</p>
+          </div>
+        </div>
       </div>
       
       <!-- Session Notes Tab -->
@@ -1292,20 +1302,9 @@
       
       <!-- Alo Activity Tab -->
       <div class="tab-content" id="tab-activity">
-        <!-- Client Messages -->
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Messages from Client</span>
-          </div>
-          <div class="card-body" id="clientMessages">
-            <div class="loading"><div class="spinner"></div></div>
-          </div>
-        </div>
-        
-        <!-- Alo Conversations -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Recent Alo Conversations</span>
+            <span class="card-title">Recent Conversations</span>
           </div>
           <div class="card-body" id="activityExcerpts">
             <div class="loading"><div class="spinner"></div></div>
@@ -1409,16 +1408,10 @@
     let currentClient = null;
     let allClients = [];
     let clientNotes = {};
-    let sortBy = 'alpha'; // 'alpha' or 'recent'
+    let sortBy = 'alpha';
     
-    // =====================================================
-    // INIT
-    // =====================================================
     document.addEventListener('DOMContentLoaded', loadDashboard);
     
-    // =====================================================
-    // API
-    // =====================================================
     async function api(endpoint, options = {}) {
       const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
         ...options,
@@ -1434,9 +1427,6 @@
       return text ? JSON.parse(text) : null;
     }
     
-    // =====================================================
-    // LOAD DASHBOARD
-    // =====================================================
     async function loadDashboard() {
       try {
         const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
@@ -1448,7 +1438,6 @@
           return;
         }
         
-        // Enrich client data
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
         
@@ -1467,7 +1456,6 @@
           if (current > previous + 2) trend = 'up';
           else if (current < previous - 2) trend = 'down';
           
-          // Determine client status for badge
           let status = 'stable';
           if (hasCrisis) {
             status = 'crisis';
@@ -1499,15 +1487,12 @@
       }
     }
     
-    // =====================================================
-    // RENDER ALERTS
-    // =====================================================
     function renderAlerts() {
       const alerts = allClients.filter(c => c.hasCrisis);
       document.getElementById('alertsCount').textContent = alerts.length;
       
       if (!alerts.length) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts â€” all clear</div>';
         return;
       }
       
@@ -1524,22 +1509,19 @@
       `).join('');
     }
     
-    // =====================================================
-    // RENDER TRIAGE
-    // =====================================================
     function renderTriage() {
       const triage = allClients.filter(c => !c.hasCrisis && (c.trend === 'down' || (c.homework > 0 && c.messages === 0)));
       document.getElementById('triageCount').textContent = triage.length;
       
       if (!triage.length) {
-        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable — no action needed</div>';
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable â€” no action needed</div>';
         return;
       }
       
       document.getElementById('triageList').innerHTML = triage.map(c => {
         let desc = '';
         if (c.trend === 'down') desc = 'Engagement declining';
-        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) — no Alo activity`;
+        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) â€” no Alo activity`;
         
         return `
           <div class="list-item" onclick="showClient('${c.client_code}')">
@@ -1555,9 +1537,6 @@
       }).join('');
     }
     
-    // =====================================================
-    // RENDER CLIENTS LIST WITH STATUS BADGES
-    // =====================================================
     function renderClientsList() {
       let sorted = [...allClients];
       
@@ -1588,7 +1567,7 @@
             </div>
             <div class="client-info">
               <div class="client-name">${displayName}</div>
-              <div class="client-meta">${c.messages} msgs · ${c.homework} hw</div>
+              <div class="client-meta">${c.messages} msgs Â· ${c.homework} hw</div>
             </div>
           </div>
         `;
@@ -1600,57 +1579,39 @@
     
     function toggleSort() {
       sortBy = sortBy === 'alpha' ? 'recent' : 'alpha';
-      document.getElementById('sortLabel').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
-      document.getElementById('sortLabel2').textContent = sortBy === 'alpha' ? 'A-Z' : 'Recent';
       renderClientsList();
     }
     
-    // =====================================================
-    // SHOW CLIENT PAGE
-    // =====================================================
     async function showClient(code) {
       currentClient = code;
-      
-      // Switch pages
       document.getElementById('homePage').style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
-      
-      // Update client list highlight
       renderClientsList();
-      
-      // Reset to prep tab
       switchTab('prep', document.querySelector('.tab'));
       
-      // Update header
       const client = allClients.find(c => c.client_code === code);
       const displayName = client?.display_name || code;
       document.getElementById('clientName').textContent = displayName;
-      
-      // Show client code (clickable to copy)
       document.getElementById('clientCodeText').textContent = code;
       
-      // Show stats in meta
       const metaText = client 
-        ? ` · ${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+        ? ` Â· ${client.messages} messages this week Â· ${client.homework} active homework Â· Trend: ${client.trend}`
         : '';
       document.getElementById('clientMeta').textContent = metaText;
       
-      // Load data
       await loadClientData(code);
     }
     
     async function loadClientData(code) {
       try {
-        const [turns, homework, messages] = await Promise.all([
+        const [turns, homework, clientMessages] = await Promise.all([
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
           api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
           api(`/rest/v1/client_messages?client_code=eq.${code}&order=created_at.desc&limit=10`)
         ]);
         
-        // Load last sessions preview
         loadLastSessionsPreview(code);
         
-        // Prep Summary
         const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
         let summary = '';
         
@@ -1658,7 +1619,7 @@
           summary = '<p>No Alo interactions this week.</p>';
         } else if (hasCrisis) {
           summary = `
-            <div class="highlight-box">⚠️ Client triggered a crisis response. Review before session.</div>
+            <div class="highlight-box">âš ï¸ Client triggered a crisis response. Review before session.</div>
             <p><strong>${turns.length} interactions</strong> with Alo this week.</p>
           `;
         } else {
@@ -1666,17 +1627,27 @@
         }
         document.getElementById('prepSummary').innerHTML = summary;
         
-        // Open Items
         const activeHw = homework?.filter(h => h.active === true) || [];
         if (activeHw.length) {
           document.getElementById('prepOpenItems').innerHTML = activeHw.map(h => `
-            <p>• <strong>${h.homework_type}:</strong> ${h.description}</p>
+            <p>â€¢ <strong>${h.homework_type}:</strong> ${h.description}</p>
           `).join('');
         } else {
           document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
         }
         
-        // Activity Excerpts
+        // Display client messages
+        if (clientMessages?.length) {
+          document.getElementById('clientMessagesContainer').innerHTML = clientMessages.map(m => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+              <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('clientMessagesContainer').innerHTML = '<p style="color: var(--text-muted);">No messages from client</p>';
+        }
+        
         if (turns?.length) {
           document.getElementById('activityExcerpts').innerHTML = turns.slice(0, 10).map(t => `
             <div class="excerpt">
@@ -1688,20 +1659,6 @@
           document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
         }
         
-        // Client Messages
-        if (messages?.length) {
-          document.getElementById('clientMessages').innerHTML = messages.map(m => `
-            <div class="excerpt" style="background: ${m.read_by_therapist ? 'var(--bg)' : 'var(--warning-bg)'}; border-left: 3px solid ${m.read_by_therapist ? 'var(--border)' : 'var(--warning)'};">
-              <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${!m.read_by_therapist ? '<span style="color: var(--warning); font-weight: 500;">• New</span>' : ''}</div>
-              <div class="excerpt-text" style="font-style: normal;">${escapeHtml(m.message)}</div>
-              ${!m.read_by_therapist ? `<button class="btn btn-sm btn-secondary" style="margin-top: 8px;" onclick="markMessageRead('${m.id}')">Mark as Read</button>` : ''}
-            </div>
-          `).join('');
-        } else {
-          document.getElementById('clientMessages').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No messages from client</p>';
-        }
-        
-        // Homework History
         if (homework?.length) {
           document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
             <div class="homework-item">
@@ -1727,10 +1684,7 @@
           document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
         }
         
-        // Notes - load from database
         await loadNotes();
-        
-        // Update preview after notes are loaded
         loadLastSessionsPreview(code);
         
       } catch (err) {
@@ -1738,12 +1692,9 @@
       }
     }
     
-    // =====================================================
-    // LAST SESSIONS PREVIEW - Shows up to 3 recent notes
-    // =====================================================
     function loadLastSessionsPreview(code) {
       const notes = clientNotes[code] || [];
-      const preview = notes.slice(0, 3); // Get first 3 (most recent)
+      const preview = notes.slice(0, 3);
       const container = document.getElementById('lastSessionsPreview');
       const viewAllBtn = document.getElementById('viewAllNotesBtn');
       
@@ -1753,7 +1704,6 @@
         return;
       }
       
-      // Show "View All" button if more than 3 notes
       viewAllBtn.style.display = notes.length > 3 ? 'inline-flex' : 'none';
       viewAllBtn.textContent = notes.length > 3 ? `View All (${notes.length})` : 'View All';
       
@@ -1770,9 +1720,6 @@
       `).join('');
     }
     
-    // =====================================================
-    // SHOW HOME PAGE
-    // =====================================================
     function showHomePage() {
       currentClient = null;
       document.getElementById('clientPage').classList.remove('active');
@@ -1780,9 +1727,6 @@
       renderClientsList();
     }
     
-    // =====================================================
-    // TABS
-    // =====================================================
     function switchTab(tab, btn) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1790,16 +1734,11 @@
       document.getElementById(`tab-${tab}`).classList.add('active');
     }
     
-    // =====================================================
-    // NOTES - Now persisted to database
-    // =====================================================
     async function loadNotes() {
       const container = document.getElementById('notesContainer');
       
       try {
         const notes = await api(`/rest/v1/session_notes?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}&order=session_date.desc,created_at.desc`);
-        
-        // Also update local cache for preview
         clientNotes[currentClient] = notes || [];
         
         if (!notes?.length) {
@@ -1810,7 +1749,7 @@
         container.innerHTML = notes.map((n) => `
           <div class="note-card">
             <div class="note-header">
-              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${n.session_type || 'Session'}</span>
+              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} â€” ${n.session_type || 'Session'}</span>
               <div style="display: flex; gap: 8px;">
                 <button class="copy-btn" onclick="copyNoteFromDb('${n.id}', this)">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1904,12 +1843,8 @@
           body: JSON.stringify(noteData)
         });
         
-        // Reload notes from database
         await loadNotes();
-        
-        // Update last sessions preview
         loadLastSessionsPreview(currentClient);
-        
         toast('Note saved');
         
       } catch (err) {
@@ -1962,23 +1897,15 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // COPY CLIENT CODE
-    // =====================================================
     function copyClientCode() {
       if (!currentClient) return;
-      
       navigator.clipboard.writeText(currentClient).then(() => {
         toast(`Copied: ${currentClient}`);
       });
     }
     
-    // =====================================================
-    // EDIT CLIENT
-    // =====================================================
     function showEditClientForm() {
       if (!currentClient) return;
-      
       const client = allClients.find(c => c.client_code === currentClient);
       document.getElementById('editClientCode').value = currentClient;
       document.getElementById('editClientName').value = client?.display_name || '';
@@ -2003,25 +1930,21 @@ Plan: ${n.plan || 'N/A'}`;
             'Content-Type': 'application/json',
             'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({
-            display_name: name || null
-          })
+          body: JSON.stringify({ display_name: name || null })
         });
         
-        // Update local data
         const client = allClients.find(c => c.client_code === currentClient);
         if (client) client.display_name = name || null;
         
-        // Update UI
         const displayName = name || currentClient;
         document.getElementById('clientName').textContent = displayName;
         
         let metaText = '';
         if (name && name !== currentClient) {
-          metaText = `${currentClient} · `;
+          metaText = `${currentClient} Â· `;
         }
         metaText += client 
-          ? `${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+          ? `${client.messages} messages this week Â· ${client.homework} active homework Â· Trend: ${client.trend}`
           : '';
         document.getElementById('clientMeta').textContent = metaText;
         
@@ -2057,8 +1980,6 @@ Plan: ${n.plan || 'N/A'}`;
         closeEditClientModal();
         showHomePage();
         toast('Client removed');
-        
-        // Reload dashboard
         await loadDashboard();
         
       } catch (err) {
@@ -2067,9 +1988,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // ADD CLIENT
-    // =====================================================
     function showAddClientForm() {
       document.getElementById('addClientModal').classList.add('show');
       document.getElementById('newClientCode').value = '';
@@ -2091,7 +2009,6 @@ Plan: ${n.plan || 'N/A'}`;
         return;
       }
       
-      // Check if already exists
       if (allClients.some(c => c.client_code === code)) {
         alert('This client code already exists');
         return;
@@ -2115,8 +2032,6 @@ Plan: ${n.plan || 'N/A'}`;
         
         closeAddClientModal();
         toast('Client added');
-        
-        // Reload dashboard to show new client
         await loadDashboard();
         
       } catch (err) {
@@ -2125,9 +2040,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // HOMEWORK
-    // =====================================================
     async function completeHomework(id) {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/homework?id=eq.${id}`, {
@@ -2186,9 +2098,6 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
-    // =====================================================
-    // UTILS
-    // =====================================================
     function timeAgo(date) {
       const s = Math.floor((new Date() - date) / 1000);
       if (s < 60) return 'Just now';
@@ -2201,33 +2110,6 @@ Plan: ${n.plan || 'N/A'}`;
     function truncate(str, len) {
       if (!str) return '';
       return str.length > len ? str.substring(0, len) + '...' : str;
-    }
-    
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    async function markMessageRead(id) {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/client_messages?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({ read_by_therapist: true })
-        });
-        
-        await loadClientData(currentClient);
-        toast('Marked as read');
-      } catch (err) {
-        console.error('Error:', err);
-      }
     }
     
     function toast(msg) {
