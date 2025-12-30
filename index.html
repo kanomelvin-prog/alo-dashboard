@@ -1012,8 +1012,8 @@
       </a>
     </div>
     <div class="header-right">
-      <span class="user-name" id="therapistName" onclick="editTherapistName()" style="cursor: pointer;" title="Click to edit your name">Dr. Dupree</span>
-      <div class="user-avatar" id="therapistAvatar">D</div>
+      <span class="user-name" id="therapistName" onclick="editTherapistName()" style="cursor: pointer;" title="Click to edit your name">Dupre' Rouse</span>
+      <div class="user-avatar" id="therapistAvatar">DR</div>
     </div>
   </header>
   
@@ -1384,7 +1384,7 @@
     // THERAPIST NAME FUNCTIONS (NEW)
     // =====================================================
     function loadTherapistName() {
-      const saved = localStorage.getItem('therapistName') || 'Dr. Dupree';
+      const saved = localStorage.getItem('therapistName') || "Dupre' Rouse";
       document.getElementById('therapistName').textContent = saved;
       
       // Update avatar
@@ -1397,7 +1397,7 @@
     }
 
     function editTherapistName() {
-      const current = localStorage.getItem('therapistName') || 'Dr. Dupree';
+      const current = localStorage.getItem('therapistName') || "Dupre' Rouse";
       const newName = prompt('Enter your name:', current);
       
       if (newName && newName.trim()) {
