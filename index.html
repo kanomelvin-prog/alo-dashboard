@@ -1428,6 +1428,8 @@
         // Load all crisis alerts (NEW)
         const allCrisisAlerts = await api(`/rest/v1/crisis_alerts?order=alert_time.desc&limit=100`);
         console.log('🚨 Crisis alerts loaded:', allCrisisAlerts?.length);
+        console.log('Sample crisis_alert:', allCrisisAlerts?.[0]);
+        console.log('Sample link client_code:', links?.[0]?.client_code);
         
         allClients = await Promise.all(links.map(async (client) => {
           const [recent, prev, hw] = await Promise.all([
@@ -1436,12 +1438,30 @@
             api(`/rest/v1/homework?client_code=eq.${client.client_code}&active=eq.true&select=id`)
           ]);
           
-          // Check for crisis in both conversation_turns AND crisis_alerts table (case-insensitive)
+          // Check for crisis in both conversation_turns AND crisis_alerts table
           const hasCrisisInTurns = recent?.some(t => t.intention_chosen === 'CRISIS');
-          const hasCrisisInAlerts = allCrisisAlerts?.some(a => 
-            a.client_code?.toLowerCase() === client.client_code.toLowerCase()
-          );
+          
+          // Check crisis_alerts table - compare against BOTH client_code AND user_id (case-insensitive)
+          const hasCrisisInAlerts = allCrisisAlerts?.some(a => {
+            const cc = (client.client_code || '').toLowerCase();
+            const alertClientCode = (a.client_code || '').toLowerCase();
+            const alertUserId = (a.user_id || '').toLowerCase();
+            return alertClientCode === cc || alertUserId === cc;
+          });
+          
           const hasCrisis = hasCrisisInTurns || hasCrisisInAlerts;
+          
+          if (hasCrisisInAlerts) {
+            console.log(`🚨 CRISIS MATCH for ${client.client_code}:`, {
+              clientCode: client.client_code,
+              matchedAlert: allCrisisAlerts.find(a => {
+                const cc = (client.client_code || '').toLowerCase();
+                const alertClientCode = (a.client_code || '').toLowerCase();
+                const alertUserId = (a.user_id || '').toLowerCase();
+                return alertClientCode === cc || alertUserId === cc;
+              })
+            });
+          }
           
           const current = recent?.length || 0;
           const previous = prev?.length || 0;
@@ -1522,7 +1542,10 @@
       }
       
       document.getElementById('messagesList').innerHTML = messages.map(m => {
-        const client = allClients.find(c => c.client_code === m.client_code);
+        // Case-insensitive client lookup
+        const client = allClients.find(c => 
+          c.client_code.toLowerCase() === m.client_code.toLowerCase()
+        );
         const displayName = client?.display_name || m.client_code;
         
         return `
