@@ -15,25 +15,35 @@
     }
     
     :root {
-      --bg: #f8fafc;
+      /* Alo Brand Colors - matching chat page */
+      --cream: #FDFBF7;
+      --warm-white: #FAF8F5;
+      --sage: #8B9A7D;
+      --sage-light: #E8EDE4;
+      --sage-hover: #7a8a6d;
+      --charcoal: #2D2A26;
+      --stone: #9C9589;
+      --border: rgba(156, 149, 137, 0.2);
+      
+      /* Functional colors */
+      --bg: var(--cream);
       --white: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-light: #64748b;
-      --text-muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --danger: #ef4444;
-      --danger-bg: #fef2f2;
-      --danger-border: #fecaca;
+      --text: var(--charcoal);
+      --text-light: var(--stone);
+      --text-muted: var(--stone);
+      --primary: var(--sage);
+      --primary-hover: var(--sage-hover);
+      --danger: #d97706;
+      --danger-bg: #fef3c7;
+      --danger-border: #fde68a;
       --warning: #f59e0b;
       --warning-bg: #fffbeb;
       --warning-border: #fde68a;
       --success: #10b981;
       --success-bg: #ecfdf5;
-      --info-bg: #eff6ff;
-      --info-border: #bfdbfe;
-      --info-text: #1e40af;
+      --info-bg: var(--sage-light);
+      --info-border: var(--border);
+      --info-text: var(--charcoal);
     }
     
     body {
@@ -46,7 +56,7 @@
     
     /* === HEADER === */
     .header {
-      background: var(--white);
+      background: var(--warm-white);
       border-bottom: 1px solid var(--border);
       padding: 0 24px;
       height: 60px;
@@ -77,12 +87,14 @@
     .home-icon {
       width: 36px;
       height: 36px;
-      background: var(--primary);
+      background: var(--sage);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
+      font-weight: 700;
+      font-size: 18px;
     }
     
     .home-icon svg {
@@ -481,6 +493,12 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+      transition: box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(45, 42, 38, 0.08);
     }
     
     .card-header {
@@ -624,22 +642,25 @@
     }
     
     .btn-primary {
-      background: var(--primary);
+      background: var(--sage);
       color: white;
     }
     
     .btn-primary:hover {
-      background: var(--primary-hover);
+      background: var(--sage-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3);
     }
     
     .btn-secondary {
-      background: var(--white);
+      background: var(--warm-white);
       border: 1px solid var(--border);
       color: var(--text);
     }
     
     .btn-secondary:hover {
-      background: var(--bg);
+      background: var(--sage-light);
+      border-color: var(--sage);
     }
     
     .btn-sm {
