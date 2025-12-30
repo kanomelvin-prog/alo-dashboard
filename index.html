@@ -1,356 +1,359 @@
-# Dashboard & Chat Integration Fixes
-## Complete Implementation Guide
+# Dashboard Updates - Messages & Editable Therapist Name
+## Code Changes to Add
 
 ---
 
-## ISSUE 1: Messages Not Showing Everywhere
+## PART 1: Add Messages Section to Homepage
 
-### Current State:
-- Messages only appear in: **Session Prep tab → "Messages from Client" card**
-- Missing from: **Homepage** and **Alo Activity tab**
+### A. Add HTML Section (after Triage section, before sidebar)
 
-### Fix Required:
-
-#### A. Add Messages Section to Homepage (3rd item)
-
-**Location:** After "Alerts" and "Triage" sections, before sidebar
-
-**HTML to add:**
+**Find this in your dashboard.html:**
 ```html
-<!-- Messages Section (NEW) -->
-<div class="section" id="messagesSection">
-  <div class="section-header">
-    <div class="section-icon" style="background: #eff6ff; color: #1e40af;">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    </div>
-    <span class="section-title">Messages from Clients</span>
-    <span class="section-count" id="messagesCount">0</span>
-  </div>
-  <div class="section-body" id="messagesList">
-    <div class="loading"><div class="spinner"></div>Loading...</div>
-  </div>
-</div>
-```
-
-#### B. JavaScript to Load Messages on Homepage
-
-**Add to `loadDashboard()` function:**
-```javascript
-// After loading clients, load all recent messages
-const allMessages = await api(`/rest/v1/client_messages?order=created_at.desc&limit=20`);
-
-// Filter to only messages from our clients
-const clientMessages = allMessages?.filter(m => 
-  allClients.some(c => c.client_code === m.client_code)
-) || [];
-
-renderMessages(clientMessages);
-```
-
-**Add new function:**
-```javascript
-function renderMessages(messages) {
-  document.getElementById('messagesCount').textContent = messages.length;
-  
-  if (!messages.length) {
-    document.getElementById('messagesList').innerHTML = 
-      '<div class="section-empty">No messages from clients</div>';
-    return;
-  }
-  
-  document.getElementById('messagesList').innerHTML = messages.map(m => {
-    const client = allClients.find(c => c.client_code === m.client_code);
-    const displayName = client?.display_name || m.client_code;
-    
-    return `
-      <div class="list-item" onclick="showClient('${m.client_code}')">
-        <div class="list-item-indicator" style="background: #3b82f6;"></div>
-        <div class="list-item-content">
-          <div class="list-item-title">${displayName}</div>
-          <div class="list-item-description">${truncate(m.message, 80)}</div>
-        </div>
-        <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
-        <button class="list-item-action">View</button>
       </div>
-    `;
-  }).join('');
-}
-```
-
-#### C. Add Messages to Alo Activity Tab
-
-**Find this section in the HTML:**
-```html
-<!-- Alo Activity Tab -->
-<div class="tab-content" id="tab-activity">
-```
-
-**Replace the content with:**
-```html
-<div class="tab-content" id="tab-activity">
-  <!-- Messages from Client Card (NEW) -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Messages from Client</span>
+      <!-- End of Triage Section -->
     </div>
-    <div class="card-body" id="activityMessagesContainer">
-      <div class="loading"><div class="spinner"></div></div>
-    </div>
-  </div>
-  
-  <!-- Recent Conversations Card (existing) -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">Recent Conversations</span>
-    </div>
-    <div class="card-body" id="activityExcerpts">
-      <div class="loading"><div class="spinner"></div></div>
-    </div>
-  </div>
-</div>
-```
-
-**Update `loadClientData()` to populate it:**
-```javascript
-// Add this after loading clientMessages
-if (clientMessages?.length) {
-  document.getElementById('activityMessagesContainer').innerHTML = clientMessages.map(m => `
-    <div class="excerpt">
-      <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
-      <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
-    </div>
-  `).join('');
-} else {
-  document.getElementById('activityMessagesContainer').innerHTML = 
-    '<p style="color: var(--text-muted);">No messages from client</p>';
-}
-```
-
----
-
-## ISSUE 2: Editable Therapist Name
-
-### Current State:
-- Hardcoded: `<span class="user-name">Dr. Dupree</span>`
-
-### Fix Required:
-
-#### A. Add Therapist Name to Header with Edit Option
-
-**Replace header HTML:**
-```html
-<div class="header-right">
-  <span class="user-name" id="therapistName" 
-        onclick="editTherapistName()" 
-        style="cursor: pointer;" 
-        title="Click to edit">
-    Dr. Dupree
-  </span>
-  <div class="user-avatar" id="therapistAvatar">D</div>
-</div>
-```
-
-#### B. Add Functions for Editing
-
-**Add these JavaScript functions:**
-```javascript
-// Load therapist name from localStorage or default
-function loadTherapistName() {
-  const saved = localStorage.getItem('therapistName') || 'Dr. Dupree';
-  document.getElementById('therapistName').textContent = saved;
-  
-  // Update avatar
-  const initials = saved.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('therapistAvatar').textContent = initials;
-}
-
-// Edit therapist name
-function editTherapistName() {
-  const current = localStorage.getItem('therapistName') || 'Dr. Dupree';
-  const newName = prompt('Enter your name:', current);
-  
-  if (newName && newName.trim()) {
-    localStorage.setItem('therapistName', newName.trim());
-    loadTherapistName();
-    toast('Name updated');
-  }
-}
-
-// Call on page load
-document.addEventListener('DOMContentLoaded', () => {
-  loadTherapistName();
-  loadDashboard();
-});
-```
-
----
-
-## ISSUE 3: Homework Not Connecting
-
-### Debugging Steps:
-
-#### A. Check Chat Page Console
-
-**Add debug logging to chat page:**
-```javascript
-async function loadHomework() {
-  console.log('🔍 Loading homework for:', clientCode);
-  
-  try {
-    const { data, error } = await db
-      .from('homework')
-      .select('*')
-      .eq('client_code', clientCode.toUpperCase())
-      .eq('active', true)
-      .order('created_at', { ascending: false });
-
-    console.log('📦 Homework query result:', { data, error });
     
-    if (error) {
-      console.error('❌ Homework error:', error);
-      throw error;
+    <!-- Sidebar -->
+    <div class="sidebar">
+```
+
+**Add this NEW section between them:**
+```html
+      </div>
+      
+      <!-- Messages Section (NEW) -->
+      <div class="section" id="messagesSection">
+        <div class="section-header">
+          <div class="section-icon" style="background: #eff6ff; color: #1e40af;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="section-title">Messages from Clients</span>
+          <span class="section-count" id="messagesCount">0</span>
+        </div>
+        <div class="section-body" id="messagesList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+```
+
+---
+
+## PART 2: Add Messages to Alo Activity Tab
+
+### B. Update Alo Activity Tab Content
+
+**Find this in your dashboard.html:**
+```html
+      <!-- Alo Activity Tab -->
+      <div class="tab-content" id="tab-activity">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Conversations</span>
+          </div>
+          <div class="card-body" id="activityExcerpts">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+```
+
+**Replace with:**
+```html
+      <!-- Alo Activity Tab -->
+      <div class="tab-content" id="tab-activity">
+        <!-- Messages from Client (NEW) -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Messages from Client</span>
+          </div>
+          <div class="card-body" id="activityMessagesContainer">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
+        <!-- Recent Conversations (existing) -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Conversations</span>
+          </div>
+          <div class="card-body" id="activityExcerpts">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+```
+
+---
+
+## PART 3: Make Therapist Name Editable
+
+### C. Update Header HTML
+
+**Find this in your dashboard.html:**
+```html
+    <div class="header-right">
+      <span class="user-name">Dr. Dupree</span>
+      <div class="user-avatar">D</div>
+    </div>
+```
+
+**Replace with:**
+```html
+    <div class="header-right">
+      <span class="user-name" id="therapistName" 
+            onclick="editTherapistName()" 
+            style="cursor: pointer;" 
+            title="Click to edit your name">
+        Dr. Dupree
+      </span>
+      <div class="user-avatar" id="therapistAvatar">D</div>
+    </div>
+```
+
+---
+
+## PART 4: JavaScript Functions
+
+### D. Add These Functions to Your <script> Section
+
+**Find your JavaScript section that starts with:**
+```javascript
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+```
+
+**Replace it with:**
+```javascript
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTherapistName();
+      loadDashboard();
+    });
+```
+
+**Then add these NEW functions anywhere in your <script> section:**
+
+```javascript
+    // =====================================================
+    // THERAPIST NAME FUNCTIONS (NEW)
+    // =====================================================
+    function loadTherapistName() {
+      const saved = localStorage.getItem('therapistName') || 'Dr. Dupree';
+      document.getElementById('therapistName').textContent = saved;
+      
+      // Update avatar
+      const initials = saved.split(' ')
+        .map(n => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
+      document.getElementById('therapistAvatar').textContent = initials;
+    }
+
+    function editTherapistName() {
+      const current = localStorage.getItem('therapistName') || 'Dr. Dupree';
+      const newName = prompt('Enter your name:', current);
+      
+      if (newName && newName.trim()) {
+        localStorage.setItem('therapistName', newName.trim());
+        loadTherapistName();
+        toast('Name updated');
+      }
     }
     
-    console.log(`✅ Found ${data?.length || 0} homework items`);
-    renderHomework(data || []);
-  } catch (error) {
-    console.error('💥 Error loading homework:', error);
-    renderHomework([]);
-  }
-}
+    // =====================================================
+    // MESSAGES FUNCTIONS (NEW)
+    // =====================================================
+    async function loadMessages() {
+      try {
+        // Get all recent messages
+        const allMessages = await api(`/rest/v1/client_messages?order=created_at.desc&limit=20`);
+        
+        // Filter to only messages from our clients
+        const clientMessages = allMessages?.filter(m => 
+          allClients.some(c => c.client_code === m.client_code)
+        ) || [];
+        
+        renderMessages(clientMessages);
+      } catch (err) {
+        console.error('Error loading messages:', err);
+        document.getElementById('messagesList').innerHTML = 
+          '<div class="section-empty">Error loading messages</div>';
+      }
+    }
+    
+    function renderMessages(messages) {
+      document.getElementById('messagesCount').textContent = messages.length;
+      
+      if (!messages.length) {
+        document.getElementById('messagesList').innerHTML = 
+          '<div class="section-empty">No messages from clients yet</div>';
+        return;
+      }
+      
+      document.getElementById('messagesList').innerHTML = messages.map(m => {
+        const client = allClients.find(c => c.client_code === m.client_code);
+        const displayName = client?.display_name || m.client_code;
+        
+        return `
+          <div class="list-item" onclick="showClient('${m.client_code}')">
+            <div class="list-item-indicator" style="background: #3b82f6;"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${displayName}</div>
+              <div class="list-item-description">${truncate(m.message, 80)}</div>
+            </div>
+            <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
+            <button class="list-item-action">View</button>
+          </div>
+        `;
+      }).join('');
+    }
 ```
 
-#### B. Verify Database Structure
+### E. Update loadDashboard() Function
 
-**Check that your `homework` table has these columns:**
-- `id` (UUID, primary key)
-- `therapist_id` (UUID)
-- `client_code` (TEXT) ← **MUST MATCH EXACTLY**
-- `homework_type` (TEXT)
-- `description` (TEXT)
-- `active` (BOOLEAN)
-- `created_at` (TIMESTAMPTZ)
-
-#### C. Test Query Directly
-
-**Run this in Supabase SQL Editor:**
-```sql
--- Check if homework exists
-SELECT * FROM homework 
-WHERE client_code = 'CLIENTNAME-001' 
-AND active = true;
-
--- Check exact match (case sensitive)
-SELECT client_code, active, homework_type, description 
-FROM homework 
-WHERE client_code ILIKE '%CLIENT%';
+**Find this line in your `loadDashboard()` function:**
+```javascript
+        renderAlerts();
+        renderTriage();
+        renderClientsList();
 ```
 
-#### D. Common Issues:
+**Change it to:**
+```javascript
+        renderAlerts();
+        renderTriage();
+        loadMessages(); // NEW: Load messages section
+        renderClientsList();
+```
 
-**Issue:** Client code mismatch
-- Dashboard uses: `CLIENTNAME-001`
-- Chat sends: `clientname-001` (lowercase)
-- **Solution:** Always use `.toUpperCase()`
+### F. Update loadClientData() Function
 
-**Issue:** Wrong `active` column
-- Using `status = 'active'` instead of `active = true`
-- **Solution:** Use boolean: `.eq('active', true)`
+**Find the section that loads clientMessages in `loadClientData()`:**
+```javascript
+        const [turns, homework, clientMessages] = await Promise.all([
+          api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
+          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
+          api(`/rest/v1/client_messages?client_code=eq.${code}&order=created_at.desc&limit=10`)
+        ]);
+```
 
-**Issue:** Wrong table name
-- Using `homework_assignments` instead of `homework`
-- **Solution:** Verify table name in Supabase
+**After this section, find where it loads activity excerpts and add this BEFORE it:**
 
-#### E. Force Reload Test
-
-**Add a "Reload Homework" button to chat:**
-```html
-<!-- In homework section -->
-<div class="homework-section">
-  <h3 class="sidebar-title">
-    📋 Your Homework
-    <button onclick="loadHomework()" style="font-size: 11px; padding: 2px 8px; margin-left: 8px; background: var(--sage); color: white; border: none; border-radius: 4px; cursor: pointer;">
-      Reload
-    </button>
-  </h3>
-  <div id="homeworkList">
-    <div class="homework-empty">Loading homework...</div>
-  </div>
-</div>
+```javascript
+        // Display client messages in Alo Activity tab (NEW)
+        if (clientMessages?.length) {
+          document.getElementById('activityMessagesContainer').innerHTML = clientMessages.map(m => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+              <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('activityMessagesContainer').innerHTML = 
+            '<p style="color: var(--text-muted); text-align: center;">No messages from client</p>';
+        }
 ```
 
 ---
 
-## COMPLETE TESTING CHECKLIST
+## TESTING CHECKLIST
 
-### Test 1: Homework Connection
+### Test 1: Messages on Homepage
 1. ✅ Open dashboard
-2. ✅ Go to ClientName-001 → Homework tab
-3. ✅ Assign homework: "Practice grounding technique"
-4. ✅ Open chat page
-5. ✅ Login as CLIENTNAME-001
-6. ✅ Check homework sidebar shows the assignment
-7. ✅ Open browser console - look for homework logs
+2. ✅ Should see 3 sections: Alerts, Triage, **Messages from Clients** (NEW)
+3. ✅ Messages count shows number
+4. ✅ Click message → goes to that client
 
-### Test 2: Messages Connection
-1. ✅ Open chat page as CLIENTNAME-001
-2. ✅ Write note: "Testing the message 01"
-3. ✅ Click "Send to Therapist"
-4. ✅ Check console for success
-5. ✅ Open dashboard
-6. ✅ Check homepage "Messages from Clients" section
-7. ✅ Click on ClientName-001
-8. ✅ Check "Session Prep" tab shows message
-9. ✅ Check "Alo Activity" tab shows message
+### Test 2: Messages in Alo Activity
+1. ✅ Open dashboard → click client
+2. ✅ Go to "Alo Activity" tab
+3. ✅ Should see 2 cards: **Messages from Client** (NEW) and Recent Conversations
+4. ✅ Messages display with timestamps
 
-### Test 3: Therapist Name
+### Test 3: Editable Therapist Name
 1. ✅ Open dashboard
-2. ✅ Click on therapist name in header
-3. ✅ Change to your name
-4. ✅ Reload page - should persist
-5. ✅ Check avatar updates
+2. ✅ Click on "Dr. Dupree" in top right
+3. ✅ Popup appears asking for name
+4. ✅ Enter your name → saves
+5. ✅ Avatar updates with initials
+6. ✅ Reload page → name persists
 
 ---
 
-## QUICK FIX SUMMARY
+## VISUAL LAYOUT
 
-**File 1: Dashboard (`dashboard.html`)**
-- Add messages section to homepage (3 sections total)
-- Add messages to Alo Activity tab
-- Make therapist name editable
-- Add debug logging
+### Homepage Before:
+```
+┌─────────────────────────────┐
+│ 1. Alerts                   │
+│ 2. Clinical Triage          │
+└─────────────────────────────┘
+```
 
-**File 2: Chat Page (`chat.html`)**
-- Already has correct Supabase URL ✅
-- Already uses correct table structure ✅
-- Add debug logging to loadHomework()
-- Add reload button for testing
+### Homepage After:
+```
+┌─────────────────────────────┐
+│ 1. Alerts                   │
+│ 2. Clinical Triage          │
+│ 3. Messages from Clients ⭐ │ ← NEW!
+└─────────────────────────────┘
+```
 
-**File 3: Database (`Supabase`)**
-- Verify `homework` table exists
-- Verify `client_messages` table exists
-- Check client_code matches exactly (case sensitive!)
+### Alo Activity Tab Before:
+```
+┌─────────────────────────────┐
+│ Recent Conversations        │
+└─────────────────────────────┘
+```
 
----
-
-## EXPECTED RESULT
-
-### Homepage Should Show:
-1. **Alerts** (crisis signals)
-2. **Clinical Triage** (needs attention)
-3. **Messages from Clients** ← NEW!
-
-### Client Page → Alo Activity Should Show:
-1. **Messages from Client** ← NEW!
-2. **Recent Conversations**
-
-### Chat Page Should Show:
-- Homework in right sidebar
-- Notes textarea working
-- Previous messages below
+### Alo Activity Tab After:
+```
+┌─────────────────────────────┐
+│ Messages from Client      ⭐│ ← NEW!
+├─────────────────────────────┤
+│ Recent Conversations        │
+└─────────────────────────────┘
+```
 
 ---
 
-**Let me know which part you want me to implement first, or I can create the complete updated files!**
+## COMPLETE IMPLEMENTATION ORDER
+
+1. **Add Messages HTML to homepage** (Part 1, Section A)
+2. **Update Alo Activity tab HTML** (Part 2, Section B)
+3. **Update header for editable name** (Part 3, Section C)
+4. **Add therapist name functions** (Part 4, Section D)
+5. **Add messages functions** (Part 4, Section D)
+6. **Update loadDashboard()** (Part 4, Section E)
+7. **Update loadClientData()** (Part 4, Section F)
+8. **Test everything!**
+
+---
+
+## QUICK COPY-PASTE SUMMARY
+
+**3 HTML Changes:**
+1. Homepage: Add messages section after triage
+2. Alo Activity: Add messages card before conversations
+3. Header: Make therapist name clickable
+
+**4 JavaScript Changes:**
+1. Add `loadTherapistName()` and `editTherapistName()` functions
+2. Add `loadMessages()` and `renderMessages()` functions
+3. Update `loadDashboard()` to call `loadMessages()`
+4. Update `loadClientData()` to populate activity messages
+
+**Result:**
+- ✅ Messages show on homepage (3rd section)
+- ✅ Messages show in Alo Activity tab (top card)
+- ✅ Therapist name is editable (click header)
+- ✅ Everything connects to Supabase
+
+---
+
+All done! These changes will add the messages sections and editable therapist name to your dashboard. Let me know if you need any clarification on where to add these! 🚀
