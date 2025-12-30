@@ -1477,13 +1477,22 @@
     // =====================================================
     async function loadMessages() {
       try {
-        // Get all recent messages
-        const allMessages = await api(`/rest/v1/client_messages?order=created_at.desc&limit=20`);
+        console.log('📨 Loading all client messages...');
         
-        // Filter to only messages from our clients
+        // Get all recent messages
+        const allMessages = await api(`/rest/v1/client_messages?order=created_at.desc&limit=50`);
+        console.log('📦 Total messages found:', allMessages?.length);
+        
+        // Filter to only messages from our clients (case-insensitive)
         const clientMessages = allMessages?.filter(m => 
-          allClients.some(c => c.client_code === m.client_code)
+          allClients.some(c => 
+            c.client_code.toLowerCase() === m.client_code.toLowerCase()
+          )
         ) || [];
+        
+        console.log('✅ Filtered to our clients:', clientMessages.length, 'messages');
+        console.log('Client codes we have:', allClients.map(c => c.client_code));
+        console.log('Message codes found:', [...new Set(allMessages?.map(m => m.client_code))]);
         
         renderMessages(clientMessages);
       } catch (err) {
@@ -1635,8 +1644,16 @@
         const [turns, homework, clientMessages] = await Promise.all([
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
           api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
-          api(`/rest/v1/client_messages?client_code=eq.${code}&order=created_at.desc&limit=10`)
+          api(`/rest/v1/client_messages?order=created_at.desc&limit=100`)
         ]);
+        
+        // Filter messages to exact client (case-insensitive)
+        const filteredMessages = clientMessages?.filter(m => 
+          m.client_code.toLowerCase() === code.toLowerCase()
+        ).slice(0, 10) || [];
+        
+        console.log('📨 Messages for', code, ':', filteredMessages.length);
+        console.log('All message codes:', [...new Set(clientMessages?.map(m => m.client_code))]);
         
         loadLastSessionsPreview(code);
         
@@ -1665,8 +1682,8 @@
         }
         
         // Display client messages in Session Prep
-        if (clientMessages?.length) {
-          document.getElementById('clientMessagesContainer').innerHTML = clientMessages.map(m => `
+        if (filteredMessages?.length) {
+          document.getElementById('clientMessagesContainer').innerHTML = filteredMessages.map(m => `
             <div class="excerpt">
               <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
               <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
@@ -1677,8 +1694,8 @@
         }
         
         // Display client messages in Alo Activity tab (NEW)
-        if (clientMessages?.length) {
-          document.getElementById('activityMessagesContainer').innerHTML = clientMessages.map(m => `
+        if (filteredMessages?.length) {
+          document.getElementById('activityMessagesContainer').innerHTML = filteredMessages.map(m => `
             <div class="excerpt">
               <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
               <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
