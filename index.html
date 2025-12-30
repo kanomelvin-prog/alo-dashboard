@@ -1424,11 +1424,17 @@
       try {
         console.log('Loading dashboard data from Supabase...');
         
-        // Load therapist's client list
-        const clientList = await supabaseQuery(`/rest/v1/therapist_client_list?therapist_id=eq.${THERAPIST_ID}&select=*&order=last_activity.desc`);
+        // Try loading from therapist_client_list first
+        let clientList = await supabaseQuery(`/rest/v1/therapist_client_list?therapist_id=eq.${THERAPIST_ID}&select=*&order=last_activity.desc`);
+        
+        // If no data in therapist_client_list, build from crisis_alerts and client_messages
+        if (!clientList || clientList.length === 0) {
+          console.warn('No data in therapist_client_list, building from other tables...');
+          clientList = await buildClientListFromSources();
+        }
         
         if (!clientList || clientList.length === 0) {
-          console.warn('No clients found for therapist');
+          console.warn('No clients found');
           APP_STATE.clients = [];
           renderClientList();
           return;
@@ -1445,13 +1451,14 @@
           }
           
           // Generate initials from client_code or name
-          const initials = client.client_code.substring(0, 2).toUpperCase();
+          const code = client.client_code || client.id;
+          const initials = code.substring(0, 2).toUpperCase();
           
           return {
-            id: client.client_code,
-            name: client.client_code, // Will be enhanced if we have a names table
+            id: code,
+            name: code, // Will be enhanced if we have a names table
             initials: initials,
-            clientCode: client.client_code,
+            clientCode: code,
             status: status,
             conversationCount: client.conversation_count || 0,
             homeworkCount: client.active_homework_count || 0,
@@ -1481,6 +1488,44 @@
         // Fall back to empty state
         APP_STATE.clients = [];
         renderClientList();
+      }
+    }
+    
+    async function buildClientListFromSources() {
+      try {
+        const clientCodes = new Set();
+        
+        // Get unique client codes from crisis_alerts
+        const alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=client_code`);
+        if (alerts) {
+          alerts.forEach(a => clientCodes.add(a.client_code));
+        }
+        
+        // Get unique client codes from client_messages
+        const messages = await supabaseQuery(`/rest/v1/client_messages?select=client_code`);
+        if (messages) {
+          messages.forEach(m => clientCodes.add(m.client_code));
+        }
+        
+        // Get unique client codes from homework
+        const homework = await supabaseQuery(`/rest/v1/homework?select=client_code`);
+        if (homework) {
+          homework.forEach(h => clientCodes.add(h.client_code));
+        }
+        
+        console.log(`Found ${clientCodes.size} unique client codes from various tables`);
+        
+        // Build client list
+        return Array.from(clientCodes).map(code => ({
+          client_code: code,
+          conversation_count: 0,
+          active_homework_count: 0,
+          last_activity: null
+        }));
+        
+      } catch (error) {
+        console.error('Error building client list:', error);
+        return [];
       }
     }
     
