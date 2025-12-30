@@ -1425,6 +1425,10 @@
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
         
+        // Load all crisis alerts (NEW)
+        const allCrisisAlerts = await api(`/rest/v1/crisis_alerts?order=alert_time.desc&limit=100`);
+        console.log('🚨 Crisis alerts loaded:', allCrisisAlerts?.length);
+        
         allClients = await Promise.all(links.map(async (client) => {
           const [recent, prev, hw] = await Promise.all([
             api(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,intention_chosen,created_at`),
@@ -1432,7 +1436,13 @@
             api(`/rest/v1/homework?client_code=eq.${client.client_code}&active=eq.true&select=id`)
           ]);
           
-          const hasCrisis = recent?.some(t => t.intention_chosen === 'CRISIS');
+          // Check for crisis in both conversation_turns AND crisis_alerts table (case-insensitive)
+          const hasCrisisInTurns = recent?.some(t => t.intention_chosen === 'CRISIS');
+          const hasCrisisInAlerts = allCrisisAlerts?.some(a => 
+            a.client_code?.toLowerCase() === client.client_code.toLowerCase()
+          );
+          const hasCrisis = hasCrisisInTurns || hasCrisisInAlerts;
+          
           const current = recent?.length || 0;
           const previous = prev?.length || 0;
           
