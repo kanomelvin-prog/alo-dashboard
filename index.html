@@ -1495,11 +1495,18 @@
       try {
         const clientCodes = new Set();
         
-        // Get unique client codes from crisis_alerts
+        // Get unique client codes from crisis_alerts (check if table name is different)
         console.log('Querying crisis_alerts...');
-        const alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=client_code`);
+        let alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=client_code`);
+        
+        // If crisis_alerts doesn't exist, try alternate names
+        if (!alerts) {
+          console.log('Trying alternate table name: crisisalerts...');
+          alerts = await supabaseQuery(`/rest/v1/crisisalerts?select=client_code`);
+        }
+        
         console.log('Crisis alerts response:', alerts);
-        if (alerts) {
+        if (alerts && Array.isArray(alerts)) {
           alerts.forEach(a => {
             if (a.client_code) {
               console.log('Adding client from crisis_alerts:', a.client_code);
@@ -1512,7 +1519,7 @@
         console.log('Querying client_messages...');
         const messages = await supabaseQuery(`/rest/v1/client_messages?select=client_code`);
         console.log('Client messages response:', messages);
-        if (messages) {
+        if (messages && Array.isArray(messages)) {
           messages.forEach(m => {
             if (m.client_code) {
               console.log('Adding client from client_messages:', m.client_code);
@@ -1525,11 +1532,24 @@
         console.log('Querying homework...');
         const homework = await supabaseQuery(`/rest/v1/homework?select=client_code`);
         console.log('Homework response:', homework);
-        if (homework) {
+        if (homework && Array.isArray(homework)) {
           homework.forEach(h => {
             if (h.client_code) {
               console.log('Adding client from homework:', h.client_code);
               clientCodes.add(h.client_code);
+            }
+          });
+        }
+        
+        // Also try conversation_turns which definitely exists
+        console.log('Querying conversation_turns...');
+        const turns = await supabaseQuery(`/rest/v1/conversation_turns?select=user_id&limit=100`);
+        console.log('Conversation turns response:', turns);
+        if (turns && Array.isArray(turns)) {
+          turns.forEach(t => {
+            if (t.user_id) {
+              console.log('Adding client from conversation_turns:', t.user_id);
+              clientCodes.add(t.user_id);
             }
           });
         }
