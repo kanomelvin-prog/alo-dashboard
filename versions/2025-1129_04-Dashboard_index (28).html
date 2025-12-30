@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alo Clinical Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      /* Alo Brand Colors - matching chat page */
+      --cream: #FDFBF7;
+      --warm-white: #FAF8F5;
+      --sage: #8B9A7D;
+      --sage-light: #E8EDE4;
+      --sage-hover: #7a8a6d;
+      --charcoal: #2D2A26;
+      --stone: #9C9589;
+      --border: rgba(156, 149, 137, 0.2);
+      
+      /* Functional colors */
+      --bg: var(--cream);
+      --white: #ffffff;
+      --text: var(--charcoal);
+      --text-light: var(--stone);
+      --text-muted: var(--stone);
+      --primary: var(--sage);
+      --primary-hover: var(--sage-hover);
+      --danger: #d97706;
+      --danger-bg: #fef3c7;
+      --danger-border: #fde68a;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --info-bg: var(--sage-light);
+      --info-border: var(--border);
+      --info-text: var(--charcoal);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    
+    /* === HEADER === */
+    .header {
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .home-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    
+    .home-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--sage);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    
+    .home-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--text);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    /* === LAYOUT === */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 84px 24px 24px;
+    }
+    
+    /* === MAIN CONTENT === */
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    /* === SECTIONS === */
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .section-icon.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+    
+    .section-icon.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .section-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .section-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    
+    .section-count {
+      margin-left: auto;
+      background: var(--bg);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+    
+    .section-body {
+      padding: 8px;
+    }
+    
+    .section-empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    /* === LIST ITEMS === */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .list-item:hover {
+      background: var(--bg);
+    }
+    
+    .list-item-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .list-item-indicator.danger { background: var(--danger); }
+    .list-item-indicator.warning { background: var(--warning); }
+    .list-item-indicator.success { background: var(--success); }
+    
+    .list-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .list-item-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    
+    .list-item-description {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+    }
+    
+    .list-item-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    
+    .list-item-action {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    
+    .list-item-action:hover {
+      background: var(--border);
+    }
+    
+    /* === SIDEBAR === */
+    .sidebar {
+      position: sticky;
+      top: 84px;
+      height: fit-content;
+    }
+    
+    .sidebar-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .sidebar-list {
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    
+    .client-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .client-item:last-child {
+      border-bottom: none;
+    }
+    
+    .client-item:hover {
+      background: var(--bg);
+    }
+    
+    .client-item.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .client-item.active .client-name {
+      color: white;
+    }
+    
+    .client-item.active .client-meta {
+      color: rgba(255,255,255,0.8);
+    }
+    
+    /* === CLIENT AVATAR WITH STATUS BADGE === */
+    .client-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      flex-shrink: 0;
+      position: relative;
+    }
+    
+    .client-item.active .client-avatar {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+    
+    .status-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+    }
+    
+    .client-item.active .status-badge {
+      border-color: var(--primary);
+    }
+    
+    .status-badge.crisis {
+      background: var(--danger);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-badge.needs-attention {
+      background: var(--warning);
+    }
+    
+    .status-badge.stable {
+      background: var(--success);
+    }
+    
+    .status-badge.dormant {
+      background: var(--text-muted);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+    }
+    
+    .client-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .client-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .client-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    /* === CLIENT PAGE === */
+    .client-page {
+      display: none;
+    }
+    
+    .client-page.active {
+      display: grid;
+    }
+    
+    .page-header {
+      margin-bottom: 24px;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .page-meta {
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+    
+    /* === TABS === */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 24px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .tab:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+    
+    .tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* === CARDS === */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+      transition: box-shadow 0.2s;
+    }
+    
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(45, 42, 38, 0.08);
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .card-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .card-body p {
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .card-body p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .highlight-box {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    
+    /* === EXCERPTS === */
+    .excerpt {
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .excerpt:last-child {
+      margin-bottom: 0;
+    }
+    
+    .excerpt-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    
+    .excerpt-text {
+      font-size: 0.875rem;
+      color: var(--text);
+      font-style: italic;
+    }
+    
+    /* === FORMS === */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .form-group label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* === BUTTONS === */
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .btn-primary {
+      background: var(--sage);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--sage-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3);
+    }
+    
+    .btn-secondary {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--sage-light);
+      border-color: var(--sage);
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8125rem;
+    }
+    
+    /* === TEMPLATES === */
+    .templates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .template-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .template-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    /* === HOMEWORK LIST === */
+    .homework-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .homework-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .homework-status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .homework-status.active {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    
+    .homework-status.completed {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+    
+    .homework-status svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .homework-content {
+      flex: 1;
+    }
+    
+    .homework-type {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .homework-desc {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+    }
+    
+    .homework-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    
+    /* === SESSION PREVIEW === */
+    .session-preview {
+      padding: 12px 0;
+    }
+    
+    .session-preview-border {
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding-top: 16px;
+    }
+    
+    .session-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .session-preview-date {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .session-preview-type {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    
+    .session-preview-text {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+    
+    .session-preview-text:last-child {
+      margin-bottom: 0;
+    }
+    
+    .session-preview-text strong {
+      color: var(--text);
+    }
+    
+    /* === NOTES === */
+    .note-card {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .note-card:last-child {
+      margin-bottom: 0;
+    }
+    
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .note-date {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .note-content p {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .note-content p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .note-content strong {
+      color: var(--text);
+    }
+    
+    .copy-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    
+    .copy-btn:hover {
+      background: var(--bg);
+    }
+    
+    .copy-btn.copied {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+    
+    .copy-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+    
+    /* === MODAL === */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: modalSlideIn 0.2s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    
+    .modal-close:hover {
+      color: var(--text);
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .modal-body .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .modal-body .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    
+    .toast.show {
+      display: flex;
+    }
+    
+    .toast svg {
+      width: 18px;
+      height: 18px;
+      color: var(--success);
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* === LOADING === */
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+    }
+    
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 8px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* === CRISIS ALERTS === */
+    .crisis-alert-item {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+    
+    .crisis-alert-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .crisis-alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .crisis-alert-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .crisis-alert-severity {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .crisis-alert-message {
+      font-size: 0.875rem;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    
+    /* === RESPONSIVE === */
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        position: static;
+        order: -1;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <a href="#" class="home-link" onclick="showHomePage(); return false;">
+        <div class="home-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </div>
+        <span class="logo-text">Alo</span>
+      </a>
+    </div>
+    <div class="header-right">
+      <span class="user-name" id="therapistName" onclick="editTherapistName()" style="cursor: pointer;" title="Click to edit your name">Dupre' Rouse</span>
+      <div class="user-avatar" id="therapistAvatar">DR</div>
+    </div>
+  </header>
+  
+  <!-- Homepage -->
+  <div class="layout" id="homePage">
+    <div class="main">
+      <!-- Alerts Section -->
+      <div class="section" id="alertsSection">
+        <div class="section-header">
+          <div class="section-icon danger">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <span class="section-title">Alerts</span>
+          <span class="section-count" id="alertsCount">0</span>
+        </div>
+        <div class="section-body" id="alertsList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+      
+      <!-- Triage Section -->
+      <div class="section" id="triageSection">
+        <div class="section-header">
+          <div class="section-icon warning">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <span class="section-title">Clinical Triage</span>
+          <span class="section-count" id="triageCount">0</span>
+        </div>
+        <div class="section-body" id="triageList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+      
+      <!-- Messages Section (NEW) -->
+      <div class="section" id="messagesSection">
+        <div class="section-header">
+          <div class="section-icon" style="background: #eff6ff; color: #1e40af;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="section-title">Messages from Clients</span>
+          <span class="section-count" id="messagesCount">0</span>
+        </div>
+        <div class="section-body" id="messagesList">
+          <div class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Clients</span>
+          <button class="btn btn-sm btn-primary" onclick="showAddClientForm()" style="padding: 4px 10px; font-size: 0.75rem;">+ Add</button>
+        </div>
+        <div class="sidebar-list" id="clientsList">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Client Page -->
+  <div class="layout client-page" id="clientPage">
+    <div class="main">
+      <div class="page-header">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h1 class="page-title" id="clientName">Client Name</h1>
+            <p class="page-meta">
+              <span id="clientCode" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="copyClientCode()" title="Click to copy client code">
+                <span id="clientCodeText"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </span>
+              <span id="clientMeta"></span>
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn" id="crisisAlertButton" onclick="goToCrisisAlerts()" style="display: none; background: var(--danger); color: white; border: none; animation: pulse 2s infinite;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span id="crisisAlertButtonText">Crisis Alert</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="showEditClientForm()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+        <button class="tab" onclick="switchTab('notes', this)">Session Notes</button>
+        <button class="tab" onclick="switchTab('homework', this)">Homework</button>
+        <button class="tab" onclick="switchTab('activity', this)">Alo Activity</button>
+      </div>
+      
+      <!-- Session Prep Tab -->
+      <div class="tab-content active" id="tab-prep">
+        <!-- Last Sessions Preview -->
+        <div class="card" id="lastSessionsCard">
+          <div class="card-header">
+            <span class="card-title">Recent Session Notes</span>
+            <button class="btn btn-sm btn-secondary" onclick="switchTab('notes', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
+          </div>
+          <div class="card-body" id="lastSessionsPreview">
+            <p style="color: var(--text-muted); text-align: center;">No session notes yet. Add one in the Session Notes tab.</p>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Since Last Session</span>
+          </div>
+          <div class="card-body" id="prepSummary">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Open Items</span>
+          </div>
+          <div class="card-body" id="prepOpenItems">
+            <p style="color: var(--text-muted);">No open items</p>
+          </div>
+        </div>
+        
+        <!-- Client Messages Card -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Messages from Client</span>
+          </div>
+          <div class="card-body" id="clientMessagesContainer">
+            <p style="color: var(--text-muted);">No messages from client</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Session Notes Tab -->
+      <div class="tab-content" id="tab-notes">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Session Notes</span>
+            <button class="btn btn-sm btn-primary" onclick="showNoteForm()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Note
+            </button>
+          </div>
+          <div class="card-body" id="notesContainer">
+            <p style="color: var(--text-muted); text-align: center;">No session notes yet</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Homework Tab -->
+      <div class="tab-content" id="tab-homework">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Assign Homework</span>
+          </div>
+          <div class="card-body">
+            <div class="templates">
+              <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</button>
+              <button class="template-btn" onclick="useTemplate('noticing', 'Notice and log moments of anxiety without trying to change them')">Noticing</button>
+              <button class="template-btn" onclick="useTemplate('journaling', 'Journal for 10 minutes each morning')">Journaling</button>
+              <button class="template-btn" onclick="useTemplate('behavioral', 'Practice one boundary-setting conversation')">Behavioral</button>
+              <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 breathing technique twice daily')">Breathing</button>
+            </div>
+            
+            <form id="homeworkForm" onsubmit="submitHomework(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Type</label>
+                  <select id="hwType" required>
+                    <option value="grounding">Grounding Technique</option>
+                    <option value="noticing">Noticing Practice</option>
+                    <option value="journaling">Journaling Prompt</option>
+                    <option value="behavioral">Behavioral Experiment</option>
+                    <option value="cognitive">Cognitive Exercise</option>
+                    <option value="breathing">Breathing Exercise</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Due Date (optional)</label>
+                  <input type="date" id="hwDue">
+                </div>
+                <div class="form-group full">
+                  <label>Instructions</label>
+                  <textarea id="hwDescription" placeholder="What should the client practice?" required></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Clinical Rationale (private)</label>
+                  <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                  <span class="form-hint">For your records only</span>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Assign Homework</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Homework History</span>
+          </div>
+          <div class="card-body" id="homeworkHistory">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Alo Activity Tab -->
+      <div class="tab-content" id="tab-activity">
+        <!-- Crisis Alerts Card (MOVED HERE) -->
+        <div class="card" id="crisisAlertsCard" style="display: none;">
+          <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
+            <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Crisis Alerts
+            </span>
+            <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
+          </div>
+          <div class="card-body" id="crisisAlertsList">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
+        <!-- Messages from Client (NEW) -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Messages from Client</span>
+          </div>
+          <div class="card-body" id="activityMessagesContainer">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
+        <!-- Recent Conversations -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Conversations</span>
+          </div>
+          <div class="card-body" id="activityExcerpts">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar (same as homepage) -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Clients</span>
+          <button class="btn btn-sm btn-primary" onclick="showAddClientForm()" style="padding: 4px 10px; font-size: 0.75rem;">+ Add</button>
+        </div>
+        <div class="sidebar-list" id="clientsList2">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Client Modal -->
+  <div class="modal-overlay" id="addClientModal" onclick="closeAddClientModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Client</h3>
+        <button class="modal-close" onclick="closeAddClientModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Client Code</label>
+          <input type="text" id="newClientCode" placeholder="e.g., ClientName-001">
+          <span class="form-hint">A unique identifier for this client</span>
+        </div>
+        <div class="form-group">
+          <label>Display Name (optional)</label>
+          <input type="text" id="newClientName" placeholder="e.g., Sarah M.">
+          <span class="form-hint">Optional friendly name, visible only to you</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAddClientModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="addClient()">Add Client</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Edit Client Modal -->
+  <div class="modal-overlay" id="editClientModal" onclick="closeEditClientModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Client</h3>
+        <button class="modal-close" onclick="closeEditClientModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Client Code</label>
+          <input type="text" id="editClientCode" disabled style="background: var(--bg); color: var(--text-muted);">
+          <span class="form-hint">Client code cannot be changed</span>
+        </div>
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
+          <span class="form-hint">Friendly name visible only to you</span>
+        </div>
+        <div class="form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <label style="color: var(--danger);">Danger Zone</label>
+          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Client
+          </button>
+          <span class="form-hint">This will unlink the client from your dashboard. Their Alo conversations are not deleted.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditClientModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClientEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toastMessage">Success</span>
+  </div>
+
+  <script>
+    // =====================================================
+    // CONFIG
+    // =====================================================
+    const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
+    const THERAPIST_ID = '94ebfe1c-57d1-48d8-a165-a9152ded65db';
+    
+    let currentClient = null;
+    let allClients = [];
+    let clientNotes = {};
+    let sortBy = 'alpha';
+    
+    // =====================================================
+    // INITIALIZATION
+    // =====================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTherapistName();
+      loadDashboard();
+    });
+    
+    async function api(endpoint, options = {}) {
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+      if (!res.ok) throw new Error(`API Error: ${res.status}`);
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    }
+    
+    // =====================================================
+    // THERAPIST NAME FUNCTIONS (NEW)
+    // =====================================================
+    function loadTherapistName() {
+      const saved = localStorage.getItem('therapistName') || "Dupre' Rouse";
+      document.getElementById('therapistName').textContent = saved;
+      
+      // Update avatar
+      const initials = saved.split(' ')
+        .map(n => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
+      document.getElementById('therapistAvatar').textContent = initials;
+    }
+
+    function editTherapistName() {
+      const current = localStorage.getItem('therapistName') || "Dupre' Rouse";
+      const newName = prompt('Enter your name:', current);
+      
+      if (newName && newName.trim()) {
+        localStorage.setItem('therapistName', newName.trim());
+        loadTherapistName();
+        toast('Name updated');
+      }
+    }
+    
+    // =====================================================
+    // DASHBOARD LOADING
+    // =====================================================
+    async function loadDashboard() {
+      try {
+        const links = await api(`/rest/v1/therapist_client_links?therapist_id=eq.${THERAPIST_ID}&select=*`);
+        
+        if (!links?.length) {
+          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No alerts</div>';
+          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items requiring attention</div>';
+          document.getElementById('messagesList').innerHTML = '<div class="section-empty">No messages yet</div>';
+          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet</div>';
+          return;
+        }
+        
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+        
+        // Load all crisis alerts (NEW)
+        const allCrisisAlerts = await api(`/rest/v1/crisis_alerts?order=alert_time.desc&limit=100`);
+        console.log('🚨 Crisis alerts loaded:', allCrisisAlerts?.length);
+        console.log('Sample crisis_alert:', allCrisisAlerts?.[0]);
+        console.log('Sample link client_code:', links?.[0]?.client_code);
+        
+        allClients = await Promise.all(links.map(async (client) => {
+          const [recent, prev, hw] = await Promise.all([
+            api(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${weekAgo}&select=id,intention_chosen,created_at`),
+            api(`/rest/v1/conversation_turns?user_id=eq.${client.client_code}&created_at=gte.${twoWeeksAgo}&created_at=lt.${weekAgo}&select=id`),
+            api(`/rest/v1/homework?client_code=eq.${client.client_code}&active=eq.true&select=id`)
+          ]);
+          
+          // Check for crisis in both conversation_turns AND crisis_alerts table
+          const hasCrisisInTurns = recent?.some(t => t.intention_chosen === 'CRISIS');
+          
+          // Check crisis_alerts table - compare against BOTH client_code AND user_id (case-insensitive)
+          const clientCrisisAlerts = allCrisisAlerts?.filter(a => {
+            const cc = (client.client_code || '').toLowerCase();
+            const alertClientCode = (a.client_code || '').toLowerCase();
+            const alertUserId = (a.user_id || '').toLowerCase();
+            return alertClientCode === cc || alertUserId === cc;
+          }) || [];
+          
+          const hasCrisisInAlerts = clientCrisisAlerts.length > 0;
+          
+          // Check if ALL alerts for this client are marked as read
+          const allAlertsRead = clientCrisisAlerts.length > 0 && 
+                                clientCrisisAlerts.every(a => a.read_by_therapist === true);
+          
+          const hasCrisis = hasCrisisInTurns || hasCrisisInAlerts;
+          
+          if (hasCrisisInAlerts) {
+            console.log(`🚨 CRISIS MATCH for ${client.client_code}:`, {
+              clientCode: client.client_code,
+              alertCount: clientCrisisAlerts.length,
+              unreadCount: clientCrisisAlerts.filter(a => !a.read_by_therapist).length,
+              allRead: allAlertsRead
+            });
+          }
+          
+          const current = recent?.length || 0;
+          const previous = prev?.length || 0;
+          
+          let trend = 'stable';
+          if (current > previous + 2) trend = 'up';
+          else if (current < previous - 2) trend = 'down';
+          
+          let status = 'stable';
+          if (hasCrisis) {
+            status = 'crisis';
+          } else if (current === 0 && (hw?.length || 0) > 0) {
+            status = 'needs-attention';
+          } else if (trend === 'down') {
+            status = 'needs-attention';
+          } else if (current === 0 && (hw?.length || 0) === 0) {
+            status = 'dormant';
+          }
+          
+          return {
+            ...client,
+            messages: current,
+            homework: hw?.length || 0,
+            hasCrisis,
+            allAlertsRead,
+            trend,
+            status,
+            lastActivity: recent?.[0]?.created_at || null
+          };
+        }));
+        
+        renderAlerts();
+        renderTriage();
+        loadMessages(); // NEW: Load messages
+        renderClientsList();
+        
+      } catch (err) {
+        console.error('Dashboard error:', err);
+      }
+    }
+    
+    // =====================================================
+    // MESSAGES FUNCTIONS (NEW)
+    // =====================================================
+    async function markMessageAsRead(messageId, event) {
+      // Stop propagation so clicking button doesn't trigger showClient
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      try {
+        // Mark this message as read
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/client_messages?id=eq.${messageId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ read_by_therapist: true })
+        });
+        
+        if (!response.ok) throw new Error('Failed to mark as read');
+        
+        // Reload messages to refresh the list
+        await loadMessages();
+        
+        toast('Message marked as read');
+        
+      } catch (err) {
+        console.error('Error marking message as read:', err);
+        alert('Error marking message as read');
+      }
+    }
+    
+    async function loadMessages() {
+      try {
+        console.log('📨 Loading all client messages...');
+        
+        // Get all recent UNREAD messages
+        const allMessages = await api(`/rest/v1/client_messages?read_by_therapist=eq.false&order=created_at.desc&limit=50`);
+        console.log('📦 Total unread messages found:', allMessages?.length);
+        
+        // Filter to only messages from our clients (case-insensitive)
+        const clientMessages = allMessages?.filter(m => 
+          allClients.some(c => 
+            c.client_code.toLowerCase() === m.client_code.toLowerCase()
+          )
+        ) || [];
+        
+        console.log('✅ Filtered to our clients:', clientMessages.length, 'messages');
+        
+        renderMessages(clientMessages);
+      } catch (err) {
+        console.error('Error loading messages:', err);
+        document.getElementById('messagesList').innerHTML = 
+          '<div class="section-empty">Error loading messages</div>';
+      }
+    }
+    
+    function renderMessages(messages) {
+      document.getElementById('messagesCount').textContent = messages.length;
+      
+      if (!messages.length) {
+        document.getElementById('messagesList').innerHTML = 
+          '<div class="section-empty">No messages from clients yet</div>';
+        return;
+      }
+      
+      document.getElementById('messagesList').innerHTML = messages.map(m => {
+        // Case-insensitive client lookup
+        const client = allClients.find(c => 
+          c.client_code.toLowerCase() === m.client_code.toLowerCase()
+        );
+        const displayName = client?.display_name || m.client_code;
+        
+        return `
+          <div class="list-item" onclick="showClient('${m.client_code}')">
+            <div class="list-item-indicator" style="background: #3b82f6;"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${displayName}</div>
+              <div class="list-item-description">${truncate(m.message, 80)}</div>
+            </div>
+            <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
+            <button class="btn btn-sm" onclick="markMessageAsRead('${m.id}', event)" style="background: var(--primary); color: white; border: none;">
+              Mark as Read
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderAlerts() {
+      const alerts = allClients.filter(c => c.hasCrisis && !c.allAlertsRead);
+      document.getElementById('alertsCount').textContent = alerts.length;
+      
+      if (!alerts.length) {
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts – all clear</div>';
+        return;
+      }
+      
+      document.getElementById('alertsList').innerHTML = alerts.map(c => `
+        <div class="list-item" onclick="showClient('${c.client_code}')">
+          <div class="list-item-indicator danger"></div>
+          <div class="list-item-content">
+            <div class="list-item-title">${c.display_name || c.client_code}</div>
+            <div class="list-item-description">Crisis signal detected</div>
+          </div>
+          <span class="list-item-meta">${c.lastActivity ? timeAgo(new Date(c.lastActivity)) : ''}</span>
+          <button class="btn btn-sm" onclick="markAlertsAsRead('${c.client_code}', event)" style="background: var(--danger); color: white; border: none;">
+            Mark as Read
+          </button>
+        </div>
+      `).join('');
+    }
+    
+    function renderTriage() {
+      const triage = allClients.filter(c => !c.hasCrisis && (c.trend === 'down' || (c.homework > 0 && c.messages === 0)));
+      document.getElementById('triageCount').textContent = triage.length;
+      
+      if (!triage.length) {
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable – no action needed</div>';
+        return;
+      }
+      
+      document.getElementById('triageList').innerHTML = triage.map(c => {
+        let desc = '';
+        if (c.trend === 'down') desc = 'Engagement declining';
+        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) – no Alo activity`;
+        
+        return `
+          <div class="list-item" onclick="showClient('${c.client_code}')">
+            <div class="list-item-indicator warning"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${c.display_name || c.client_code}</div>
+              <div class="list-item-description">${desc}</div>
+            </div>
+            <span class="list-item-meta">${c.messages} msgs this week</span>
+            <button class="list-item-action">Review</button>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderClientsList() {
+      let sorted = [...allClients];
+      
+      if (sortBy === 'alpha') {
+        sorted.sort((a, b) => {
+          const nameA = a.display_name || a.client_code;
+          const nameB = b.display_name || b.client_code;
+          return nameA.localeCompare(nameB);
+        });
+      } else {
+        sorted.sort((a, b) => {
+          if (!a.lastActivity) return 1;
+          if (!b.lastActivity) return -1;
+          return new Date(b.lastActivity) - new Date(a.lastActivity);
+        });
+      }
+      
+      const html = sorted.map(c => {
+        const displayName = c.display_name || c.client_code;
+        const initials = displayName.substring(0, 2).toUpperCase();
+        const isActive = currentClient === c.client_code;
+        
+        return `
+          <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${c.client_code}')">
+            <div class="client-avatar">
+              ${initials}
+              <div class="status-badge ${c.status}"></div>
+            </div>
+            <div class="client-info">
+              <div class="client-name">${displayName}</div>
+              <div class="client-meta">${c.messages} msgs · ${c.homework} hw</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('clientsList').innerHTML = html;
+      document.getElementById('clientsList2').innerHTML = html;
+    }
+    
+    async function showClient(code) {
+      currentClient = code;
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('clientPage').classList.add('active');
+      renderClientsList();
+      switchTab('prep', document.querySelector('.tab'));
+      
+      const client = allClients.find(c => c.client_code === code);
+      const displayName = client?.display_name || code;
+      document.getElementById('clientName').textContent = displayName;
+      document.getElementById('clientCodeText').textContent = code;
+      
+      const metaText = client 
+        ? ` · ${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+        : '';
+      document.getElementById('clientMeta').textContent = metaText;
+      
+      await loadClientData(code);
+    }
+    
+    async function loadClientData(code) {
+      try {
+        const [turns, homework, clientMessages, crisisAlerts] = await Promise.all([
+          api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
+          api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
+          api(`/rest/v1/client_messages?order=created_at.desc&limit=100`),
+          api(`/rest/v1/crisis_alerts?order=alert_time.desc&limit=50`)
+        ]);
+        
+        // Filter messages and crisis alerts to exact client (case-insensitive)
+        const filteredMessages = clientMessages?.filter(m => 
+          m.client_code.toLowerCase() === code.toLowerCase()
+        ).slice(0, 10) || [];
+        
+        const filteredCrisisAlerts = crisisAlerts?.filter(a => 
+          a.client_code.toLowerCase() === code.toLowerCase()
+        ) || [];
+        
+        console.log('📨 Messages for', code, ':', filteredMessages.length);
+        console.log('🚨 Crisis alerts for', code, ':', filteredCrisisAlerts.length);
+        
+        // Display crisis alerts
+        displayCrisisAlerts(filteredCrisisAlerts);
+        
+        loadLastSessionsPreview(code);
+        
+        const hasCrisis = turns?.some(t => t.intention_chosen === 'CRISIS');
+        let summary = '';
+        
+        if (!turns?.length) {
+          summary = '<p>No Alo interactions this week.</p>';
+        } else if (hasCrisis) {
+          summary = `
+            <div class="highlight-box">⚠️ Client triggered a crisis response. Review before session.</div>
+            <p><strong>${turns.length} interactions</strong> with Alo this week.</p>
+          `;
+        } else {
+          summary = `<p><strong>${turns.length} interactions</strong> with Alo this week.</p>`;
+        }
+        document.getElementById('prepSummary').innerHTML = summary;
+        
+        const activeHw = homework?.filter(h => h.active === true) || [];
+        if (activeHw.length) {
+          document.getElementById('prepOpenItems').innerHTML = activeHw.map(h => `
+            <p>• <strong>${h.homework_type}:</strong> ${h.description}</p>
+          `).join('');
+        } else {
+          document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
+        }
+        
+        // Display client messages in Session Prep
+        if (filteredMessages?.length) {
+          document.getElementById('clientMessagesContainer').innerHTML = filteredMessages.map(m => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+              <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('clientMessagesContainer').innerHTML = '<p style="color: var(--text-muted);">No messages from client</p>';
+        }
+        
+        // Display client messages in Alo Activity tab (NEW)
+        if (filteredMessages?.length) {
+          document.getElementById('activityMessagesContainer').innerHTML = filteredMessages.map(m => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+              <div class="excerpt-text">"${truncate(m.message, 300)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('activityMessagesContainer').innerHTML = 
+            '<p style="color: var(--text-muted); text-align: center;">No messages from client</p>';
+        }
+        
+        if (turns?.length) {
+          document.getElementById('activityExcerpts').innerHTML = turns.slice(0, 10).map(t => `
+            <div class="excerpt">
+              <div class="excerpt-time">${timeAgo(new Date(t.created_at))}</div>
+              <div class="excerpt-text">"${truncate(t.user_message, 200)}"</div>
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('activityExcerpts').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent conversations</p>';
+        }
+        
+        if (homework?.length) {
+          document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
+            <div class="homework-item">
+              <div class="homework-status ${h.active ? 'active' : 'completed'}">
+                ${h.active 
+                  ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                  : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+                }
+              </div>
+              <div class="homework-content">
+                <div class="homework-type">${h.homework_type}</div>
+                <div class="homework-desc">${h.description}</div>
+                <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
+              </div>
+              ${h.active ? `
+                <button class="btn btn-sm btn-secondary" onclick="completeHomework('${h.id}')">
+                  Mark Complete
+                </button>
+              ` : ''}
+            </div>
+          `).join('');
+        } else {
+          document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
+        }
+        
+        await loadNotes();
+        loadLastSessionsPreview(code);
+        
+      } catch (err) {
+        console.error('Error loading client:', err);
+      }
+    }
+    
+    function loadLastSessionsPreview(code) {
+      const notes = clientNotes[code] || [];
+      const preview = notes.slice(0, 3);
+      const container = document.getElementById('lastSessionsPreview');
+      const viewAllBtn = document.getElementById('viewAllNotesBtn');
+      
+      if (notes.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Add one in the Session Notes tab.</p>';
+        viewAllBtn.style.display = 'none';
+        return;
+      }
+      
+      viewAllBtn.style.display = notes.length > 3 ? 'inline-flex' : 'none';
+      viewAllBtn.textContent = notes.length > 3 ? `View All (${notes.length})` : 'View All';
+      
+      container.innerHTML = preview.map((n, i) => `
+        <div class="session-preview ${i > 0 ? 'session-preview-border' : ''}">
+          <div class="session-preview-header">
+            <span class="session-preview-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            <span class="session-preview-type">${n.session_type || 'Session'}</span>
+          </div>
+          ${n.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${truncate(n.themes, 100)}</p>` : ''}
+          ${n.plan ? `<p class="session-preview-text"><strong>Plan:</strong> ${truncate(n.plan, 100)}</p>` : ''}
+          ${!n.themes && !n.plan && n.observations ? `<p class="session-preview-text"><strong>Observations:</strong> ${truncate(n.observations, 100)}</p>` : ''}
+        </div>
+      `).join('');
+    }
+    
+    function showHomePage() {
+      currentClient = null;
+      document.getElementById('clientPage').classList.remove('active');
+      document.getElementById('homePage').style.display = 'grid';
+      renderClientsList();
+    }
+    
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+    
+    async function loadNotes() {
+      const container = document.getElementById('notesContainer');
+      
+      try {
+        const notes = await api(`/rest/v1/session_notes?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}&order=session_date.desc,created_at.desc`);
+        clientNotes[currentClient] = notes || [];
+        
+        if (!notes?.length) {
+          container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Click "Add Note" to create one.</p>';
+          return;
+        }
+        
+        container.innerHTML = notes.map((n) => `
+          <div class="note-card">
+            <div class="note-header">
+              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} – ${n.session_type || 'Session'}</span>
+              <div style="display: flex; gap: 8px;">
+                <button class="copy-btn" onclick="copyNoteFromDb('${n.id}', this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy for EHR
+                </button>
+                <button class="copy-btn" onclick="deleteNote('${n.id}')" title="Delete note">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="note-content">
+              ${n.themes ? `<p><strong>Themes:</strong> ${n.themes}</p>` : ''}
+              ${n.interventions ? `<p><strong>Interventions:</strong> ${n.interventions}</p>` : ''}
+              ${n.observations ? `<p><strong>Observations:</strong> ${n.observations}</p>` : ''}
+              ${n.plan ? `<p><strong>Plan:</strong> ${n.plan}</p>` : ''}
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (err) {
+        console.error('Error loading notes:', err);
+        container.innerHTML = '<p style="color: var(--danger);">Error loading notes</p>';
+      }
+    }
+    
+    function showNoteForm() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('notesContainer').innerHTML = `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Session Date</label>
+            <input type="date" id="noteDate" value="${today}">
+          </div>
+          <div class="form-group">
+            <label>Session Type</label>
+            <select id="noteType">
+              <option value="Individual">Individual</option>
+              <option value="Couples">Couples</option>
+              <option value="Family">Family</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Themes Discussed</label>
+            <textarea id="noteThemes" placeholder="Main topics..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Interventions Used</label>
+            <textarea id="noteInterventions" placeholder="Techniques used..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Clinical Observations</label>
+            <textarea id="noteObservations" placeholder="Affect, engagement, progress..."></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Plan / Next Steps</label>
+            <textarea id="notePlan" placeholder="Goals for next session..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="loadNotes()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+        </div>
+      `;
+    }
+    
+    async function saveNote() {
+      const noteData = {
+        therapist_id: THERAPIST_ID,
+        client_code: currentClient,
+        session_date: document.getElementById('noteDate').value,
+        session_type: document.getElementById('noteType').value,
+        themes: document.getElementById('noteThemes').value || null,
+        interventions: document.getElementById('noteInterventions').value || null,
+        observations: document.getElementById('noteObservations').value || null,
+        plan: document.getElementById('notePlan').value || null
+      };
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/session_notes`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(noteData)
+        });
+        
+        await loadNotes();
+        loadLastSessionsPreview(currentClient);
+        toast('Note saved');
+        
+      } catch (err) {
+        console.error('Error saving note:', err);
+        alert('Error saving note');
+      }
+    }
+    
+    function copyNoteFromDb(noteId, btn) {
+      const notes = clientNotes[currentClient] || [];
+      const n = notes.find(note => note.id === noteId);
+      if (!n) return;
+      
+      const text = `Session: ${new Date(n.session_date).toLocaleDateString()} (${n.session_type || 'Session'})
+
+Themes: ${n.themes || 'N/A'}
+Interventions: ${n.interventions || 'N/A'}
+Observations: ${n.observations || 'N/A'}
+Plan: ${n.plan || 'N/A'}`;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy for EHR';
+        }, 2000);
+      });
+    }
+    
+    async function deleteNote(noteId) {
+      if (!confirm('Delete this session note?')) return;
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/session_notes?id=eq.${noteId}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          }
+        });
+        
+        await loadNotes();
+        loadLastSessionsPreview(currentClient);
+        toast('Note deleted');
+        
+      } catch (err) {
+        console.error('Error deleting note:', err);
+        alert('Error deleting note');
+      }
+    }
+    
+    function copyClientCode() {
+      if (!currentClient) return;
+      navigator.clipboard.writeText(currentClient).then(() => {
+        toast(`Copied: ${currentClient}`);
+      });
+    }
+    
+    function showEditClientForm() {
+      if (!currentClient) return;
+      const client = allClients.find(c => c.client_code === currentClient);
+      document.getElementById('editClientCode').value = currentClient;
+      document.getElementById('editClientName').value = client?.display_name || '';
+      document.getElementById('editClientModal').classList.add('show');
+      document.getElementById('editClientName').focus();
+    }
+    
+    function closeEditClientModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('editClientModal').classList.remove('show');
+    }
+    
+    async function saveClientEdit() {
+      const name = document.getElementById('editClientName').value.trim();
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/therapist_client_links?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ display_name: name || null })
+        });
+        
+        const client = allClients.find(c => c.client_code === currentClient);
+        if (client) client.display_name = name || null;
+        
+        const displayName = name || currentClient;
+        document.getElementById('clientName').textContent = displayName;
+        
+        let metaText = '';
+        if (name && name !== currentClient) {
+          metaText = `${currentClient} · `;
+        }
+        metaText += client 
+          ? `${client.messages} messages this week · ${client.homework} active homework · Trend: ${client.trend}`
+          : '';
+        document.getElementById('clientMeta').textContent = metaText;
+        
+        renderClientsList();
+        closeEditClientModal();
+        toast('Client updated');
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error updating client');
+      }
+    }
+    
+    function confirmDeleteClient() {
+      const client = allClients.find(c => c.client_code === currentClient);
+      const displayName = client?.display_name || currentClient;
+      
+      if (confirm(`Are you sure you want to remove "${displayName}" from your dashboard?\n\nThis will unlink them from your account. Their Alo conversations and homework history will not be deleted.`)) {
+        deleteClient();
+      }
+    }
+    
+    async function deleteClient() {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/therapist_client_links?client_code=eq.${currentClient}&therapist_id=eq.${THERAPIST_ID}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          }
+        });
+        
+        closeEditClientModal();
+        showHomePage();
+        toast('Client removed');
+        await loadDashboard();
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error removing client');
+      }
+    }
+    
+    function showAddClientForm() {
+      document.getElementById('addClientModal').classList.add('show');
+      document.getElementById('newClientCode').value = '';
+      document.getElementById('newClientName').value = '';
+      document.getElementById('newClientCode').focus();
+    }
+    
+    function closeAddClientModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('addClientModal').classList.remove('show');
+    }
+    
+    async function addClient() {
+      const code = document.getElementById('newClientCode').value.trim();
+      const name = document.getElementById('newClientName').value.trim();
+      
+      if (!code) {
+        alert('Please enter a client code');
+        return;
+      }
+      
+      if (allClients.some(c => c.client_code === code)) {
+        alert('This client code already exists');
+        return;
+      }
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/therapist_client_links`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            therapist_id: THERAPIST_ID,
+            client_code: code,
+            display_name: name || null
+          })
+        });
+        
+        closeAddClientModal();
+        toast('Client added');
+        await loadDashboard();
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error adding client');
+      }
+    }
+    
+    async function completeHomework(id) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/homework?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ active: false })
+        });
+        
+        await loadClientData(currentClient);
+        toast('Homework marked complete');
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error updating homework');
+      }
+    }
+    
+    function useTemplate(type, desc) {
+      document.getElementById('hwType').value = type;
+      document.getElementById('hwDescription').value = desc;
+    }
+    
+    async function submitHomework(e) {
+      e.preventDefault();
+      
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/homework`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            therapist_id: THERAPIST_ID,
+            client_code: currentClient,
+            homework_type: document.getElementById('hwType').value,
+            description: document.getElementById('hwDescription').value,
+            therapist_notes: document.getElementById('hwRationale').value || null,
+            active: true
+          })
+        });
+        
+        document.getElementById('homeworkForm').reset();
+        await loadClientData(currentClient);
+        toast('Homework assigned');
+        
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Error assigning homework');
+      }
+    }
+    
+    function goToCrisisAlerts() {
+      // Switch to Alo Activity tab
+      const activityTab = document.querySelectorAll('.tab')[3]; // 4th tab (0-indexed)
+      switchTab('activity', activityTab);
+      
+      // Scroll to crisis alerts card
+      const crisisCard = document.getElementById('crisisAlertsCard');
+      if (crisisCard) {
+        crisisCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    
+    async function markAlertsAsRead(clientCode, event) {
+      // Stop propagation so clicking button doesn't trigger showClient
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      try {
+        // Mark all alerts for this client as read
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/crisis_alerts?client_code=eq.${clientCode}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ read_by_therapist: true })
+        });
+        
+        if (!response.ok) throw new Error('Failed to mark as read');
+        
+        // Update local state
+        const client = allClients.find(c => c.client_code === clientCode);
+        if (client) {
+          client.allAlertsRead = true;
+        }
+        
+        // Re-render alerts section
+        renderAlerts();
+        
+        toast('Crisis alerts marked as read');
+        
+      } catch (err) {
+        console.error('Error marking alerts as read:', err);
+        alert('Error marking alerts as read');
+      }
+    }
+    
+    function displayCrisisAlerts(alerts) {
+      const card = document.getElementById('crisisAlertsCard');
+      const count = document.getElementById('crisisAlertCount');
+      const list = document.getElementById('crisisAlertsList');
+      
+      // Update header crisis button
+      const crisisButton = document.getElementById('crisisAlertButton');
+      const crisisButtonText = document.getElementById('crisisAlertButtonText');
+      
+      if (!alerts || alerts.length === 0) {
+        card.style.display = 'none';
+        if (crisisButton) crisisButton.style.display = 'none';
+        return;
+      }
+      
+      // Show crisis button in header
+      if (crisisButton) {
+        crisisButton.style.display = 'inline-flex';
+        if (crisisButtonText) {
+          crisisButtonText.textContent = alerts.length === 1 
+            ? 'Crisis Alert' 
+            : `${alerts.length} Crisis Alerts`;
+        }
+      }
+      
+      card.style.display = 'block';
+      count.textContent = alerts.length;
+      
+      list.innerHTML = alerts.map(a => `
+        <div class="crisis-alert-item">
+          <div class="crisis-alert-header">
+            <span class="crisis-alert-time">${timeAgo(new Date(a.alert_time))}</span>
+            <span class="crisis-alert-severity" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${a.severity || 'HIGH'}</span>
+          </div>
+          <div class="crisis-alert-message">"${a.message_excerpt || 'Crisis signal detected'}"</div>
+        </div>
+      `).join('');
+    }
+    
+    function timeAgo(date) {
+      const s = Math.floor((new Date() - date) / 1000);
+      if (s < 60) return 'Just now';
+      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+      if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+      if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function truncate(str, len) {
+      if (!str) return '';
+      return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+    
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
