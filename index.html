@@ -981,6 +981,44 @@
       to { transform: rotate(360deg); }
     }
     
+    /* === CRISIS ALERTS === */
+    .crisis-alert-item {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+    
+    .crisis-alert-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .crisis-alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .crisis-alert-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .crisis-alert-severity {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .crisis-alert-message {
+      font-size: 0.875rem;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.5;
+    }
+    
     /* === RESPONSIVE === */
     @media (max-width: 900px) {
       .layout {
@@ -1118,6 +1156,22 @@
       
       <!-- Session Prep Tab -->
       <div class="tab-content active" id="tab-prep">
+        <!-- Crisis Alerts Card (NEW) -->
+        <div class="card" id="crisisAlertsCard" style="display: none;">
+          <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
+            <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Crisis Alerts
+            </span>
+            <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
+          </div>
+          <div class="card-body" id="crisisAlertsList">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        
         <!-- Last Sessions Preview -->
         <div class="card" id="lastSessionsCard">
           <div class="card-header">
@@ -1674,19 +1728,27 @@
     
     async function loadClientData(code) {
       try {
-        const [turns, homework, clientMessages] = await Promise.all([
+        const [turns, homework, clientMessages, crisisAlerts] = await Promise.all([
           api(`/rest/v1/conversation_turns?user_id=eq.${code}&order=created_at.desc&limit=15`),
           api(`/rest/v1/homework?client_code=eq.${code}&order=created_at.desc`),
-          api(`/rest/v1/client_messages?order=created_at.desc&limit=100`)
+          api(`/rest/v1/client_messages?order=created_at.desc&limit=100`),
+          api(`/rest/v1/crisis_alerts?order=alert_time.desc&limit=50`)
         ]);
         
-        // Filter messages to exact client (case-insensitive)
+        // Filter messages and crisis alerts to exact client (case-insensitive)
         const filteredMessages = clientMessages?.filter(m => 
           m.client_code.toLowerCase() === code.toLowerCase()
         ).slice(0, 10) || [];
         
+        const filteredCrisisAlerts = crisisAlerts?.filter(a => 
+          a.client_code.toLowerCase() === code.toLowerCase()
+        ) || [];
+        
         console.log('📨 Messages for', code, ':', filteredMessages.length);
-        console.log('All message codes:', [...new Set(clientMessages?.map(m => m.client_code))]);
+        console.log('🚨 Crisis alerts for', code, ':', filteredCrisisAlerts.length);
+        
+        // Display crisis alerts
+        displayCrisisAlerts(filteredCrisisAlerts);
         
         loadLastSessionsPreview(code);
         
@@ -2188,6 +2250,30 @@ Plan: ${n.plan || 'N/A'}`;
         console.error('Error:', err);
         alert('Error assigning homework');
       }
+    }
+    
+    function displayCrisisAlerts(alerts) {
+      const card = document.getElementById('crisisAlertsCard');
+      const count = document.getElementById('crisisAlertCount');
+      const list = document.getElementById('crisisAlertsList');
+      
+      if (!alerts || alerts.length === 0) {
+        card.style.display = 'none';
+        return;
+      }
+      
+      card.style.display = 'block';
+      count.textContent = alerts.length;
+      
+      list.innerHTML = alerts.map(a => `
+        <div class="crisis-alert-item">
+          <div class="crisis-alert-header">
+            <span class="crisis-alert-time">${timeAgo(new Date(a.alert_time))}</span>
+            <span class="crisis-alert-severity" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${a.severity || 'HIGH'}</span>
+          </div>
+          <div class="crisis-alert-message">"${a.message_excerpt || 'Crisis signal detected'}"</div>
+        </div>
+      `).join('');
     }
     
     function timeAgo(date) {
