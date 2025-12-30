@@ -1496,24 +1496,45 @@
         const clientCodes = new Set();
         
         // Get unique client codes from crisis_alerts
+        console.log('Querying crisis_alerts...');
         const alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=client_code`);
+        console.log('Crisis alerts response:', alerts);
         if (alerts) {
-          alerts.forEach(a => clientCodes.add(a.client_code));
+          alerts.forEach(a => {
+            if (a.client_code) {
+              console.log('Adding client from crisis_alerts:', a.client_code);
+              clientCodes.add(a.client_code);
+            }
+          });
         }
         
         // Get unique client codes from client_messages
+        console.log('Querying client_messages...');
         const messages = await supabaseQuery(`/rest/v1/client_messages?select=client_code`);
+        console.log('Client messages response:', messages);
         if (messages) {
-          messages.forEach(m => clientCodes.add(m.client_code));
+          messages.forEach(m => {
+            if (m.client_code) {
+              console.log('Adding client from client_messages:', m.client_code);
+              clientCodes.add(m.client_code);
+            }
+          });
         }
         
         // Get unique client codes from homework
+        console.log('Querying homework...');
         const homework = await supabaseQuery(`/rest/v1/homework?select=client_code`);
+        console.log('Homework response:', homework);
         if (homework) {
-          homework.forEach(h => clientCodes.add(h.client_code));
+          homework.forEach(h => {
+            if (h.client_code) {
+              console.log('Adding client from homework:', h.client_code);
+              clientCodes.add(h.client_code);
+            }
+          });
         }
         
-        console.log(`Found ${clientCodes.size} unique client codes from various tables`);
+        console.log(`Found ${clientCodes.size} unique client codes:`, Array.from(clientCodes));
         
         // Build client list
         return Array.from(clientCodes).map(code => ({
