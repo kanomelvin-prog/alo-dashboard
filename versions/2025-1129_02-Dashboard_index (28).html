@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alo Therapist Dashboard - Enhanced</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============================================================ */
+    /* CSS CUSTOM PROPERTIES - Design System                       */
+    /* ============================================================ */
+    :root {
+      --cream: #FDFBF7;
+      --warm-white: #FAF8F5;
+      --stone: #9C9589;
+      --charcoal: #2D2A26;
+      --sage: #8B9A7D;
+      --sage-light: #E8EDE4;
+      --border: rgba(156, 149, 137, 0.2);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --text: var(--charcoal);
+      --text-light: var(--stone);
+      --text-muted: #B8B3A9;
+      --bg: var(--cream);
+      --white: #FFFFFF;
+    }
+    
+    /* ============================================================ */
+    /* GLOBAL RESET & BASE STYLES                                  */
+    /* ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      overflow: hidden;
+    }
+    
+    /* ============================================================ */
+    /* MAIN LAYOUT - Two-pane grid                                 */
+    /* ============================================================ */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      height: 100vh;
+      background: var(--bg);
+    }
+    
+    /* ============================================================ */
+    /* SIDEBAR - Left pane                                         */
+    /* ============================================================ */
+    .sidebar {
+      background: var(--warm-white);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--sage);
+      color: white;
+    }
+    
+    .sidebar-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .sidebar-header p {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+    
+    .sidebar-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .sidebar-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .sidebar-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-light);
+    }
+    
+    .client-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--sage-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    /* Sort controls */
+    .sort-controls {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    
+    .sort-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .sort-btn:hover {
+      background: var(--sage-light);
+    }
+    
+    .sort-btn.active {
+      background: var(--sage);
+      color: white;
+      border-color: var(--sage);
+    }
+    
+    /* ============================================================ */
+    /* CLIENT LIST ITEMS                                           */
+    /* ============================================================ */
+    .client-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .client-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    
+    .client-item:hover {
+      background: var(--sage-light);
+      border-color: var(--sage);
+    }
+    
+    .client-item.active {
+      background: var(--sage);
+      color: white;
+      border-color: var(--sage);
+    }
+    
+    .client-item-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .client-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--sage-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--sage);
+      flex-shrink: 0;
+      position: relative;
+    }
+    
+    .client-item.active .client-avatar {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    /* Status badges on avatars */
+    .status-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    .client-item.active .status-badge {
+      border-color: var(--sage);
+    }
+    
+    .status-badge.crisis {
+      background: var(--danger);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-badge.needs-attention {
+      background: var(--warning);
+    }
+    
+    .status-badge.active-status {
+      background: var(--success);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); 
+      }
+      50% { 
+        transform: scale(1.1); 
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); 
+      }
+    }
+    
+    .client-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .client-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .client-meta {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 4px;
+    }
+    
+    .client-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    
+    .meta-label {
+      color: inherit;
+      opacity: 0.8;
+    }
+    
+    .meta-value {
+      font-weight: 500;
+    }
+    
+    /* ============================================================ */
+    /* MAIN CONTENT AREA - Right pane                              */
+    /* ============================================================ */
+    .main {
+      padding: 30px 40px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+    
+    .view {
+      display: none;
+    }
+    
+    .view.active {
+      display: block;
+    }
+    
+    /* ============================================================ */
+    /* PAGE HEADER                                                 */
+    /* ============================================================ */
+    .page-header {
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: 4px;
+    }
+    
+    .page-subtitle {
+      font-size: 1rem;
+      color: var(--text-light);
+    }
+    
+    /* ============================================================ */
+    /* STATS GRID                                                  */
+    /* ============================================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.2s;
+    }
+    
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .stat-card.crisis {
+      border-left: 4px solid var(--danger);
+      background: #fef2f2;
+    }
+    
+    .stat-card.warning {
+      border-left: 4px solid var(--warning);
+      background: #fffbeb;
+    }
+    
+    .stat-card.info {
+      border-left: 4px solid var(--sage);
+      background: var(--sage-light);
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: 4px;
+    }
+    
+    .stat-change {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    /* ============================================================ */
+    /* TABS SYSTEM                                                 */
+    /* ============================================================ */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 24px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab:hover {
+      background: var(--sage-light);
+      color: var(--charcoal);
+    }
+    
+    .tab.active {
+      background: var(--sage);
+      color: white;
+    }
+    
+    /* ============================================================ */
+    /* TAB CONTENT                                                 */
+    /* ============================================================ */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* ============================================================ */
+    /* CARD COMPONENT                                              */
+    /* ============================================================ */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--warm-white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--charcoal);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* ============================================================ */
+    /* ALERT COMPONENT                                             */
+    /* ============================================================ */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border: 1px solid;
+    }
+    
+    .alert-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .alert-content {
+      flex: 1;
+    }
+    
+    .alert-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .alert-text {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    
+    .alert.crisis {
+      background: #fef2f2;
+      border-color: var(--danger);
+      color: #991b1b;
+    }
+    
+    .alert.warning {
+      background: #fffbeb;
+      border-color: var(--warning);
+      color: #92400e;
+    }
+    
+    .alert.info {
+      background: var(--sage-light);
+      border-color: var(--sage);
+      color: #1e3a1a;
+    }
+    
+    /* ============================================================ */
+    /* BUTTONS                                                     */
+    /* ============================================================ */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-primary {
+      background: var(--sage);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #7a8a6d;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: var(--charcoal);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--sage-light);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+    
+    /* ============================================================ */
+    /* LIST ITEMS                                                  */
+    /* ============================================================ */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .list-item {
+      padding: 16px;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .list-item:hover {
+      border-color: var(--sage);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .list-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    
+    .list-item-title {
+      font-weight: 600;
+      color: var(--charcoal);
+      font-size: 0.95rem;
+    }
+    
+    .list-item-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .list-item-badge.crisis {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .list-item-badge.urgent {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .list-item-badge.new {
+      background: var(--info);
+      color: white;
+    }
+    
+    .list-item-text {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    .list-item-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* ============================================================ */
+    /* MESSAGE COMPONENT                                           */
+    /* ============================================================ */
+    .message-item {
+      padding: 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--sage);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .message-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .message-item.unread {
+      background: var(--sage-light);
+      border-left-color: var(--info);
+    }
+    
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .message-from {
+      font-weight: 600;
+      color: var(--charcoal);
+      font-size: 0.9rem;
+    }
+    
+    .message-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .message-preview {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+    
+    /* Full message view */
+    .message-full {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .message-full-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .message-full-body {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--charcoal);
+    }
+    
+    /* ============================================================ */
+    /* EMPTY STATES                                                */
+    /* ============================================================ */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+    
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+    
+    .empty-state-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--charcoal);
+    }
+    
+    .empty-state-text {
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+    
+    /* ============================================================ */
+    /* INFO BOX                                                    */
+    /* ============================================================ */
+    .info-box {
+      background: var(--sage-light);
+      border-left: 4px solid var(--sage);
+      padding: 16px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .info-box-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--charcoal);
+      font-size: 0.875rem;
+    }
+    
+    .info-box-text {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+    
+    /* ============================================================ */
+    /* GRID LAYOUTS                                                */
+    /* ============================================================ */
+    .two-column-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 1200px) {
+      .two-column-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* ============================================================ */
+    /* RESPONSIVE                                                  */
+    /* ============================================================ */
+    @media (max-width: 768px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- ============================================================ -->
+  <!-- MAIN LAYOUT                                                 -->
+  <!-- ============================================================ -->
+  <div class="layout">
+    
+    <!-- ============================================================ -->
+    <!-- SIDEBAR                                                     -->
+    <!-- ============================================================ -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>Dashboard</h1>
+        <p>Manage your practice</p>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-section-header">
+          <div class="sidebar-section-title">Sort By</div>
+        </div>
+        <div class="sort-controls">
+          <button class="sort-btn active" onclick="sortClients('az', event)">A-Z</button>
+          <button class="sort-btn" onclick="sortClients('next', event)">Next</button>
+          <button class="sort-btn" onclick="sortClients('last', event)">Last</button>
+        </div>
+      </div>
+      
+      <div class="sidebar-section" style="flex: 1; overflow-y: auto;">
+        <div class="sidebar-section-header">
+          <div class="sidebar-section-title">Clients</div>
+          <div class="client-count" id="clientCount">0</div>
+        </div>
+        <div class="client-list" id="clientList">
+          <!-- Client items will be inserted here by JavaScript -->
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <button class="btn btn-primary" style="width: 100%;" onclick="addNewClient()">
+          <span>➕</span>
+          <span>Add Client</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT AREA                                           -->
+    <!-- ============================================================ -->
+    <div class="main">
+      
+      <!-- ============================================================ -->
+      <!-- HOME VIEW                                                   -->
+      <!-- ============================================================ -->
+      <div id="homeView" class="view active">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Welcome Back, Dupre' Rouse</h1>
+            <p class="page-subtitle">Here's what needs your attention today</p>
+          </div>
+        </div>
+        
+        <!-- Crisis Alerts Section -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">
+              <span>🚨</span>
+              <span>Crisis Alerts</span>
+            </span>
+            <span class="btn btn-sm btn-danger" style="pointer-events: none;">1 Active</span>
+          </div>
+          <div class="card-body">
+            <div class="alert crisis">
+              <div class="alert-icon">⚠️</div>
+              <div class="alert-content">
+                <div class="alert-title">Emily Rodriguez - Self-Harm Keywords Detected</div>
+                <div class="alert-text">
+                  During conversation with Alo on 12/27/2024 at 11:42 PM, Emily mentioned thoughts of self-harm. 
+                  Alo provided 988 resources and encouraged immediate professional help. 
+                  Last known contact: 16 hours ago.
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 8px;">
+                  <button class="btn btn-danger btn-sm" onclick="selectClient('client-3')">View Client</button>
+                  <button class="btn btn-secondary btn-sm" onclick="alert('Crisis marked as contacted')">Mark as Contacted</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Two Column Layout for Messages & Triage -->
+        <div class="two-column-grid">
+          
+          <!-- Client Messages -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">
+                <span>💬</span>
+                <span>Messages from Clients</span>
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">5 unread</span>
+            </div>
+            <div class="card-body">
+              <div class="message-item unread" onclick="viewClientMessages('client-1')">
+                <div class="message-header">
+                  <div class="message-from">Sarah Johnson</div>
+                  <div class="message-time">2 hours ago</div>
+                </div>
+                <div class="message-preview">
+                  "I tried the boundary-setting exercise and it went better than expected! 
+                  My manager actually thanked me for being clear about my workload..."
+                </div>
+              </div>
+              
+              <div class="message-item unread" onclick="viewClientMessages('client-4')">
+                <div class="message-header">
+                  <div class="message-from">David Park</div>
+                  <div class="message-time">5 hours ago</div>
+                </div>
+                <div class="message-preview">
+                  "Quick question before our session tomorrow - should I bring my sleep journal? 
+                  I've been tracking it like you suggested..."
+                </div>
+              </div>
+              
+              <div class="message-item" onclick="viewClientMessages('client-2')">
+                <div class="message-header">
+                  <div class="message-from">Michael Chen</div>
+                  <div class="message-time">1 day ago</div>
+                </div>
+                <div class="message-preview">
+                  "Thank you for the resources about grief processing. Talking to Alo has been 
+                  helpful during the late nights when everything feels overwhelming..."
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Clients Needing Attention -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">
+                <span>📋</span>
+                <span>Needs Follow-Up</span>
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">3 clients</span>
+            </div>
+            <div class="card-body">
+              <div class="item-list">
+                <div class="list-item" onclick="selectClient('client-3')">
+                  <div class="list-item-header">
+                    <div class="list-item-title">Emily Rodriguez</div>
+                    <div class="list-item-badge crisis">Crisis</div>
+                  </div>
+                  <div class="list-item-text">
+                    Self-harm keywords detected in Alo conversation. Immediate follow-up required.
+                  </div>
+                  <div class="list-item-meta">
+                    <span class="meta-item">🕐 16 hours ago</span>
+                    <span class="meta-item">💬 3 conversations</span>
+                  </div>
+                </div>
+                
+                <div class="list-item" onclick="selectClient('client-5')">
+                  <div class="list-item-header">
+                    <div class="list-item-title">James Wilson</div>
+                    <div class="list-item-badge urgent">Urgent</div>
+                  </div>
+                  <div class="list-item-text">
+                    Hasn't checked in for 10 days. Last session showed signs of withdrawal.
+                  </div>
+                  <div class="list-item-meta">
+                    <span class="meta-item">📅 Last session: 12/17</span>
+                    <span class="meta-item">💬 0 Alo conversations</span>
+                  </div>
+                </div>
+                
+                <div class="list-item" onclick="selectClient('client-1')">
+                  <div class="list-item-header">
+                    <div class="list-item-title">Sarah Johnson</div>
+                    <div class="list-item-badge new">Update</div>
+                  </div>
+                  <div class="list-item-text">
+                    Reported positive progress with boundary-setting homework. Ready to discuss next steps.
+                  </div>
+                  <div class="list-item-meta">
+                    <span class="meta-item">✅ Homework completed</span>
+                    <span class="meta-item">📅 Session tomorrow</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Recent Alo Activity -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">
+              <span>🤖</span>
+              <span>Recent Alo Activity</span>
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="item-list">
+              <div class="list-item" onclick="selectClient('client-1')">
+                <div class="list-item-header">
+                  <div class="list-item-title">Sarah Johnson - Work Stress Discussion</div>
+                  <div class="list-item-badge new">2h ago</div>
+                </div>
+                <div class="list-item-text">
+                  8-minute conversation about managing expectations with manager. 
+                  Alo used LISTEN → EXPLORE → OFFER flow. Client reported feeling clearer afterward.
+                </div>
+                <div class="list-item-meta">
+                  <span class="meta-item">😊 Emotional load: Moderate</span>
+                  <span class="meta-item">💡 4 options offered</span>
+                </div>
+              </div>
+              
+              <div class="list-item" onclick="selectClient('client-2')">
+                <div class="list-item-header">
+                  <div class="list-item-title">Michael Chen - Grief Processing</div>
+                  <div class="list-item-badge new">5h ago</div>
+                </div>
+                <div class="list-item-text">
+                  12-minute late-night conversation about loss and overwhelm. 
+                  Alo used WITNESS → HOLD flow, focusing on presence rather than problem-solving.
+                </div>
+                <div class="list-item-meta">
+                  <span class="meta-item">😢 Emotional load: High</span>
+                  <span class="meta-item">🕐 11:47 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- ============================================================ -->
+      <!-- CLIENT DETAIL VIEW                                          -->
+      <!-- ============================================================ -->
+      <div id="clientView" class="view">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title" id="clientDetailName">Client Name</h1>
+            <p class="page-subtitle" id="clientDetailMeta">Client Code: ABC-001</p>
+          </div>
+          <button class="btn btn-secondary" onclick="showHomeView()">
+            ← Back to Home
+          </button>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('prep', event)">Session Prep</button>
+          <button class="tab" onclick="switchTab('notes', event)">Session Notes</button>
+          <button class="tab" onclick="switchTab('homework', event)">Homework</button>
+          <button class="tab" onclick="switchTab('messages', event)">Messages</button>
+          <button class="tab" onclick="switchTab('activity', event)">Alo Activity</button>
+        </div>
+        
+        <!-- Tab: Session Prep -->
+        <div class="tab-content active" id="tab-prep">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Since Last Session</span>
+            </div>
+            <div class="card-body" id="prepContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Open Items</span>
+            </div>
+            <div class="card-body" id="openItemsContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Session Notes -->
+        <div class="tab-content" id="tab-notes">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Session Notes</span>
+              <button class="btn btn-sm btn-primary" onclick="addSessionNote()">+ New Note</button>
+            </div>
+            <div class="card-body" id="notesContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Homework -->
+        <div class="tab-content" id="tab-homework">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Assigned Homework</span>
+              <button class="btn btn-sm btn-primary" onclick="assignHomework()">+ Assign</button>
+            </div>
+            <div class="card-body" id="homeworkContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Messages -->
+        <div class="tab-content" id="tab-messages">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+            </div>
+            <div class="card-body" id="messagesContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Alo Activity -->
+        <div class="tab-content" id="tab-activity">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Conversations with Alo</span>
+            </div>
+            <div class="card-body" id="activityContent">
+              <!-- Dynamic content -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT                                                  -->
+  <!-- ============================================================ -->
+  <script>
+    // ============================================================
+    // SUPABASE CONFIGURATION
+    // ============================================================
+    
+    const SUPABASE_URL = 'https://wekvrjnbjpbvvpfuwzvz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indla3Zyam5ianBidnZwZnV3enZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQzOTM4NzIsImV4cCI6MjA0OTk2OTg3Mn0.HTG4XJ-LoOJsn0rNF2APLpLEqYoPZ3NVLJ9c8HfOYMY';
+    const THERAPIST_ID = 'THERAPIST_001';
+    
+    // ============================================================
+    // API HELPER FUNCTION
+    // ============================================================
+    
+    async function supabaseQuery(endpoint) {
+      try {
+        const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        
+        if (!response.ok) {
+          console.error('Supabase error:', response.status);
+          return null;
+        }
+        
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+      } catch (error) {
+        console.error('API error:', error);
+        return null;
+      }
+    }
+    
+    // ============================================================
+    // DATA - Mock client data with full details
+    // ============================================================
+    
+    const MOCK_CLIENTS = [
+      {
+        id: 'client-1',
+        name: 'Sarah Johnson',
+        initials: 'SJ',
+        clientCode: 'SARAH-001',
+        lastSession: '12/20/2024 2:00 PM',
+        lastSessionDate: new Date('2024-12-20T14:00:00'),
+        nextSession: '12/29/2024 2:00 PM',
+        nextSessionDate: new Date('2024-12-29T14:00:00'),
+        status: 'active-status',
+        needsAttention: true,
+        messages: [
+          {
+            id: 'msg-1',
+            text: "I tried the boundary-setting exercise and it went better than expected! My manager actually thanked me for being clear about my workload. I told her I couldn't take on the new project right now, and instead of being upset, she said she appreciated my honesty. I feel like I'm finally learning to advocate for myself.",
+            time: '2 hours ago',
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+            unread: true
+          }
+        ],
+        homework: [
+          {
+            title: 'Boundary-Setting Practice',
+            description: 'Practice saying "no" to one small request this week',
+            assigned: '12/20/2024',
+            status: 'Completed',
+            notes: 'Client successfully set boundary with manager about new project'
+          },
+          {
+            title: 'Thought Journal',
+            description: 'Track automatic negative thoughts when feeling overwhelmed',
+            assigned: '12/13/2024',
+            status: 'In Progress',
+            notes: null
+          }
+        ],
+        notes: [
+          {
+            date: '12/20/2024',
+            content: 'Discussed work stress and boundary-setting. Client showed insight into patterns of over-commitment. Assigned homework on assertive communication. Client expressed motivation to try new approach with manager.'
+          },
+          {
+            date: '12/13/2024',
+            content: 'Explored relationship with parents and how it relates to perfectionism at work. Client processing childhood experiences of feeling need to please others to be valued.'
+          }
+        ],
+        alocActivity: [
+          {
+            date: '2 hours ago',
+            title: 'Work Stress Discussion',
+            duration: '8 minutes',
+            emotionalLoad: 'Moderate',
+            intentionFlow: 'LISTEN → EXPLORE → OFFER',
+            summary: 'Discussed managing expectations with manager. Client reported feeling clearer afterward.'
+          }
+        ],
+        prepSummary: {
+          conversationCount: 2,
+          topics: ['work stress', 'boundary-setting'],
+          emotionalLoad: 'Moderate',
+          homeworkStatus: 'Completed boundary-setting exercise with positive results'
+        }
+      },
+      {
+        id: 'client-2',
+        name: 'Michael Chen',
+        initials: 'MC',
+        clientCode: 'MICHAEL-002',
+        lastSession: '12/18/2024 3:30 PM',
+        lastSessionDate: new Date('2024-12-18T15:30:00'),
+        nextSession: '12/30/2024 3:00 PM',
+        nextSessionDate: new Date('2024-12-30T15:00:00'),
+        status: 'active-status',
+        needsAttention: false,
+        messages: [
+          {
+            id: 'msg-2',
+            text: "Thank you for the resources about grief processing. Talking to Alo has been helpful during the late nights when everything feels overwhelming. It doesn't fix anything, but it helps me feel less alone in the dark hours.",
+            time: '1 day ago',
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            unread: false
+          }
+        ],
+        homework: [
+          {
+            title: 'Grief Journal',
+            description: 'Write about memories and feelings when they arise',
+            assigned: '12/18/2024',
+            status: 'In Progress',
+            notes: 'Client using Alo for late-night support'
+          }
+        ],
+        notes: [
+          {
+            date: '12/18/2024',
+            content: 'Continued grief work following loss of father. Client experiencing waves of emotion, particularly at night. Discussed healthy coping mechanisms. Encouraged use of Alo for between-session support.'
+          }
+        ],
+        alocActivity: [
+          {
+            date: '5 hours ago',
+            title: 'Grief Processing',
+            duration: '12 minutes',
+            emotionalLoad: 'High',
+            intentionFlow: 'WITNESS → HOLD',
+            summary: 'Late-night conversation about loss and overwhelm. Alo provided presence without problem-solving.'
+          }
+        ],
+        prepSummary: {
+          conversationCount: 4,
+          topics: ['grief', 'loss', 'overwhelm'],
+          emotionalLoad: 'High',
+          homeworkStatus: 'Actively journaling, high Alo usage during nights'
+        }
+      },
+      {
+        id: 'client-3',
+        name: 'Emily Rodriguez',
+        initials: 'ER',
+        clientCode: 'EMILY-003',
+        lastSession: '12/15/2024 4:00 PM',
+        lastSessionDate: new Date('2024-12-15T16:00:00'),
+        nextSession: '12/31/2024 10:00 AM',
+        nextSessionDate: new Date('2024-12-31T10:00:00'),
+        status: 'crisis',
+        needsAttention: true,
+        messages: [],
+        homework: [],
+        notes: [
+          {
+            date: '12/15/2024',
+            content: 'Session focused on depression symptoms and coping strategies. Client reported increased isolation and negative thoughts. Safety plan reviewed. Scheduled follow-up for next week.'
+          }
+        ],
+        alocActivity: [
+          {
+            date: '16 hours ago',
+            title: 'Crisis Intervention',
+            duration: '5 minutes',
+            emotionalLoad: 'Crisis',
+            intentionFlow: 'CRISIS',
+            summary: 'Self-harm keywords detected. Alo provided 988 resources and encouraged immediate professional contact.'
+          }
+        ],
+        prepSummary: {
+          conversationCount: 3,
+          topics: ['depression', 'self-harm thoughts'],
+          emotionalLoad: 'Crisis',
+          homeworkStatus: 'CRISIS ALERT - Immediate follow-up required'
+        }
+      },
+      {
+        id: 'client-4',
+        name: 'David Park',
+        initials: 'DP',
+        clientCode: 'DAVID-004',
+        lastSession: '12/22/2024 1:00 PM',
+        lastSessionDate: new Date('2024-12-22T13:00:00'),
+        nextSession: '12/29/2024 4:00 PM',
+        nextSessionDate: new Date('2024-12-29T16:00:00'),
+        status: 'active-status',
+        needsAttention: false,
+        messages: [
+          {
+            id: 'msg-3',
+            text: "Quick question before our session tomorrow - should I bring my sleep journal? I've been tracking it like you suggested and I have about 10 days of data now. Some interesting patterns are emerging.",
+            time: '5 hours ago',
+            timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+            unread: true
+          }
+        ],
+        homework: [
+          {
+            title: 'Sleep Hygiene Tracking',
+            description: 'Track bedtime, wake time, and sleep quality for 7 days',
+            assigned: '12/22/2024',
+            status: 'In Progress',
+            notes: 'Client tracking consistently, 10 days of data collected'
+          }
+        ],
+        notes: [
+          {
+            date: '12/22/2024',
+            content: 'Discussed sleep issues and impact on mood. Client willing to try sleep hygiene improvements. Assigned tracking homework. Follow-up scheduled to review patterns.'
+          }
+        ],
+        alocActivity: [
+          {
+            date: 'Yesterday',
+            title: 'Sleep Hygiene Check-In',
+            duration: '4 minutes',
+            emotionalLoad: 'Low',
+            intentionFlow: 'LISTEN → EXPLORE',
+            summary: 'Asked logistical question about bringing journal to session.'
+          }
+        ],
+        prepSummary: {
+          conversationCount: 1,
+          topics: ['sleep hygiene', 'homework question'],
+          emotionalLoad: 'Low',
+          homeworkStatus: '10 days of sleep tracking completed - ready to review'
+        }
+      },
+      {
+        id: 'client-5',
+        name: 'James Wilson',
+        initials: 'JW',
+        clientCode: 'JAMES-005',
+        lastSession: '12/17/2024 11:00 AM',
+        lastSessionDate: new Date('2024-12-17T11:00:00'),
+        nextSession: '01/02/2025 11:00 AM',
+        nextSessionDate: new Date('2025-01-02T11:00:00'),
+        status: 'needs-attention',
+        needsAttention: true,
+        messages: [],
+        homework: [],
+        notes: [
+          {
+            date: '12/17/2024',
+            content: 'Client showed signs of withdrawal and reduced engagement. Discussed recent stressors but client minimized concerns. Scheduled follow-up. Will monitor for continued isolation.'
+          }
+        ],
+        alocActivity: [],
+        prepSummary: {
+          conversationCount: 0,
+          topics: [],
+          emotionalLoad: 'Unknown',
+          homeworkStatus: 'No Alo activity in 10 days - consider outreach'
+        }
+      }
+    ];
+    
+    // ============================================================
+    // APPLICATION STATE
+    // ============================================================
+    
+    let APP_STATE = {
+      currentClient: null,
+      currentTab: 'prep',
+      currentSort: 'status',
+      clients: []
+    };
+    
+    // ============================================================
+    // LOAD DATA FROM SUPABASE
+    // ============================================================
+    
+    async function loadDashboardData() {
+      try {
+        console.log('Loading dashboard data from Supabase...');
+        
+        // Try loading from therapist_client_list first
+        let clientList = await supabaseQuery(`/rest/v1/therapist_client_list?therapist_id=eq.${THERAPIST_ID}&select=*&order=last_activity.desc`);
+        
+        // If no data in therapist_client_list, build from crisis_alerts and client_messages
+        if (!clientList || clientList.length === 0) {
+          console.warn('No data in therapist_client_list, building from other tables...');
+          clientList = await buildClientListFromSources();
+        }
+        
+        // If still no data, fall back to mock data
+        if (!clientList || clientList.length === 0) {
+          console.warn('⚠️ Supabase unreachable or empty. Using MOCK DATA for demo.');
+          APP_STATE.clients = [...MOCK_CLIENTS];
+          renderClientList();
+          return;
+        }
+        
+        console.log(`Found ${clientList.length} clients`);
+        
+        // Transform Supabase data to match our client structure
+        APP_STATE.clients = clientList.map(client => {
+          // Determine status based on severity and activity
+          let status = 'active-status';
+          if (client.conversation_count === 0 && client.active_homework_count > 0) {
+            status = 'needs-attention';
+          }
+          
+          // Generate initials from client_code or name
+          const code = client.client_code || client.id;
+          const initials = code.substring(0, 2).toUpperCase();
+          
+          return {
+            id: code,
+            name: code, // Will be enhanced if we have a names table
+            initials: initials,
+            clientCode: code,
+            status: status,
+            conversationCount: client.conversation_count || 0,
+            homeworkCount: client.active_homework_count || 0,
+            lastActivity: client.last_activity,
+            needsAttention: status === 'needs-attention',
+            messages: [],
+            homework: [],
+            notes: [],
+            alocActivity: [],
+            prepSummary: {
+              conversationCount: client.conversation_count || 0,
+              topics: [],
+              emotionalLoad: 'Unknown',
+              homeworkStatus: ''
+            }
+          };
+        });
+        
+        // Load crisis alerts
+        await loadCrisisAlerts();
+        
+        // Sort and render
+        sortClients('status');
+        
+      } catch (error) {
+        console.error('⚠️ Critical error loading dashboard. Using MOCK DATA:', error);
+        APP_STATE.clients = [...MOCK_CLIENTS];
+        renderClientList();
+      }
+    }
+    
+    async function buildClientListFromSources() {
+      try {
+        const clientCodes = new Set();
+        
+        // Get unique client codes from crisis_alerts (check if table name is different)
+        console.log('Querying crisis_alerts...');
+        let alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=client_code`);
+        
+        // If crisis_alerts doesn't exist, try alternate names
+        if (!alerts) {
+          console.log('Trying alternate table name: crisisalerts...');
+          alerts = await supabaseQuery(`/rest/v1/crisisalerts?select=client_code`);
+        }
+        
+        console.log('Crisis alerts response:', alerts);
+        if (alerts && Array.isArray(alerts)) {
+          alerts.forEach(a => {
+            if (a.client_code) {
+              console.log('Adding client from crisis_alerts:', a.client_code);
+              clientCodes.add(a.client_code);
+            }
+          });
+        }
+        
+        // Get unique client codes from client_messages
+        console.log('Querying client_messages...');
+        const messages = await supabaseQuery(`/rest/v1/client_messages?select=client_code`);
+        console.log('Client messages response:', messages);
+        if (messages && Array.isArray(messages)) {
+          messages.forEach(m => {
+            if (m.client_code) {
+              console.log('Adding client from client_messages:', m.client_code);
+              clientCodes.add(m.client_code);
+            }
+          });
+        }
+        
+        // Get unique client codes from homework
+        console.log('Querying homework...');
+        const homework = await supabaseQuery(`/rest/v1/homework?select=client_code`);
+        console.log('Homework response:', homework);
+        if (homework && Array.isArray(homework)) {
+          homework.forEach(h => {
+            if (h.client_code) {
+              console.log('Adding client from homework:', h.client_code);
+              clientCodes.add(h.client_code);
+            }
+          });
+        }
+        
+        // Also try conversation_turns which definitely exists
+        console.log('Querying conversation_turns...');
+        const turns = await supabaseQuery(`/rest/v1/conversation_turns?select=user_id&limit=100`);
+        console.log('Conversation turns response:', turns);
+        if (turns && Array.isArray(turns)) {
+          turns.forEach(t => {
+            if (t.user_id) {
+              console.log('Adding client from conversation_turns:', t.user_id);
+              clientCodes.add(t.user_id);
+            }
+          });
+        }
+        
+        console.log(`Found ${clientCodes.size} unique client codes:`, Array.from(clientCodes));
+        
+        // Build client list
+        return Array.from(clientCodes).map(code => ({
+          client_code: code,
+          conversation_count: 0,
+          active_homework_count: 0,
+          last_activity: null
+        }));
+        
+      } catch (error) {
+        console.error('Error building client list:', error);
+        return [];
+      }
+    }
+    
+    async function loadCrisisAlerts() {
+      try {
+        const alerts = await supabaseQuery(`/rest/v1/crisis_alerts?select=*&order=alert_time.desc&limit=10`);
+        
+        if (alerts && alerts.length > 0) {
+          console.log(`Found ${alerts.length} crisis alerts`);
+          
+          // Mark clients with crisis status
+          alerts.forEach(alert => {
+            const client = APP_STATE.clients.find(c => c.clientCode === alert.client_code);
+            if (client && alert.severity === 'HIGH') {
+              client.status = 'crisis';
+              client.needsAttention = true;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error loading crisis alerts:', error);
+      }
+    }
+    
+    async function loadClientDetails(clientCode) {
+      try {
+        console.log(`Loading details for ${clientCode}...`);
+        
+        const client = APP_STATE.clients.find(c => c.clientCode === clientCode);
+        if (!client) return;
+        
+        // Load messages
+        const messages = await supabaseQuery(`/rest/v1/client_messages?client_code=eq.${clientCode}&select=*&order=created_at.desc&limit=10`);
+        if (messages) {
+          client.messages = messages.map(msg => ({
+            id: msg.id,
+            text: msg.message,
+            time: timeAgo(new Date(msg.created_at)),
+            timestamp: new Date(msg.created_at),
+            unread: !msg.read_by_therapist
+          }));
+        }
+        
+        // Load homework
+        const homework = await supabaseQuery(`/rest/v1/homework?client_code=eq.${clientCode}&active=eq.true&select=*&order=created_at.desc`);
+        if (homework) {
+          client.homework = homework.map(hw => ({
+            id: hw.id,
+            title: hw.homework_type,
+            description: hw.description,
+            assigned: new Date(hw.created_at).toLocaleDateString(),
+            status: hw.active ? 'In Progress' : 'Completed',
+            notes: hw.therapist_notes
+          }));
+        }
+        
+        // Load conversation traces for activity
+        const traces = await supabaseQuery(`/rest/v1/conversation_traces?user_id=eq.${clientCode}&select=*&order=execution_time_ms.desc&limit=20`);
+        if (traces) {
+          // Group by conversation_id to get distinct conversations
+          const conversations = {};
+          traces.forEach(trace => {
+            if (!conversations[trace.conversation_id]) {
+              conversations[trace.conversation_id] = {
+                id: trace.conversation_id,
+                traces: [],
+                firstTrace: trace
+              };
+            }
+            conversations[trace.conversation_id].traces.push(trace);
+          });
+          
+          client.alocActivity = Object.values(conversations).slice(0, 10).map(conv => {
+            const nodes = conv.traces.map(t => t.node_name).filter(Boolean);
+            const intentionFlow = nodes.join(' → ');
+            
+            return {
+              date: timeAgo(new Date(conv.firstTrace.execution_time_ms)),
+              title: 'Alo Conversation',
+              duration: `${conv.traces.length} turns`,
+              emotionalLoad: 'Moderate',
+              intentionFlow: intentionFlow || 'Unknown',
+              summary: 'Conversation with Alo'
+            };
+          });
+        }
+        
+        // Load notes
+        const notes = await supabaseQuery(`/rest/v1/client_notes?client_code=eq.${clientCode}&select=*&order=created_at.desc`);
+        if (notes) {
+          client.notes = notes.map(note => ({
+            date: new Date(note.created_at).toLocaleDateString(),
+            content: note.notes
+          }));
+        }
+        
+        console.log('Client details loaded:', client);
+        
+      } catch (error) {
+        console.error('Error loading client details:', error);
+      }
+    }
+    
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+      return date.toLocaleDateString();
+    }
+    
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Dashboard loading...');
+      loadDashboardData();
+    });
+    
+    // ============================================================
+    // SORTING FUNCTIONS
+    // ============================================================
+    
+    function sortClients(sortType, event) {
+      APP_STATE.currentSort = sortType;
+      
+      // Update button states
+      document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // If event is passed, use it; otherwise find the button by sort type
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Find button by data attribute or content
+        const buttons = document.querySelectorAll('.sort-btn');
+        buttons.forEach(btn => {
+          if (btn.textContent.toLowerCase().includes(sortType)) {
+            btn.classList.add('active');
+          }
+        });
+      }
+      
+      // Sort clients
+      let sorted = [...APP_STATE.clients];
+      
+      if (sortType === 'az') {
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortType === 'next') {
+        sorted.sort((a, b) => a.nextSessionDate - b.nextSessionDate);
+      } else if (sortType === 'last') {
+        sorted.sort((a, b) => b.lastSessionDate - a.lastSessionDate);
+      }
+      
+      APP_STATE.clients = sorted;
+      renderClientList();
+    }
+    
+    // ============================================================
+    // RENDER FUNCTIONS
+    // ============================================================
+    
+    function renderClientList() {
+      const container = document.getElementById('clientList');
+      const countEl = document.getElementById('clientCount');
+      
+      countEl.textContent = APP_STATE.clients.length;
+      
+      container.innerHTML = APP_STATE.clients.map(client => `
+        <div class="client-item ${APP_STATE.currentClient?.id === client.id ? 'active' : ''}" 
+             onclick="selectClient('${client.id}')">
+          <div class="client-item-header">
+            <div class="client-avatar">
+              ${client.initials}
+              <div class="status-badge ${client.status}"></div>
+            </div>
+            <div class="client-info">
+              <div class="client-name">${client.name}</div>
+            </div>
+          </div>
+          <div class="client-meta">
+            <div class="client-meta-row">
+              <span class="meta-label">Last:</span>
+              <span class="meta-value">${client.lastSession}</span>
+            </div>
+            <div class="client-meta-row">
+              <span class="meta-label">Next:</span>
+              <span class="meta-value">${client.nextSession}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function renderClientDetail(client) {
+      // Update header
+      document.getElementById('clientDetailName').textContent = client.name;
+      document.getElementById('clientDetailMeta').textContent = `Client Code: ${client.clientCode} • Next: ${client.nextSession}`;
+      
+      // Render Prep Tab
+      renderPrepTab(client);
+      
+      // Render Notes Tab
+      renderNotesTab(client);
+      
+      // Render Homework Tab
+      renderHomeworkTab(client);
+      
+      // Render Messages Tab
+      renderMessagesTab(client);
+      
+      // Render Activity Tab
+      renderActivityTab(client);
+    }
+    
+    function renderPrepTab(client) {
+      const prepContent = document.getElementById('prepContent');
+      const openItemsContent = document.getElementById('openItemsContent');
+      
+      // Crisis alert if needed
+      let crisisAlert = '';
+      if (client.status === 'crisis') {
+        crisisAlert = `
+          <div class="alert crisis">
+            <div class="alert-icon">🚨</div>
+            <div class="alert-content">
+              <div class="alert-title">CRISIS ALERT</div>
+              <div class="alert-text">Self-harm keywords detected 16 hours ago. Client mentioned thoughts of self-harm during Alo conversation. 988 resources provided. Immediate follow-up required.</div>
+            </div>
+          </div>
+        `;
+      }
+      
+      prepContent.innerHTML = `
+        ${crisisAlert}
+        <div class="info-box">
+          <div class="info-box-title">📊 Activity Summary</div>
+          <div class="info-box-text">
+            • ${client.prepSummary.conversationCount} conversations with Alo<br>
+            ${client.prepSummary.topics.length > 0 ? `• Primary topics: ${client.prepSummary.topics.join(', ')}<br>` : ''}
+            • Emotional load: ${client.prepSummary.emotionalLoad}
+          </div>
+        </div>
+      `;
+      
+      // Open items
+      const openHomework = client.homework.filter(h => h.status !== 'Completed');
+      if (openHomework.length > 0) {
+        openItemsContent.innerHTML = `
+          <div class="item-list">
+            ${openHomework.map(hw => `
+              <div class="list-item">
+                <div class="list-item-title">${hw.title}</div>
+                <div class="list-item-text">${hw.description}</div>
+                <div class="list-item-meta">
+                  <span class="meta-item">Assigned: ${hw.assigned}</span>
+                  <span class="meta-item">Status: ${hw.status}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        openItemsContent.innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
+      }
+    }
+    
+    function renderNotesTab(client) {
+      const content = document.getElementById('notesContent');
+      
+      if (client.notes.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-muted);">No session notes yet</p>';
+        return;
+      }
+      
+      content.innerHTML = `
+        <div class="item-list">
+          ${client.notes.map(note => `
+            <div class="list-item">
+              <div class="list-item-title">Session ${note.date}</div>
+              <div class="list-item-text">${note.content}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    function renderHomeworkTab(client) {
+      const content = document.getElementById('homeworkContent');
+      
+      if (client.homework.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-muted);">No homework assigned yet</p>';
+        return;
+      }
+      
+      content.innerHTML = `
+        <div class="item-list">
+          ${client.homework.map(hw => `
+            <div class="list-item">
+              <div class="list-item-header">
+                <div class="list-item-title">${hw.title}</div>
+                <div class="list-item-badge ${hw.status === 'Completed' ? 'new' : 'urgent'}">${hw.status}</div>
+              </div>
+              <div class="list-item-text">${hw.description}</div>
+              ${hw.notes ? `<div class="list-item-text" style="margin-top: 8px; font-style: italic;">Note: ${hw.notes}</div>` : ''}
+              <div class="list-item-meta">
+                <span class="meta-item">Assigned: ${hw.assigned}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    function renderMessagesTab(client) {
+      const content = document.getElementById('messagesContent');
+      
+      if (client.messages.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-muted);">No messages from client</p>';
+        return;
+      }
+      
+      content.innerHTML = client.messages.map(msg => `
+        <div class="message-full">
+          <div class="message-full-header">
+            <div>
+              <div class="message-from">${client.name}</div>
+              <div class="message-time">${msg.time}</div>
+            </div>
+            ${msg.unread ? '<div class="list-item-badge new">Unread</div>' : ''}
+          </div>
+          <div class="message-full-body">
+            ${msg.text}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function renderActivityTab(client) {
+      const content = document.getElementById('activityContent');
+      
+      if (client.alocActivity.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-muted);">No Alo conversations yet</p>';
+        return;
+      }
+      
+      content.innerHTML = `
+        <div class="item-list">
+          ${client.alocActivity.map(activity => `
+            <div class="list-item">
+              <div class="list-item-header">
+                <div class="list-item-title">${activity.title}</div>
+                <div class="list-item-badge ${activity.emotionalLoad === 'Crisis' ? 'crisis' : 'new'}">${activity.date}</div>
+              </div>
+              <div class="list-item-text">${activity.summary}</div>
+              <div class="list-item-meta">
+                <span class="meta-item">Duration: ${activity.duration}</span>
+                <span class="meta-item">Emotional load: ${activity.emotionalLoad}</span>
+                <span class="meta-item">Flow: ${activity.intentionFlow}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    // ============================================================
+    // VIEW SWITCHING
+    // ============================================================
+    
+    async function selectClient(clientId) {
+      const client = APP_STATE.clients.find(c => c.id === clientId);
+      if (!client) return;
+      
+      APP_STATE.currentClient = client;
+      APP_STATE.currentTab = 'prep';
+      
+      // Load full client details from Supabase
+      await loadClientDetails(clientId);
+      
+      // Render client detail
+      renderClientDetail(client);
+      
+      // Show client view
+      document.getElementById('homeView').classList.remove('active');
+      document.getElementById('clientView').classList.add('active');
+      
+      // Reset tabs
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById('tab-prep').classList.add('active');
+      
+      // Re-render client list to show active state
+      renderClientList();
+    }
+    
+    function showHomeView() {
+      APP_STATE.currentClient = null;
+      
+      document.getElementById('homeView').classList.add('active');
+      document.getElementById('clientView').classList.remove('active');
+      
+      renderClientList();
+    }
+    
+    function viewClientMessages(clientId) {
+      selectClient(clientId);
+      // Wait a moment for client view to render, then switch to messages tab
+      setTimeout(() => {
+        const messagesTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
+          tab.textContent.includes('Messages')
+        );
+        if (messagesTab) {
+          messagesTab.click();
+        }
+      }, 50);
+    }
+    
+    // ============================================================
+    // TAB SWITCHING
+    // ============================================================
+    
+    function switchTab(tabName, event) {
+      APP_STATE.currentTab = tabName;
+      
+      // Remove active class from all tabs and tab-content
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Add active class to current tab
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Fallback: find tab by checking which one matches
+        document.querySelectorAll('.tab').forEach(tab => {
+          if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+            tab.classList.add('active');
+          }
+        });
+      }
+      
+      // Show corresponding tab content
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+    
+    // ============================================================
+    // ACTION FUNCTIONS
+    // ============================================================
+    
+    function addNewClient() {
+      alert('Add New Client\n\nIn production, this would open a modal to create a new client with:\n• Name\n• Contact info\n• Generated client code\n• Initial session scheduling');
+    }
+    
+    function addSessionNote() {
+      alert('Add Session Note\n\nIn production, this would open a modal to:\n• Write session notes\n• Tag topics discussed\n• Mark homework assignments\n• Set follow-up reminders');
+    }
+    
+    function assignHomework() {
+      alert('Assign Homework\n\nIn production, this would open a modal to:\n• Select from template library\n• Customize instructions\n• Set due date\n• Client will see in their Alo interface');
+    }
+  </script>
+  
+</body>
+</html>
