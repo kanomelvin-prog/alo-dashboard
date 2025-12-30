@@ -1138,12 +1138,20 @@
               <span id="clientMeta"></span>
             </p>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="showEditClientForm()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-            Edit
-          </button>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn" id="crisisAlertButton" onclick="goToCrisisAlerts()" style="display: none; background: var(--danger); color: white; border: none; animation: pulse 2s infinite;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span id="crisisAlertButtonText">Crisis Alert</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="showEditClientForm()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
+            </button>
+          </div>
         </div>
       </div>
       
@@ -1563,13 +1571,45 @@
     // =====================================================
     // MESSAGES FUNCTIONS (NEW)
     // =====================================================
+    async function markMessageAsRead(messageId, event) {
+      // Stop propagation so clicking button doesn't trigger showClient
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      try {
+        // Mark this message as read
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/client_messages?id=eq.${messageId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ read_by_therapist: true })
+        });
+        
+        if (!response.ok) throw new Error('Failed to mark as read');
+        
+        // Reload messages to refresh the list
+        await loadMessages();
+        
+        toast('Message marked as read');
+        
+      } catch (err) {
+        console.error('Error marking message as read:', err);
+        alert('Error marking message as read');
+      }
+    }
+    
     async function loadMessages() {
       try {
         console.log('📨 Loading all client messages...');
         
-        // Get all recent messages
-        const allMessages = await api(`/rest/v1/client_messages?order=created_at.desc&limit=50`);
-        console.log('📦 Total messages found:', allMessages?.length);
+        // Get all recent UNREAD messages
+        const allMessages = await api(`/rest/v1/client_messages?read_by_therapist=eq.false&order=created_at.desc&limit=50`);
+        console.log('📦 Total unread messages found:', allMessages?.length);
         
         // Filter to only messages from our clients (case-insensitive)
         const clientMessages = allMessages?.filter(m => 
@@ -1579,8 +1619,6 @@
         ) || [];
         
         console.log('✅ Filtered to our clients:', clientMessages.length, 'messages');
-        console.log('Client codes we have:', allClients.map(c => c.client_code));
-        console.log('Message codes found:', [...new Set(allMessages?.map(m => m.client_code))]);
         
         renderMessages(clientMessages);
       } catch (err) {
@@ -1614,7 +1652,9 @@
               <div class="list-item-description">${truncate(m.message, 80)}</div>
             </div>
             <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
-            <button class="list-item-action">View</button>
+            <button class="btn btn-sm" onclick="markMessageAsRead('${m.id}', event)" style="background: var(--primary); color: white; border: none;">
+              Mark as Read
+            </button>
           </div>
         `;
       }).join('');
@@ -2258,6 +2298,18 @@ Plan: ${n.plan || 'N/A'}`;
       }
     }
     
+    function goToCrisisAlerts() {
+      // Switch to Alo Activity tab
+      const activityTab = document.querySelectorAll('.tab')[3]; // 4th tab (0-indexed)
+      switchTab('activity', activityTab);
+      
+      // Scroll to crisis alerts card
+      const crisisCard = document.getElementById('crisisAlertsCard');
+      if (crisisCard) {
+        crisisCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    
     async function markAlertsAsRead(clientCode, event) {
       // Stop propagation so clicking button doesn't trigger showClient
       if (event) {
@@ -2301,9 +2353,24 @@ Plan: ${n.plan || 'N/A'}`;
       const count = document.getElementById('crisisAlertCount');
       const list = document.getElementById('crisisAlertsList');
       
+      // Update header crisis button
+      const crisisButton = document.getElementById('crisisAlertButton');
+      const crisisButtonText = document.getElementById('crisisAlertButtonText');
+      
       if (!alerts || alerts.length === 0) {
         card.style.display = 'none';
+        if (crisisButton) crisisButton.style.display = 'none';
         return;
+      }
+      
+      // Show crisis button in header
+      if (crisisButton) {
+        crisisButton.style.display = 'inline-flex';
+        if (crisisButtonText) {
+          crisisButtonText.textContent = alerts.length === 1 
+            ? 'Crisis Alert' 
+            : `${alerts.length} Crisis Alerts`;
+        }
       }
       
       card.style.display = 'block';
