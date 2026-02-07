@@ -1347,8 +1347,8 @@
 
         // Load crisis events, messages, homework, sessions in parallel
         const [crisisEvents, messages, homework, sessions] = await Promise.all([
-          api(`/rest/v1/crisis_events?therapist_id=eq.${therapistId}&read_by_therapist=eq.false&order=created_at.desc&limit=50`),
-          api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&read_by_therapist=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`),
+          api(`/rest/v1/crisis_events?acknowledged=eq.false&order=created_at.desc&limit=50`),
+          api(`/rest/v1/client_messages?read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`),
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
           api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`)
         ]);
@@ -1516,8 +1516,8 @@
     async function loadClientData(clientId) {
       try {
         const [crisisEvents, messages, homework, sessions, notes] = await Promise.all([
-          api(`/rest/v1/crisis_events?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&order=created_at.desc&limit=20`),
-          api(`/rest/v1/client_messages?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&revoked_at=is.null&order=created_at.desc&limit=20`),
+          api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
+          api(`/rest/v1/client_messages?client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc&limit=20`),
           api(`/rest/v1/homework_cards?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&order=created_at.desc`),
           api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
           api(`/rest/v1/session_notes?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`)
@@ -1533,7 +1533,7 @@
 
         // Session prep summary
         const weekSessions = sessions?.filter(s => new Date(s.created_at) > new Date(Date.now() - 7 * 86400000)) || [];
-        const hasCrisis = crisisEvents?.some(e => !e.read_by_therapist);
+        const hasCrisis = crisisEvents?.some(e => !e.acknowledged);
 
         let summary = '';
         if (!weekSessions.length) {
@@ -1599,7 +1599,7 @@
       const btn = document.getElementById('crisisAlertButton');
       const btnText = document.getElementById('crisisAlertButtonText');
 
-      const unread = alerts.filter(a => !a.read_by_therapist);
+      const unread = alerts.filter(a => !a.acknowledged);
 
       if (!unread.length) {
         card.style.display = 'none';
@@ -1636,7 +1636,7 @@
       if (event) event.stopPropagation();
       try {
         await apiMutate(`/rest/v1/crisis_events?id=eq.${id}`, 'PATCH', {
-          read_by_therapist: true,
+          acknowledged: true,
           acknowledged_at: new Date().toISOString(),
           acknowledged_by: therapistId
         });
@@ -1649,7 +1649,7 @@
     async function markFalsePositive(id) {
       try {
         await apiMutate(`/rest/v1/crisis_events?id=eq.${id}`, 'PATCH', {
-          read_by_therapist: true,
+          acknowledged: true,
           false_positive: true,
           acknowledged_at: new Date().toISOString(),
           acknowledged_by: therapistId
@@ -1666,7 +1666,7 @@
       if (event) event.stopPropagation();
       try {
         await apiMutate(`/rest/v1/client_messages?id=eq.${id}`, 'PATCH', {
-          read_by_therapist: true,
+          read: true,
           read_at: new Date().toISOString()
         });
         toast('Message marked as read');
