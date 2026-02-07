@@ -1623,12 +1623,12 @@
       // For pending clients, load notes and homework using the therapist_clients record id
       const tcId = currentClient.id;
       try {
-        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        const notes = await api(`/rest/v1/session_notes?client_id=is.null&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
         clientNotes[tcId] = notes || [];
         renderNotesPreview(tcId);
         renderNotes(tcId);
 
-        const homework = await api(`/rest/v1/homework_cards?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=created_at.desc`);
+        const homework = await api(`/rest/v1/homework_cards?client_id=is.null&therapist_id=eq.${therapistId}&order=created_at.desc`);
         document.getElementById('homeworkHistory').innerHTML = homework?.length
           ? homework.map(h => `
               <div class="homework-item">
