@@ -824,6 +824,29 @@
     }
     .tooltip-trigger:hover .tooltip-content { display: block; }
 
+    /* === INVITE BADGE === */
+    .invite-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--text);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+    .invite-badge:hover { background: var(--warning-border); }
+    .invite-badge svg { width: 10px; height: 10px; }
+    .pending-label {
+      font-size: 0.7rem;
+      color: var(--warning);
+      font-weight: 500;
+    }
+
     .loading { text-align: center; padding: 32px; color: var(--text-muted); }
     .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -1395,15 +1418,15 @@
           return;
         }
 
-        const clientIds = links.map(l => l.client_id);
-        const idFilter = clientIds.map(id => `"${id}"`).join(',');
+        const clientIds = links.map(l => l.client_id).filter(Boolean);
+        const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
 
         // Load crisis events, messages, homework, sessions in parallel
         const [crisisEvents, messages, homework, sessions] = await Promise.all([
           api(`/rest/v1/crisis_events?acknowledged=eq.false&order=created_at.desc&limit=50`),
           api(`/rest/v1/client_messages?read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`),
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
-          api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`)
+          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
         ]);
 
         const weekAgo = new Date(Date.now() - 7 * 86400000);
@@ -1526,18 +1549,24 @@
       const html = sorted.map(c => {
         const name = c.display_name || 'Client';
         const initials = name.substring(0, 2).toUpperCase();
-        const isActive = currentClient?.client_id === c.client_id;
+        const clientKey = c.client_id || c.id; // use record id for pending clients
+        const isActive = currentClient && (currentClient.client_id === c.client_id || currentClient.id === c.id);
+        const isPending = !c.client_id;
 
         return `
-          <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${c.client_id}')">
+          <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${clientKey}', ${isPending})">
             <div class="client-avatar">
               ${initials}
-              <div class="status-badge ${c.status}"></div>
+              <div class="status-badge ${isPending ? 'dormant' : c.status}"></div>
             </div>
             <div class="client-info">
               <div class="client-name">${esc(name)}</div>
-              <div class="client-meta">${c.sessionCount} sessions · ${c.homeworkCount} hw</div>
+              ${isPending
+                ? `<div class="client-meta"><span class="pending-label">Pending signup</span></div>`
+                : `<div class="client-meta">${c.sessionCount} sessions · ${c.homeworkCount} hw</div>`
+              }
             </div>
+            ${isPending && c.invite_code ? `<span class="invite-badge" onclick="event.stopPropagation(); copyCode('${c.invite_code}')" title="Click to copy">${esc(c.invite_code)}</span>` : ''}
           </div>
         `;
       }).join('');
@@ -1546,11 +1575,19 @@
       document.getElementById('clientsList2').innerHTML = html;
     }
 
+    function copyCode(code) {
+      navigator.clipboard.writeText(code).then(() => toast(`Copied: ${code}`));
+    }
+
     // =====================================================
     // CLIENT DETAIL
     // =====================================================
-    async function showClient(clientId) {
-      currentClient = allClients.find(c => c.client_id === clientId);
+    async function showClient(clientKey, isPending = false) {
+      if (isPending) {
+        currentClient = allClients.find(c => c.id === clientKey);
+      } else {
+        currentClient = allClients.find(c => c.client_id === clientKey);
+      }
       if (!currentClient) return;
 
       document.getElementById('homePage').style.display = 'none';
@@ -1560,10 +1597,65 @@
 
       const name = currentClient.display_name || 'Client';
       document.getElementById('clientName').textContent = name;
-      document.getElementById('clientMeta').textContent =
-        `${currentClient.sessionCount} sessions this week · ${currentClient.homeworkCount} active homework`;
 
-      await loadClientData(clientId);
+      if (!currentClient.client_id) {
+        // Pending client — show invite info instead of stats
+        document.getElementById('clientMeta').innerHTML =
+          `<span class="pending-label">⏳ Pending signup</span>${currentClient.invite_code ? ` · Invite: <strong>${esc(currentClient.invite_code)}</strong>` : ''}`;
+        // Show empty state for all tabs
+        document.getElementById('prepSummary').innerHTML = '<p style="color: var(--text-muted);">Client hasn\'t signed up yet. You can still write session notes and assign homework.</p>';
+        document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
+        document.getElementById('clientMessagesPrep').innerHTML = '<p style="color: var(--text-muted);">No messages</p>';
+        document.getElementById('activityMessages').innerHTML = '<p style="color: var(--text-muted);">No messages</p>';
+        document.getElementById('activitySessions').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions recorded</p>';
+        document.getElementById('crisisAlertsCard').style.display = 'none';
+        document.getElementById('crisisAlertButton').style.display = 'none';
+        // Load notes and homework using therapist_clients.id as reference
+        await loadPendingClientData();
+      } else {
+        document.getElementById('clientMeta').textContent =
+          `${currentClient.sessionCount} sessions this week · ${currentClient.homeworkCount} active homework`;
+        await loadClientData(currentClient.client_id);
+      }
+    }
+
+    async function loadPendingClientData() {
+      // For pending clients, load notes and homework using the therapist_clients record id
+      const tcId = currentClient.id;
+      try {
+        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        clientNotes[tcId] = notes || [];
+        renderNotesPreview(tcId);
+        renderNotes(tcId);
+
+        const homework = await api(`/rest/v1/homework_cards?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=created_at.desc`);
+        document.getElementById('homeworkHistory').innerHTML = homework?.length
+          ? homework.map(h => `
+              <div class="homework-item">
+                <div class="homework-status ${h.is_active ? 'active' : 'completed'}">
+                  ${h.is_active
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
+                  }
+                </div>
+                <div class="homework-content">
+                  <div class="homework-type">${esc(h.title)}</div>
+                  <div class="homework-desc">${esc(h.goal)}</div>
+                  <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
+                </div>
+                ${h.is_active ? `<button class="btn btn-sm btn-secondary" onclick="completeHomework('${h.id}')">Complete</button>` : ''}
+              </div>
+            `).join('')
+          : '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
+
+        // Update open items
+        const activeHw = homework?.filter(h => h.is_active) || [];
+        document.getElementById('prepOpenItems').innerHTML = activeHw.length
+          ? activeHw.map(h => `<p>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
+          : '<p style="color: var(--text-muted);">No open items</p>';
+      } catch (err) {
+        console.error('Pending client data error:', err);
+      }
     }
 
     async function loadClientData(clientId) {
@@ -1737,9 +1829,10 @@
         let code = 'ALO-';
         for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
 
-        const displayName = document.getElementById('inviteClientName').value.trim();
+        const displayName = document.getElementById('inviteClientName').value.trim() || 'New Client';
         const expires = new Date(Date.now() + 7 * 86400000).toISOString();
 
+        // Create invite record
         await api('/rest/v1/invites', {
           method: 'POST',
           body: JSON.stringify({
@@ -1752,16 +1845,25 @@
           prefer: 'return=minimal'
         });
 
+        // Create placeholder client record immediately so therapist can start documenting
+        await api('/rest/v1/therapist_clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            therapist_id: therapistId,
+            client_id: null,
+            display_name: displayName,
+            invite_code: code,
+            status: 'active'
+          }),
+          prefer: 'return=minimal'
+        });
+
         document.getElementById('inviteCodeDisplay').textContent = code;
         document.getElementById('inviteResult').style.display = 'block';
         document.getElementById('generateInviteBtn').style.display = 'none';
 
-        // Store display name for when client redeems
-        if (displayName) {
-          localStorage.setItem(`invite_name_${code}`, displayName);
-        }
-
-        toast('Invite code generated');
+        toast('Client added & invite code generated');
+        await loadDashboard();
       } catch (err) {
         console.error(err);
         alert('Error generating invite code');
@@ -1854,19 +1956,20 @@
           <div class="form-group full"><label>Plan / Next Steps</label><textarea id="notePlan" placeholder="Goals for next session..."></textarea></div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-secondary" onclick="renderNotes('${currentClient.client_id}')">Cancel</button>
+          <button class="btn btn-secondary" onclick="renderNotes('${currentClient.client_id || currentClient.id}')">Cancel</button>
           <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
         </div>
       `;
     }
 
     async function saveNote() {
+      const cacheKey = currentClient.client_id || currentClient.id;
       try {
         await api('/rest/v1/session_notes', {
           method: 'POST',
           body: JSON.stringify({
             therapist_id: therapistId,
-            client_id: currentClient.client_id,
+            client_id: currentClient.client_id || null,
             session_date: document.getElementById('noteDate').value,
             session_type: document.getElementById('noteType').value,
             themes: document.getElementById('noteThemes').value || null,
@@ -1878,16 +1981,20 @@
         });
 
         // Reload notes
-        const notes = await api(`/rest/v1/session_notes?client_id=eq.${currentClient.client_id}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
-        clientNotes[currentClient.client_id] = notes || [];
-        renderNotes(currentClient.client_id);
-        renderNotesPreview(currentClient.client_id);
+        const noteFilter = currentClient.client_id
+          ? `client_id=eq.${currentClient.client_id}`
+          : `client_id=is.null`;
+        const notes = await api(`/rest/v1/session_notes?${noteFilter}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        clientNotes[cacheKey] = notes || [];
+        renderNotes(cacheKey);
+        renderNotesPreview(cacheKey);
         toast('Note saved');
       } catch (err) { console.error(err); alert('Error saving note'); }
     }
 
     function copyNote(noteId, btn) {
-      const notes = clientNotes[currentClient.client_id] || [];
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
       const n = notes.find(note => note.id === noteId);
       if (!n) return;
       const text = `Session: ${new Date(n.session_date).toLocaleDateString()} (${n.session_type || 'Session'})\n\nThemes: ${n.themes || 'N/A'}\nInterventions: ${n.interventions || 'N/A'}\nObservations: ${n.observations || 'N/A'}\nPlan: ${n.plan || 'N/A'}`;
@@ -1903,12 +2010,16 @@
 
     async function deleteNote(noteId) {
       if (!confirm('Delete this session note?')) return;
+      const cacheKey = currentClient.client_id || currentClient.id;
       try {
         await apiMutate(`/rest/v1/session_notes?id=eq.${noteId}`, 'DELETE', null);
-        const notes = await api(`/rest/v1/session_notes?client_id=eq.${currentClient.client_id}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
-        clientNotes[currentClient.client_id] = notes || [];
-        renderNotes(currentClient.client_id);
-        renderNotesPreview(currentClient.client_id);
+        const noteFilter = currentClient.client_id
+          ? `client_id=eq.${currentClient.client_id}`
+          : `client_id=is.null`;
+        const notes = await api(`/rest/v1/session_notes?${noteFilter}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        clientNotes[cacheKey] = notes || [];
+        renderNotes(cacheKey);
+        renderNotesPreview(cacheKey);
         toast('Note deleted');
       } catch (err) { console.error(err); }
     }
@@ -1929,7 +2040,7 @@
           method: 'POST',
           body: JSON.stringify({
             therapist_id: therapistId,
-            client_id: currentClient.client_id,
+            client_id: currentClient.client_id || null,
             title: document.getElementById('hwTitle').value,
             homework_type: document.getElementById('hwType').value,
             goal: document.getElementById('hwGoal').value,
@@ -1941,7 +2052,11 @@
         });
 
         document.getElementById('homeworkForm').reset();
-        await loadClientData(currentClient.client_id);
+        if (currentClient.client_id) {
+          await loadClientData(currentClient.client_id);
+        } else {
+          await loadPendingClientData();
+        }
         toast('Homework assigned');
       } catch (err) {
         console.error(err);
@@ -1975,9 +2090,12 @@
 
     async function saveClientEdit() {
       const name = document.getElementById('editClientName').value.trim();
+      const filter = currentClient.client_id
+        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
+        : `id=eq.${currentClient.id}`;
       try {
         await apiMutate(
-          `/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`,
+          `/rest/v1/therapist_clients?${filter}`,
           'PATCH',
           { display_name: name || null }
         );
@@ -1997,9 +2115,12 @@
     }
 
     async function deleteClient() {
+      const filter = currentClient.client_id
+        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
+        : `id=eq.${currentClient.id}`;
       try {
         await apiMutate(
-          `/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`,
+          `/rest/v1/therapist_clients?${filter}`,
           'DELETE',
           null
         );
