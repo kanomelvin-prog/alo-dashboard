@@ -1620,15 +1620,15 @@
     }
 
     async function loadPendingClientData() {
-      // For pending clients, load notes and homework using the therapist_clients record id
+      // For pending clients, load notes and homework using therapist_client_id
       const tcId = currentClient.id;
       try {
-        const notes = await api(`/rest/v1/session_notes?client_id=is.null&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
         clientNotes[tcId] = notes || [];
         renderNotesPreview(tcId);
         renderNotes(tcId);
 
-        const homework = await api(`/rest/v1/homework_cards?client_id=is.null&therapist_id=eq.${therapistId}&order=created_at.desc`);
+        const homework = await api(`/rest/v1/homework_cards?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=created_at.desc`);
         document.getElementById('homeworkHistory').innerHTML = homework?.length
           ? homework.map(h => `
               <div class="homework-item">
@@ -1663,9 +1663,9 @@
         const [crisisEvents, messages, homework, sessions, notes] = await Promise.all([
           api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
           api(`/rest/v1/client_messages?client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc&limit=20`),
-          api(`/rest/v1/homework_cards?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&order=created_at.desc`),
+          api(`/rest/v1/homework_cards?therapist_client_id=eq.${currentClient.id}&therapist_id=eq.${therapistId}&order=created_at.desc`),
           api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
-          api(`/rest/v1/session_notes?client_id=eq.${clientId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`)
+          api(`/rest/v1/session_notes?therapist_client_id=eq.${currentClient.id}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`)
         ]);
 
         clientNotes[clientId] = notes || [];
@@ -1964,12 +1964,14 @@
 
     async function saveNote() {
       const cacheKey = currentClient.client_id || currentClient.id;
+      const tcId = currentClient.id;
       try {
         await api('/rest/v1/session_notes', {
           method: 'POST',
           body: JSON.stringify({
             therapist_id: therapistId,
             client_id: currentClient.client_id || null,
+            therapist_client_id: tcId,
             session_date: document.getElementById('noteDate').value,
             session_type: document.getElementById('noteType').value,
             themes: document.getElementById('noteThemes').value || null,
@@ -1980,11 +1982,8 @@
           prefer: 'return=minimal'
         });
 
-        // Reload notes
-        const noteFilter = currentClient.client_id
-          ? `client_id=eq.${currentClient.client_id}`
-          : `client_id=is.null`;
-        const notes = await api(`/rest/v1/session_notes?${noteFilter}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        // Reload notes using therapist_client_id
+        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
         clientNotes[cacheKey] = notes || [];
         renderNotes(cacheKey);
         renderNotesPreview(cacheKey);
@@ -2011,12 +2010,10 @@
     async function deleteNote(noteId) {
       if (!confirm('Delete this session note?')) return;
       const cacheKey = currentClient.client_id || currentClient.id;
+      const tcId = currentClient.id;
       try {
         await apiMutate(`/rest/v1/session_notes?id=eq.${noteId}`, 'DELETE', null);
-        const noteFilter = currentClient.client_id
-          ? `client_id=eq.${currentClient.client_id}`
-          : `client_id=is.null`;
-        const notes = await api(`/rest/v1/session_notes?${noteFilter}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
+        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
         clientNotes[cacheKey] = notes || [];
         renderNotes(cacheKey);
         renderNotesPreview(cacheKey);
@@ -2041,6 +2038,7 @@
           body: JSON.stringify({
             therapist_id: therapistId,
             client_id: currentClient.client_id || null,
+            therapist_client_id: currentClient.id,
             title: document.getElementById('hwTitle').value,
             homework_type: document.getElementById('hwType').value,
             goal: document.getElementById('hwGoal').value,
@@ -2074,7 +2072,11 @@
           is_active: false,
           completed_at: new Date().toISOString()
         });
-        await loadClientData(currentClient.client_id);
+        if (currentClient.client_id) {
+          await loadClientData(currentClient.client_id);
+        } else {
+          await loadPendingClientData();
+        }
         toast('Homework completed');
       } catch (err) { console.error(err); }
     }
