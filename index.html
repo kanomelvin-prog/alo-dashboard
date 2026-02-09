@@ -2012,20 +2012,7 @@
         const name = c.display_name || 'Client';
         const initials = name.substring(0, 2).toUpperCase();
         const clientKey = c.client_id || c.id; // use record id for pending clients
-        const isActive = currentClient && (
-  (currentClient.client_id && currentClient.client_id === c.client_id) ||
-  (!currentClient.client_id && currentClient.id === c.id)
-);
-```
-
----
-
-## **BUG 2: Delete Client Still Not Working**
-
-Looking at the console error in Image 2, the issue is actually a **form field validation error**, not the delete function itself. The error says:
-```
-A <label> isn't associated with a form field.
-
+        const isActive = currentClient && (currentClient.client_id === c.client_id || currentClient.id === c.id);
         const isPending = !c.client_id;
 
         return `
@@ -2806,28 +2793,19 @@ A <label> isn't associated with a form field.
   const filter = currentClient.client_id
     ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
     : `id=eq.${currentClient.id}`;
-  
-  console.log('DELETE filter:', filter);
-  console.log('Current client:', currentClient);
-  
   try {
-    const result = await api(`/rest/v1/therapist_clients?${filter}`, {
-      method: 'DELETE',
-      prefer: 'return=representation'
+    await api(`/rest/v1/therapist_clients?${filter}`, {
+      method: 'DELETE'
     });
-    
-    console.log('Delete result:', result);
-    
     closeModal('editClientModal');
     showHomePage();
     toast('Client removed');
     await loadDashboard();
   } catch (err) { 
-    console.error('Delete error FULL:', err);
+    console.error('Delete error:', err);
     alert('Error removing client: ' + err.message);
   }
 }
-
 
 
     // =====================================================
@@ -3014,4 +2992,3 @@ Safety: ${unresolvedCrisis.length ? unresolvedCrisis.map(c => `Alert on ${new Da
   </script>
 </body>
 </html>
-
