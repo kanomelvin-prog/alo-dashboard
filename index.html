@@ -1498,8 +1498,9 @@
         <!-- Danger Zone -->
         <div class="form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
           <label style="color: var(--danger);">Danger Zone</label>
-          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Remove Client</button>
-          <span class="form-hint">Unlinks client from your dashboard. Their Alo conversations are not deleted.</span>
+          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Archive Client</button>
+<span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
+
         </div>
       </div>
       <div class="modal-footer">
@@ -2793,19 +2794,33 @@
   const filter = currentClient.client_id
     ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
     : `id=eq.${currentClient.id}`;
+  
+  console.log('[ARCHIVE] Current client:', currentClient);
+  console.log('[ARCHIVE] Filter:', filter);
+  
   try {
-    await api(`/rest/v1/therapist_clients?${filter}`, {
-      method: 'DELETE'
+    const result = await api(`/rest/v1/therapist_clients?${filter}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'archived' }),
+      prefer: 'return=representation'
     });
+    
+    console.log('[ARCHIVE] Result:', result);
+    
+    if (!result || result.length === 0) {
+      throw new Error('No rows archived - client may not exist or RLS blocking update');
+    }
+    
     closeModal('editClientModal');
     showHomePage();
-    toast('Client removed');
+    toast('Client archived');
     await loadDashboard();
-  } catch (err) { 
-    console.error('Delete error:', err);
-    alert('Error removing client: ' + err.message);
+  } catch (err) {
+    console.error('[ARCHIVE] Error:', err);
+    alert('Error archiving client: ' + err.message);
   }
 }
+
 
 
     // =====================================================
@@ -2992,3 +3007,5 @@ Safety: ${unresolvedCrisis.length ? unresolvedCrisis.map(c => `Alert on ${new Da
   </script>
 </body>
 </html>
+
+
