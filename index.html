@@ -672,6 +672,36 @@
     .copy-btn.copied { background: var(--success-bg); border-color: var(--success); color: var(--success); }
     .copy-btn svg { width: 12px; height: 12px; }
 
+    /* === SIMPLEPRACTICE SECTION COPY BUTTONS === */
+    .sp-section-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .sp-section-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sp-section-btn:hover {
+      background: var(--sage-light);
+      border-color: var(--sage);
+      color: var(--sage);
+    }
+    .sp-section-btn.copied {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+
     /* === CRISIS ALERTS === */
     .crisis-alert-item {
       background: var(--danger-bg);
@@ -1209,7 +1239,14 @@
           </div>
 
           <div class="card">
-            <div class="card-header"><span class="card-title">What Changed</span></div>
+            <div class="card-header">
+              <span class="card-title">What Changed</span>
+              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                Copy Prep Pack
+              </button>
+            </div>
+
             <div class="card-body" id="prepSummary">
               <div class="loading"><div class="spinner"></div></div>
             </div>
@@ -1249,11 +1286,12 @@
             <div class="card-header"><span class="card-title">Assign Homework</span></div>
             <div class="card-body">
               <div class="templates">
-                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</button>
-                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them')">Noticing</button>
-                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning')">Journaling</button>
-                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation')">Behavioral</button>
-                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily')">Breathing</button>
+                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
+                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
+                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
+                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
+                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
+
               </div>
               <form id="homeworkForm" onsubmit="submitHomework(event)">
                 <div class="form-grid">
@@ -1284,12 +1322,18 @@
                     <label>Title</label>
                     <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
                   </div>
-                  <div class="form-group full">
+                 <div class="form-group full">
                     <label>Goal / Instructions</label>
                     <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
                   </div>
                   <div class="form-group full">
+                    <label>Treatment Plan Goal (SimplePractice)</label>
+                    <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                    <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                  </div>
+                  <div class="form-group full">
                     <label>Clinical Rationale (private)</label>
+
                     <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
                     <span class="form-hint">For your records only — client never sees this</span>
                   </div>
@@ -1553,6 +1597,11 @@
     let currentClient = null; // Currently viewed client object
     let allClients = [];      // Array of client objects
     let clientNotes = {};     // client_id → notes array cache
+    let clientHomework = {};  // client_id → homework array cache
+    let clientMessages = {};  // client_id → messages array cache
+    let clientSessions = {};  // client_id → sessions array cache
+    let clientCrisis = {};    // client_id → crisis events array cache
+
 
     // =====================================================
     // SUPABASE API HELPER
@@ -2352,8 +2401,9 @@
         <div class="note-card">
           <div class="note-header">
             <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${esc(n.session_type || 'Session')}</span>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <button class="copy-btn" onclick="copyNote('${n.id}', this)">
+
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 Copy for EHR
               </button>
@@ -2364,6 +2414,13 @@
           </div>
           <div class="note-content">
             ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p>` : ''}
+            <div class="sp-section-buttons">
+              ${n.themes ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S')">Copy S</button>` : ''}
+              ${n.observations ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O')">Copy O</button>` : ''}
+              ${n.interventions ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A')">Copy A</button>` : ''}
+              ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P')">Copy P</button>` : ''}
+            </div>
+
             ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p>` : ''}
             ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p>` : ''}
             ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p>` : ''}
@@ -2391,7 +2448,13 @@
           <div class="form-group full"><label>Interventions Used</label><textarea id="noteInterventions" placeholder="Techniques used...">${esc(draft.interventions || '')}</textarea></div>
           <div class="form-group full"><label>Clinical Observations</label><textarea id="noteObservations" placeholder="Affect, engagement, progress...">${esc(draft.observations || '')}</textarea></div>
           <div class="form-group full"><label>Plan / Next Steps</label><textarea id="notePlan" placeholder="Goals for next session...">${esc(draft.plan || '')}</textarea></div>
+          <div class="form-group"><label>Next Session Date</label><input type="date" id="noteNextSession" value="${draft.nextSession || ''}"></div>
+          <div class="form-group" style="align-items: center; justify-content: flex-start; flex-direction: row; gap: 8px;">
+            <input type="checkbox" id="noteBilling" ${draft.billing ? 'checked' : ''} style="width: auto; margin: 0;">
+            <label for="noteBilling" style="margin: 0; cursor: pointer;">Add billing justification line to Plan</label>
+          </div>
         </div>
+
         <div class="form-actions" style="display: flex; align-items: center; justify-content: space-between;">
           <span class="save-status" id="autoSaveStatus"></span>
           <div style="display: flex; gap: 8px;">
@@ -2419,8 +2482,11 @@
           themes: themes.value,
           interventions: document.getElementById('noteInterventions')?.value,
           observations: document.getElementById('noteObservations')?.value,
-          plan: document.getElementById('notePlan')?.value
+          plan: document.getElementById('notePlan')?.value,
+          nextSession: document.getElementById('noteNextSession')?.value,
+          billing: document.getElementById('noteBilling')?.checked
         };
+
         
         // Only save if there's content
         if (draft.themes || draft.interventions || draft.observations || draft.plan) {
@@ -2463,7 +2529,10 @@
             themes: document.getElementById('noteThemes').value || null,
             interventions: document.getElementById('noteInterventions').value || null,
             observations: document.getElementById('noteObservations').value || null,
-            plan: document.getElementById('notePlan').value || null
+            plan: document.getElementById('notePlan').value || null,
+            next_session_date: document.getElementById('noteNextSession').value || null,
+            billing_justification: document.getElementById('noteBilling').checked
+
           }),
           prefer: 'return=minimal'
         });
@@ -2565,11 +2634,13 @@
     // =====================================================
     // HOMEWORK
     // =====================================================
-    function useTemplate(type, title, goal) {
+    function useTemplate(type, title, goal, txPlanGoal) {
       document.getElementById('hwType').value = type;
       document.getElementById('hwTitle').value = title;
       document.getElementById('hwGoal').value = goal;
+      if (txPlanGoal) document.getElementById('hwTxPlanGoal').value = txPlanGoal;
     }
+
 
     async function submitHomework(e) {
       e.preventDefault();
@@ -2583,8 +2654,10 @@
             title: document.getElementById('hwTitle').value,
             homework_type: document.getElementById('hwType').value,
             goal: document.getElementById('hwGoal').value,
+            treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
             sensitivity: document.getElementById('hwSensitivity').value,
             therapist_notes: document.getElementById('hwRationale').value || null,
+
             is_active: true
           }),
           prefer: 'return=minimal'
@@ -2791,6 +2864,130 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
     }
+// =====================================================
+    // SIMPLEPRACTICE INTEGRATION FUNCTIONS
+    // =====================================================
+    
+    // Copy individual SOAP section
+    function copySoapSection(noteId, section) {
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
+      const n = notes.find(note => note.id === noteId);
+      if (!n) return;
+      
+      let text = '';
+      const clientName = currentClient.display_name || 'Client';
+      const dateStr = new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      
+      if (section === 'S') {
+        text = `S (Subjective) — ${clientName} — ${dateStr}\n${n.themes || 'N/A'}`;
+      } else if (section === 'O') {
+        text = `O (Objective) — ${clientName} — ${dateStr}\n${n.observations || 'N/A'}`;
+      } else if (section === 'A') {
+        text = `A (Assessment) — ${clientName} — ${dateStr}\n${n.interventions || 'N/A'}`;
+      } else if (section === 'P') {
+        let planText = n.plan || 'N/A';
+        if (n.next_session_date) {
+          planText += `\nNext session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`;
+        }
+        if (n.billing_justification) {
+          planText += '\nContinued therapeutic support medically necessary for symptom management and functional improvement.';
+        }
+        text = `P (Plan) — ${clientName} — ${dateStr}\n${planText}`;
+      }
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        btn.classList.add('copied');
+        btn.textContent = '✓ Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.textContent = `Copy ${section}`;
+        }, 2000);
+      });
+    }
+    
+    // Generate Between-Session Addendum
+    function generateAddendum(format = 'full') {
+      if (!currentClient) return '';
+      
+      const clientName = currentClient.display_name || 'Client';
+      const cacheKey = currentClient.client_id || currentClient.id;
+      
+      // Get data
+      const sessions = clientSessions[cacheKey] || [];
+      const homework = (clientHomework[cacheKey] || []).filter(h => h.is_active);
+      const messages = clientMessages[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
+      const recentMessages = messages.filter(m => new Date(m.created_at) > weekAgo);
+      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
+      
+      // Generate themes from recent sessions
+      const themes = recentSessions
+        .map(s => s.primary_mode || 'emotional processing')
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .join(', ');
+      
+      const lastSession = recentSessions[0] ? new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+      
+      const dateRange = recentSessions.length 
+        ? `${new Date(recentSessions[recentSessions.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+        : 'Past 7 days';
+      
+      if (format === 'brief') {
+        return `Between-session (Alo): ${recentSessions.length} check-in${recentSessions.length !== 1 ? 's' : ''}; HW ${homework.length ? homework[0].title + ' (' + (homework[0].completed_at ? 'completed' : 'in progress') + ')' : 'none'}; messages ${recentMessages.length ? 'Y' : 'N'}; alerts ${unresolvedCrisis.length ? 'Y' : 'N'}.`;
+      }
+      
+      // Full format
+      return `BETWEEN-SESSION DATA (Source: Alo Clinical Dashboard, ${dateRange})
+
+Source: Client self-directed use of an emotional support tool. No session transcript available.
+
+Engagement: Client engaged in ${recentSessions.length} Alo session${recentSessions.length !== 1 ? 's' : ''} (last: ${lastSession}).
+
+Themes: Client-reported focus areas: ${themes || 'general emotional processing'}.
+
+Homework: ${homework.length ? homework.map(h => `${h.title} — Status: ${h.completed_at ? 'completed' : 'in progress'}`).join('; ') : 'None assigned'}.
+
+Client Messages: ${recentMessages.length} message${recentMessages.length !== 1 ? 's' : ''} received${recentMessages.length ? '; subject: ' + truncate(recentMessages[0].message, 50) : ''}.
+
+Safety: ${unresolvedCrisis.length ? unresolvedCrisis.map(c => `Alert on ${new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${c.category}; resolved via ${c.alo_response_action}`).join('. ') : 'No alerts'}.`;
+    }
+    
+    // Copy Prep Pack (entire Session Prep as paste block)
+    function copyPrepPack() {
+      const clientName = currentClient?.display_name || 'Client';
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      
+      // Build the prep pack
+      const addendum = generateAddendum('full');
+      const notes = clientNotes[cacheKey] || [];
+      const recentNote = notes[0];
+      
+      let prepPack = `SESSION PREP PACK — ${clientName} — ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\n\n`;
+      prepPack += addendum;
+      
+      if (recentNote) {
+        prepPack += `\n\n—————————————————————————————————————————\n\nLAST SESSION NOTE (${new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}):\n`;
+        if (recentNote.themes) prepPack += `Themes: ${recentNote.themes}\n`;
+        if (recentNote.plan) prepPack += `Plan: ${recentNote.plan}\n`;
+      }
+      
+      navigator.clipboard.writeText(prepPack).then(() => {
+        const btn = document.getElementById('copyPrepPackBtn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+        toast('Prep Pack copied to clipboard');
+      });
+    }
+
   </script>
 </body>
 </html>
+
