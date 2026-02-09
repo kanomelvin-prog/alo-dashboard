@@ -2790,21 +2790,23 @@
     }
 
     async function deleteClient() {
-      const filter = currentClient.client_id
-        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
-        : `id=eq.${currentClient.id}`;
-      try {
-        await apiMutate(
-          `/rest/v1/therapist_clients?${filter}`,
-          'DELETE',
-          null
-        );
-        closeModal('editClientModal');
-        showHomePage();
-        toast('Client removed');
-        await loadDashboard();
-      } catch (err) { console.error(err); }
-    }
+  const filter = currentClient.client_id
+    ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
+    : `id=eq.${currentClient.id}`;
+  try {
+    await api(`/rest/v1/therapist_clients?${filter}`, {
+      method: 'DELETE'
+    });
+    closeModal('editClientModal');
+    showHomePage();
+    toast('Client removed');
+    await loadDashboard();
+  } catch (err) { 
+    console.error('Delete error:', err);
+    alert('Error removing client: ' + err.message);
+  }
+}
+
 
     // =====================================================
     // NAVIGATION
