@@ -2423,10 +2423,11 @@
           <div class="note-content">
             ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p>` : ''}
             <div class="sp-section-buttons">
-              ${n.themes ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S')">Copy S</button>` : ''}
-              ${n.observations ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O')">Copy O</button>` : ''}
-              ${n.interventions ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A')">Copy A</button>` : ''}
-              ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P')">Copy P</button>` : ''}
+              ${n.themes ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button>` : ''}
+${n.observations ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button>` : ''}
+${n.interventions ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button>` : ''}
+${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button>` : ''}
+
             </div>
 
             ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p>` : ''}
