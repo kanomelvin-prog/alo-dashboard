@@ -35,10 +35,7 @@
       --success: #10b981;
       --success-bg: #ecfdf5;
       --info-bg: var(--sage-light);
-    --olive: var(--sage);
-    --bg-warm: var(--warm-white);
-  }
-
+    }
     
     body {
       font-family: 'Inter', -apple-system, sans-serif;
@@ -675,36 +672,6 @@
     .copy-btn.copied { background: var(--success-bg); border-color: var(--success); color: var(--success); }
     .copy-btn svg { width: 12px; height: 12px; }
 
-    /* === SIMPLEPRACTICE SECTION COPY BUTTONS === */
-    .sp-section-buttons {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .sp-section-btn {
-      background: var(--white);
-      border: 1px solid var(--border);
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .sp-section-btn:hover {
-      background: var(--sage-light);
-      border-color: var(--sage);
-      color: var(--sage);
-    }
-    .sp-section-btn.copied {
-      background: var(--success-bg);
-      border-color: var(--success);
-      color: var(--success);
-    }
-
-
     /* === CRISIS ALERTS === */
     .crisis-alert-item {
       background: var(--danger-bg);
@@ -1070,7 +1037,7 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••">
+          <input type="password" id="loginPassword" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
         </div>
         <button class="btn btn-primary btn-full" onclick="handleLogin()" style="margin-top: 16px;">Sign In</button>
         <p style="text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
@@ -1125,7 +1092,7 @@
 
     <!-- Liability disclaimer banner -->
     <div class="disclaimer-banner">
-      ⚠️ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
+      âš ï¸ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
     </div>
 
     <!-- ============================================ -->
@@ -1242,14 +1209,7 @@
           </div>
 
           <div class="card">
-            <div class="card-header">
-              <span class="card-title">What Changed</span>
-              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                Copy Prep Pack
-              </button>
-            </div>
-
+            <div class="card-header"><span class="card-title">What Changed</span></div>
             <div class="card-body" id="prepSummary">
               <div class="loading"><div class="spinner"></div></div>
             </div>
@@ -1289,12 +1249,11 @@
             <div class="card-header"><span class="card-title">Assign Homework</span></div>
             <div class="card-body">
               <div class="templates">
-                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
-                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
-                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
-                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
-                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
-
+                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</button>
+                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them')">Noticing</button>
+                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning')">Journaling</button>
+                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation')">Behavioral</button>
+                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily')">Breathing</button>
               </div>
               <form id="homeworkForm" onsubmit="submitHomework(event)">
                 <div class="form-grid">
@@ -1313,7 +1272,7 @@
                   <div class="form-group">
                     <label class="tooltip-trigger">Sensitivity
                       <span class="tooltip-icon">?</span>
-                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly — works on the underlying skill only.</span>
+                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly â€” works on the underlying skill only.</span>
                     </label>
                     <select id="hwSensitivity">
                       <option value="low">Low</option>
@@ -1325,20 +1284,14 @@
                     <label>Title</label>
                     <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
                   </div>
-                 <div class="form-group full">
+                  <div class="form-group full">
                     <label>Goal / Instructions</label>
                     <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
                   </div>
                   <div class="form-group full">
-                    <label>Treatment Plan Goal (SimplePractice)</label>
-                    <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
-                    <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
-                  </div>
-                  <div class="form-group full">
                     <label>Clinical Rationale (private)</label>
-
                     <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                    <span class="form-hint">For your records only — client never sees this</span>
+                    <span class="form-hint">For your records only â€” client never sees this</span>
                   </div>
                 </div>
                 <div class="form-actions">
@@ -1416,7 +1369,7 @@
           <div class="invite-display">
             <div class="invite-hint">Share this code with your client</div>
             <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
-            <div class="invite-hint">Expires in 7 days · Click to copy</div>
+            <div class="invite-hint">Expires in 7 days Â· Click to copy</div>
           </div>
         </div>
       </div>
@@ -1501,9 +1454,8 @@
         <!-- Danger Zone -->
         <div class="form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
           <label style="color: var(--danger);">Danger Zone</label>
-          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Archive Client</button>
-<span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
-
+          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Remove Client</button>
+          <span class="form-hint">Unlinks client from your dashboard. Their Alo conversations are not deleted.</span>
         </div>
       </div>
       <div class="modal-footer">
@@ -1591,7 +1543,7 @@
   <!-- ============================================ -->
   <script>
     // =====================================================
-    // CONFIG — UPDATE THESE
+    // CONFIG â€” UPDATE THESE
     // =====================================================
     const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
@@ -1600,12 +1552,7 @@
     let therapistId = null;   // UUID from auth
     let currentClient = null; // Currently viewed client object
     let allClients = [];      // Array of client objects
-    let clientNotes = {};     // client_id → notes array cache
-    let clientHomework = {};  // client_id → homework array cache
-    let clientMessages = {};  // client_id → messages array cache
-    let clientSessions = {};  // client_id → sessions array cache
-    let clientCrisis = {};    // client_id → crisis events array cache
-
+    let clientNotes = {};     // client_id â†’ notes array cache
 
     // =====================================================
     // SUPABASE API HELPER
@@ -1741,7 +1688,7 @@
 
         // Check if email confirmation is required
         if (!signupData.access_token) {
-          // Auto-confirm may be off — try signing in immediately
+          // Auto-confirm may be off â€” try signing in immediately
           // (Supabase free tier has auto-confirm on by default)
           infoEl.textContent = 'Account created! Check your email for a confirmation link, then sign in.';
           infoEl.style.display = 'block';
@@ -1749,7 +1696,7 @@
           return;
         }
 
-        // Step 2: We have a session — set it up
+        // Step 2: We have a session â€” set it up
         session = signupData;
         therapistId = session.user.id;
         localStorage.setItem('alo_session', JSON.stringify(session));
@@ -1938,7 +1885,7 @@
       document.getElementById('alertsCount').textContent = count;
 
       if (!count) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts â€” all clear</div>';
         return;
       }
 
@@ -1950,7 +1897,7 @@
             <div class="list-item-indicator danger"></div>
             <div class="list-item-content">
               <div class="list-item-title">${esc(name)}</div>
-              <div class="list-item-description">${esc(e.severity)} · ${esc(e.category)} · Alo: ${esc(e.alo_response_action)}</div>
+              <div class="list-item-description">${esc(e.severity)} Â· ${esc(e.category)} Â· Alo: ${esc(e.alo_response_action)}</div>
             </div>
             <span class="list-item-meta">${timeAgo(new Date(e.created_at))}</span>
             <button class="list-item-action" onclick="acknowledgeCrisis('${e.id}', event)">Acknowledge</button>
@@ -2016,11 +1963,7 @@
         const name = c.display_name || 'Client';
         const initials = name.substring(0, 2).toUpperCase();
         const clientKey = c.client_id || c.id; // use record id for pending clients
-        const isActive = !!currentClient && (
-  (currentClient.client_id && currentClient.client_id === c.client_id) ||
-  (!currentClient.client_id && currentClient.id === c.id)
-);
-
+        const isActive = currentClient && (currentClient.client_id === c.client_id || currentClient.id === c.id);
         const isPending = !c.client_id;
 
         return `
@@ -2033,7 +1976,7 @@
               <div class="client-name">${esc(name)}</div>
               ${isPending
                 ? `<div class="client-meta"><span class="pending-label">Pending signup</span></div>`
-                : `<div class="client-meta">${c.sessionCount} sessions · ${c.homeworkCount} hw</div>`
+                : `<div class="client-meta">${c.sessionCount} sessions Â· ${c.homeworkCount} hw</div>`
               }
             </div>
             ${isPending && c.invite_code ? `<span class="invite-badge" onclick="event.stopPropagation(); copyCode('${c.invite_code}')" title="Click to copy">${esc(c.invite_code)}</span>` : ''}
@@ -2069,9 +2012,9 @@
       document.getElementById('clientName').textContent = name;
 
       if (!currentClient.client_id) {
-        // Pending client — show invite info instead of stats
+        // Pending client â€” show invite info instead of stats
         document.getElementById('clientMeta').innerHTML =
-          `<span class="pending-label">⏳ Pending signup</span>${currentClient.invite_code ? ` · Invite: <strong>${esc(currentClient.invite_code)}</strong>` : ''}`;
+          `<span class="pending-label">â³ Pending signup</span>${currentClient.invite_code ? ` Â· Invite: <strong>${esc(currentClient.invite_code)}</strong>` : ''}`;
         // Show empty state for all tabs
         document.getElementById('prepSummary').innerHTML = '<p style="color: var(--text-muted);">Client hasn\'t signed up yet. You can still write session notes and assign homework.</p>';
         document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
@@ -2084,7 +2027,7 @@
         await loadPendingClientData();
       } else {
         document.getElementById('clientMeta').textContent =
-          `${currentClient.sessionCount} sessions this week · ${currentClient.homeworkCount} active homework`;
+          `${currentClient.sessionCount} sessions this week Â· ${currentClient.homeworkCount} active homework`;
         await loadClientData(currentClient.client_id);
       }
     }
@@ -2121,7 +2064,7 @@
         // Update open items
         const activeHw = homework?.filter(h => h.is_active) || [];
         document.getElementById('prepOpenItems').innerHTML = activeHw.length
-          ? activeHw.map(h => `<p>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
+          ? activeHw.map(h => `<p>â€¢ <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
           : '<p style="color: var(--text-muted);">No open items</p>';
       } catch (err) {
         console.error('Pending client data error:', err);
@@ -2156,19 +2099,19 @@
         let changes = [];
         
         if (unresolvedCrisis.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge alert">🔴 Alert</span><span>Unacknowledged crisis alert${unresolvedCrisis.length > 1 ? 's' : ''} — review before session</span></div>`);
+          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge alert">ðŸ”´ Alert</span><span>Unacknowledged crisis alert${unresolvedCrisis.length > 1 ? 's' : ''} â€” review before session</span></div>`);
         }
         if (recentMessages.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">🟢 New</span><span>${recentMessages.length} message${recentMessages.length > 1 ? 's' : ''} from client this week</span></div>`);
+          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">ðŸŸ¢ New</span><span>${recentMessages.length} message${recentMessages.length > 1 ? 's' : ''} from client this week</span></div>`);
         }
         if (weekSessions.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">🟢 New</span><span>${weekSessions.length} Alo session${weekSessions.length > 1 ? 's' : ''} this week</span></div>`);
+          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">ðŸŸ¢ New</span><span>${weekSessions.length} Alo session${weekSessions.length > 1 ? 's' : ''} this week</span></div>`);
         }
         if (completedHwThisWeek.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge changed">🟡 Updated</span><span>Completed: ${completedHwThisWeek.map(h => esc(h.title)).join(', ')}</span></div>`);
+          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge changed">ðŸŸ¡ Updated</span><span>Completed: ${completedHwThisWeek.map(h => esc(h.title)).join(', ')}</span></div>`);
         }
         if (activeHw.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge unchanged">⚪ Open</span><span>Active homework: ${activeHw.map(h => esc(h.title)).join(', ')}</span></div>`);
+          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge unchanged">âšª Open</span><span>Active homework: ${activeHw.map(h => esc(h.title)).join(', ')}</span></div>`);
         }
         if (!changes.length) {
           changes.push(`<div style="padding: 8px 0; color: var(--text-muted);">No between-session activity this week.</div>`);
@@ -2178,7 +2121,7 @@
 
         // Open items (now integrated into What Changed above, keep card for detailed view)
         document.getElementById('prepOpenItems').innerHTML = activeHw.length
-          ? activeHw.map(h => `<p>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
+          ? activeHw.map(h => `<p>â€¢ <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
           : '<p style="color: var(--text-muted);">No open items</p>';
 
         // Messages in prep and activity tabs
@@ -2190,7 +2133,7 @@
 
         // Session history in activity tab
         document.getElementById('activitySessions').innerHTML = sessions?.length
-          ? sessions.slice(0, 10).map(s => `<div class="excerpt"><div class="excerpt-time">${timeAgo(new Date(s.created_at))}</div><div class="excerpt-text">${s.turn_count || 0} turns · Mode: ${esc(s.primary_mode || 'unknown')}</div></div>`).join('')
+          ? sessions.slice(0, 10).map(s => `<div class="excerpt"><div class="excerpt-time">${timeAgo(new Date(s.created_at))}</div><div class="excerpt-text">${s.turn_count || 0} turns Â· Mode: ${esc(s.primary_mode || 'unknown')}</div></div>`).join('')
           : '<p style="color: var(--text-muted); text-align: center;">No sessions recorded</p>';
 
         // Homework history
@@ -2257,7 +2200,7 @@
               <button class="btn btn-sm" onclick="acknowledgeCrisis('${a.id}')" style="background: var(--danger); color: white; border: none;">Acknowledge</button>
               <button class="btn btn-sm btn-secondary" onclick="markFalsePositive('${a.id}')">False Positive</button>
             </div>
-          ` : `<div style="margin-top: 8px; font-size: 0.75rem; color: var(--success);">✓ Acknowledged ${timeAgo(new Date(a.acknowledged_at))}</div>`}
+          ` : `<div style="margin-top: 8px; font-size: 0.75rem; color: var(--success);">âœ“ Acknowledged ${timeAgo(new Date(a.acknowledged_at))}</div>`}
         </div>
       `).join('');
     }
@@ -2408,10 +2351,9 @@
       container.innerHTML = notes.map(n => `
         <div class="note-card">
           <div class="note-header">
-            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${esc(n.session_type || 'Session')}</span>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} â€” ${esc(n.session_type || 'Session')}</span>
+            <div style="display: flex; gap: 8px;">
               <button class="copy-btn" onclick="copyNote('${n.id}', this)">
-
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 Copy for EHR
               </button>
@@ -2422,14 +2364,6 @@
           </div>
           <div class="note-content">
             ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p>` : ''}
-            <div class="sp-section-buttons">
-              ${n.themes ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button>` : ''}
-${n.observations ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button>` : ''}
-${n.interventions ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button>` : ''}
-${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button>` : ''}
-
-            </div>
-
             ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p>` : ''}
             ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p>` : ''}
             ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p>` : ''}
@@ -2457,13 +2391,7 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
           <div class="form-group full"><label>Interventions Used</label><textarea id="noteInterventions" placeholder="Techniques used...">${esc(draft.interventions || '')}</textarea></div>
           <div class="form-group full"><label>Clinical Observations</label><textarea id="noteObservations" placeholder="Affect, engagement, progress...">${esc(draft.observations || '')}</textarea></div>
           <div class="form-group full"><label>Plan / Next Steps</label><textarea id="notePlan" placeholder="Goals for next session...">${esc(draft.plan || '')}</textarea></div>
-          <div class="form-group"><label>Next Session Date</label><input type="date" id="noteNextSession" value="${draft.nextSession || ''}"></div>
-          <div class="form-group" style="align-items: center; justify-content: flex-start; flex-direction: row; gap: 8px;">
-            <input type="checkbox" id="noteBilling" ${draft.billing ? 'checked' : ''} style="width: auto; margin: 0;">
-            <label for="noteBilling" style="margin: 0; cursor: pointer;">Add billing justification line to Plan</label>
-          </div>
         </div>
-
         <div class="form-actions" style="display: flex; align-items: center; justify-content: space-between;">
           <span class="save-status" id="autoSaveStatus"></span>
           <div style="display: flex; gap: 8px;">
@@ -2491,11 +2419,8 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
           themes: themes.value,
           interventions: document.getElementById('noteInterventions')?.value,
           observations: document.getElementById('noteObservations')?.value,
-          plan: document.getElementById('notePlan')?.value,
-          nextSession: document.getElementById('noteNextSession')?.value,
-          billing: document.getElementById('noteBilling')?.checked
+          plan: document.getElementById('notePlan')?.value
         };
-
         
         // Only save if there's content
         if (draft.themes || draft.interventions || draft.observations || draft.plan) {
@@ -2538,10 +2463,7 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
             themes: document.getElementById('noteThemes').value || null,
             interventions: document.getElementById('noteInterventions').value || null,
             observations: document.getElementById('noteObservations').value || null,
-            plan: document.getElementById('notePlan').value || null,
-            next_session_date: document.getElementById('noteNextSession').value || null,
-            billing_justification: document.getElementById('noteBilling').checked
-
+            plan: document.getElementById('notePlan').value || null
           }),
           prefer: 'return=minimal'
         });
@@ -2558,7 +2480,7 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
       } catch (err) {
         console.error(err);
         if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Note'; }
-        if (status) { status.className = 'save-status error'; status.innerHTML = '<span class="dot"></span> Save failed — try again'; }
+        if (status) { status.className = 'save-status error'; status.innerHTML = '<span class="dot"></span> Save failed â€” try again'; }
       }
     }
 
@@ -2578,8 +2500,8 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
       const menu = document.createElement('div');
       menu.className = 'ehr-format-menu';
       menu.innerHTML = `
-        <button onclick="copyNoteFormat('${noteId}', 'soap', this)">SOAP Format<small>Subjective · Objective · Assessment · Plan</small></button>
-        <button onclick="copyNoteFormat('${noteId}', 'dap', this)">DAP Format<small>Data · Assessment · Plan</small></button>
+        <button onclick="copyNoteFormat('${noteId}', 'soap', this)">SOAP Format<small>Subjective Â· Objective Â· Assessment Â· Plan</small></button>
+        <button onclick="copyNoteFormat('${noteId}', 'dap', this)">DAP Format<small>Data Â· Assessment Â· Plan</small></button>
         <button onclick="copyNoteFormat('${noteId}', 'narrative', this)">Narrative<small>Free-form clinical summary</small></button>
       `;
       btn.style.position = 'relative';
@@ -2608,15 +2530,15 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
       let text = '';
       
       if (format === 'soap') {
-        text = `SOAP Note — ${clientName} — ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nS (Subjective):\n${n.themes || 'N/A'}\n\nO (Objective):\n${n.observations || 'N/A'}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
+        text = `SOAP Note â€” ${clientName} â€” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nS (Subjective):\n${n.themes || 'N/A'}\n\nO (Objective):\n${n.observations || 'N/A'}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
       } else if (format === 'dap') {
-        text = `DAP Note — ${clientName} — ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nD (Data):\n${n.themes || 'N/A'}${n.observations ? '\n' + n.observations : ''}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
+        text = `DAP Note â€” ${clientName} â€” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nD (Data):\n${n.themes || 'N/A'}${n.observations ? '\n' + n.observations : ''}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
       } else {
-        text = `Session Note — ${clientName} — ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nThemes Discussed: ${n.themes || 'N/A'}\nInterventions Used: ${n.interventions || 'N/A'}\nClinical Observations: ${n.observations || 'N/A'}\nPlan / Next Steps: ${n.plan || 'N/A'}`;
+        text = `Session Note â€” ${clientName} â€” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nThemes Discussed: ${n.themes || 'N/A'}\nInterventions Used: ${n.interventions || 'N/A'}\nClinical Observations: ${n.observations || 'N/A'}\nPlan / Next Steps: ${n.plan || 'N/A'}`;
       }
       
       // Add between-session addendum if we have metadata
-      text += '\n\n— Exported from Alo Clinical Dashboard';
+      text += '\n\nâ€” Exported from Alo Clinical Dashboard';
       
       navigator.clipboard.writeText(text).then(() => {
         // Close menu and show confirmation
@@ -2643,13 +2565,11 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
     // =====================================================
     // HOMEWORK
     // =====================================================
-    function useTemplate(type, title, goal, txPlanGoal) {
+    function useTemplate(type, title, goal) {
       document.getElementById('hwType').value = type;
       document.getElementById('hwTitle').value = title;
       document.getElementById('hwGoal').value = goal;
-      if (txPlanGoal) document.getElementById('hwTxPlanGoal').value = txPlanGoal;
     }
-
 
     async function submitHomework(e) {
       e.preventDefault();
@@ -2663,10 +2583,8 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
             title: document.getElementById('hwTitle').value,
             homework_type: document.getElementById('hwType').value,
             goal: document.getElementById('hwGoal').value,
-            treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
             sensitivity: document.getElementById('hwSensitivity').value,
             therapist_notes: document.getElementById('hwRationale').value || null,
-
             is_active: true
           }),
           prefer: 'return=minimal'
@@ -2799,37 +2717,21 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
     }
 
     async function deleteClient() {
-  const filter = currentClient.client_id
-    ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
-    : `id=eq.${currentClient.id}`;
-  
-  console.log('[ARCHIVE] Current client:', currentClient);
-  console.log('[ARCHIVE] Filter:', filter);
-  
-  try {
-    const result = await api(`/rest/v1/therapist_clients?${filter}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'archived' }),
-      prefer: 'return=representation'
-    });
-    
-    console.log('[ARCHIVE] Result:', result);
-    
-    if (!result || result.length === 0) {
-      throw new Error('No rows archived - client may not exist or RLS blocking update');
+      const filter = currentClient.client_id
+        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
+        : `id=eq.${currentClient.id}`;
+      try {
+        await apiMutate(
+          `/rest/v1/therapist_clients?${filter}`,
+          'DELETE',
+          null
+        );
+        closeModal('editClientModal');
+        showHomePage();
+        toast('Client removed');
+        await loadDashboard();
+      } catch (err) { console.error(err); }
     }
-    
-    closeModal('editClientModal');
-    showHomePage();
-    toast('Client archived');
-    await loadDashboard();
-  } catch (err) {
-    console.error('[ARCHIVE] Error:', err);
-    alert('Error archiving client: ' + err.message);
-  }
-}
-
-
 
     // =====================================================
     // NAVIGATION
@@ -2889,131 +2791,6 @@ ${n.plan ? `<button class="sp-section-btn" onclick="copySoapSection('${n.id}', '
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
     }
-// =====================================================
-    // SIMPLEPRACTICE INTEGRATION FUNCTIONS
-    // =====================================================
-    
-    // Copy individual SOAP section
-    function copySoapSection(noteId, section, event) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-      
-      let text = '';
-      const clientName = currentClient.display_name || 'Client';
-      const dateStr = new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      
-      if (section === 'S') {
-        text = `S (Subjective) — ${clientName} — ${dateStr}\n${n.themes || 'N/A'}`;
-      } else if (section === 'O') {
-        text = `O (Objective) — ${clientName} — ${dateStr}\n${n.observations || 'N/A'}`;
-      } else if (section === 'A') {
-        text = `A (Assessment) — ${clientName} — ${dateStr}\n${n.interventions || 'N/A'}`;
-      } else if (section === 'P') {
-        let planText = n.plan || 'N/A';
-        if (n.next_session_date) {
-          planText += `\nNext session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`;
-        }
-        if (n.billing_justification) {
-          planText += '\nContinued therapeutic support medically necessary for symptom management and functional improvement.';
-        }
-        text = `P (Plan) — ${clientName} — ${dateStr}\n${planText}`;
-      }
-      
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = event.target;
-        btn.classList.add('copied');
-        btn.textContent = '✓ Copied';
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          btn.textContent = `Copy ${section}`;
-        }, 2000);
-      });
-    }
-    
-    // Generate Between-Session Addendum
-    function generateAddendum(format = 'full') {
-      if (!currentClient) return '';
-      
-      const clientName = currentClient.display_name || 'Client';
-      const cacheKey = currentClient.client_id || currentClient.id;
-      
-      // Get data
-      const sessions = clientSessions[cacheKey] || [];
-      const homework = (clientHomework[cacheKey] || []).filter(h => h.is_active);
-      const messages = clientMessages[cacheKey] || [];
-      const crisis = clientCrisis[cacheKey] || [];
-      
-      const weekAgo = new Date(Date.now() - 7 * 86400000);
-      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
-      const recentMessages = messages.filter(m => new Date(m.created_at) > weekAgo);
-      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
-      
-      // Generate themes from recent sessions
-      const themes = recentSessions
-        .map(s => s.primary_mode || 'emotional processing')
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .join(', ');
-      
-      const lastSession = recentSessions[0] ? new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
-      
-      const dateRange = recentSessions.length 
-        ? `${new Date(recentSessions[recentSessions.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-        : 'Past 7 days';
-      
-      if (format === 'brief') {
-        return `Between-session (Alo): ${recentSessions.length} check-in${recentSessions.length !== 1 ? 's' : ''}; HW ${homework.length ? homework[0].title + ' (' + (homework[0].completed_at ? 'completed' : 'in progress') + ')' : 'none'}; messages ${recentMessages.length ? 'Y' : 'N'}; alerts ${unresolvedCrisis.length ? 'Y' : 'N'}.`;
-      }
-      
-      // Full format
-      return `BETWEEN-SESSION DATA (Source: Alo Clinical Dashboard, ${dateRange})
-
-Source: Client self-directed use of an emotional support tool. No session transcript available.
-
-Engagement: Client engaged in ${recentSessions.length} Alo session${recentSessions.length !== 1 ? 's' : ''} (last: ${lastSession}).
-
-Themes: Client-reported focus areas: ${themes || 'general emotional processing'}.
-
-Homework: ${homework.length ? homework.map(h => `${h.title} — Status: ${h.completed_at ? 'completed' : 'in progress'}`).join('; ') : 'None assigned'}.
-
-Client Messages: ${recentMessages.length} message${recentMessages.length !== 1 ? 's' : ''} received${recentMessages.length ? '; subject: ' + truncate(recentMessages[0].message, 50) : ''}.
-
-Safety: ${unresolvedCrisis.length ? unresolvedCrisis.map(c => `Alert on ${new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${c.category}; resolved via ${c.alo_response_action}`).join('. ') : 'No alerts'}.`;
-    }
-    
-    // Copy Prep Pack (entire Session Prep as paste block)
-    function copyPrepPack() {
-      const clientName = currentClient?.display_name || 'Client';
-      const cacheKey = currentClient?.client_id || currentClient?.id;
-      
-      // Build the prep pack
-      const addendum = generateAddendum('full');
-      const notes = clientNotes[cacheKey] || [];
-      const recentNote = notes[0];
-      
-      let prepPack = `SESSION PREP PACK — ${clientName} — ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\n\n`;
-      prepPack += addendum;
-      
-      if (recentNote) {
-        prepPack += `\n\n—————————————————————————————————————————\n\nLAST SESSION NOTE (${new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}):\n`;
-        if (recentNote.themes) prepPack += `Themes: ${recentNote.themes}\n`;
-        if (recentNote.plan) prepPack += `Plan: ${recentNote.plan}\n`;
-      }
-      
-      navigator.clipboard.writeText(prepPack).then(() => {
-        const btn = document.getElementById('copyPrepPackBtn');
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
-        setTimeout(() => {
-          btn.innerHTML = originalHTML;
-        }, 2000);
-        toast('Prep Pack copied to clipboard');
-      });
-    }
-
   </script>
 </body>
 </html>
-
-
