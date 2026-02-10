@@ -1,2930 +1,393 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alo Clinical Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alo — Clinical Dashboard</title>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    :root {
-      --cream: #FDFBF7;
-      --warm-white: #FAF8F5;
-      --sage: #8B9A7D;
-      --sage-light: #E8EDE4;
-      --sage-hover: #7a8a6d;
-      --charcoal: #2D2A26;
-      --stone: #9C9589;
-      --border: rgba(156, 149, 137, 0.2);
-      --bg: var(--cream);
-      --white: #ffffff;
-      --text: var(--charcoal);
-      --text-light: var(--stone);
-      --text-muted: var(--stone);
-      --primary: var(--sage);
-      --primary-hover: var(--sage-hover);
-      --danger: #d97706;
-      --danger-bg: #fef3c7;
-      --danger-border: #fde68a;
-      --warning: #f59e0b;
-      --warning-bg: #fffbeb;
-      --warning-border: #fde68a;
-      --success: #10b981;
-      --success-bg: #ecfdf5;
-      --info-bg: var(--sage-light);
+    :root{
+      --bg: #fbfaf6;
+      --card: #ffffff;
+      --border: #e6e1d6;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #7c8b6a;        /* olive */
+      --accent-2: #6f7f5f;
+      --warn-bg: #fff3c4;       /* pale yellow */
+      --warn-border: #f1d98a;
+      --chip: #f3f4f6;
+      --shadow: 0 1px 0 rgba(0,0,0,.02);
+      --radius: 14px;
     }
-    
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
       background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      min-height: 100vh;
     }
 
-    /* === LOGIN PAGE === */
-    .login-page {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-
-    .login-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(45, 42, 38, 0.06);
-    }
-
-    .login-logo {
-      width: 56px;
-      height: 56px;
-      background: var(--sage);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 24px;
-      margin: 0 auto 16px;
-    }
-
-    .login-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .login-subtitle {
-      font-size: 0.875rem;
-      color: var(--text-light);
-      margin-bottom: 24px;
-    }
-
-    .login-form { text-align: left; }
-
-    .login-form .form-group {
-      margin-bottom: 16px;
-    }
-
-    .login-form label {
-      display: block;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    .login-form input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-family: inherit;
-    }
-
-    .login-form input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .login-error {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.8125rem;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .login-info {
-      background: var(--sage-light);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.8125rem;
-      color: var(--text);
-      margin-bottom: 16px;
-      display: none;
-    }
-    
-    /* === HEADER === */
-    .header {
-      background: var(--warm-white);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 60px;
+    /* Top bar */
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
+      padding: 12px 16px;
+      background: #f7f6f1;
+      border-bottom: 1px solid var(--border);
     }
-    
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .home-link {
+    .brand {
       display: flex;
       align-items: center;
       gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-    }
-    
-    .home-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--sage);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
       font-weight: 700;
-      font-size: 18px;
     }
-
-    .home-icon svg { width: 20px; height: 20px; }
-    
-    .logo-text {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .user-name {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      background: var(--text);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .logout-btn {
-      background: none;
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      color: var(--text-light);
-      cursor: pointer;
-    }
-
-    .logout-btn:hover { background: var(--bg); }
-
-    /* === DISCLAIMER BANNER === */
-    .disclaimer-banner {
-      background: var(--danger-bg);
-      border-bottom: 1px solid var(--danger-border);
-      padding: 6px 24px;
-      font-size: 0.75rem;
-      color: var(--text);
-      text-align: center;
-      position: fixed;
-      top: 60px;
-      left: 0;
-      right: 0;
-      z-index: 99;
-    }
-    
-    /* === LAYOUT === */
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 24px;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 108px 24px 24px;
-    }
-    
-    .main {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    
-    /* === SECTIONS === */
-    .section {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    
-    .section-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .section-icon {
-      width: 32px;
-      height: 32px;
+    .brand .home {
+      width: 30px;
+      height: 30px;
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .section-icon.danger { background: var(--danger-bg); color: var(--danger); }
-    .section-icon.warning { background: var(--warning-bg); color: var(--warning); }
-    .section-icon svg { width: 18px; height: 18px; }
-    
-    .section-title { font-size: 0.9375rem; font-weight: 600; }
-    
-    .section-count {
-      margin-left: auto;
-      background: var(--bg);
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-light);
-    }
-    
-    .section-body { padding: 8px; }
-    
-    .section-empty {
-      padding: 32px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.875rem;
-    }
-    
-    /* === LIST ITEMS === */
-    .list-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    
-    .list-item:hover { background: var(--bg); }
-    
-    .list-item-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    
-    .list-item-indicator.danger { background: var(--danger); }
-    .list-item-indicator.warning { background: var(--warning); }
-    .list-item-indicator.success { background: var(--success); }
-    
-    .list-item-content { flex: 1; min-width: 0; }
-    
-    .list-item-title {
-      font-size: 0.875rem;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    
-    .list-item-description {
-      font-size: 0.8125rem;
-      color: var(--text-light);
-    }
-    
-    .list-item-meta {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-    
-    .list-item-action {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .list-item-action:hover { background: var(--border); }
-    
-    /* === SIDEBAR === */
-    .sidebar {
-      position: sticky;
-      top: 108px;
-      height: fit-content;
-    }
-    
-    .sidebar-section {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    
-    .sidebar-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .sidebar-title { font-size: 0.875rem; font-weight: 600; }
-    
-    .sidebar-list {
-      max-height: calc(100vh - 240px);
-      overflow-y: auto;
-    }
-    
-    .client-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .client-item:last-child { border-bottom: none; }
-    .client-item:hover { background: var(--bg); }
-    .client-item.active { background: var(--primary); color: white; }
-    .client-item.active .client-name { color: white; }
-    .client-item.active .client-meta { color: rgba(255,255,255,0.8); }
-    
-    .client-avatar {
-      width: 40px;
-      height: 40px;
-      background: var(--bg);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-light);
-      flex-shrink: 0;
-      position: relative;
-    }
-    
-    .client-item.active .client-avatar { background: rgba(255,255,255,0.2); color: white; }
-    
-    .status-badge {
-      position: absolute;
-      bottom: -2px;
-      right: -2px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 2px solid var(--white);
-    }
-    
-    .client-item.active .status-badge { border-color: var(--primary); }
-    .status-badge.crisis { background: var(--danger); animation: pulse 2s infinite; }
-    .status-badge.needs-attention { background: var(--warning); }
-    .status-badge.stable { background: var(--success); }
-    .status-badge.dormant { background: var(--text-muted); }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
-    }
-    
-    .client-info { flex: 1; min-width: 0; }
-    .client-name { font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .client-meta { font-size: 0.75rem; color: var(--text-muted); }
-    
-    /* === CLIENT PAGE === */
-    .client-page { display: none; }
-    .client-page.active { display: grid; }
-    
-    .page-header { margin-bottom: 24px; }
-    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-    .page-meta { font-size: 0.875rem; color: var(--text-light); }
-    
-    /* === TABS === */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 6px;
-      margin-bottom: 24px;
-    }
-    
-    .tab {
-      flex: 1;
-      padding: 10px 16px;
-      border: none;
-      background: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    
-    .tab:hover { background: var(--bg); color: var(--text); }
-    .tab.active { background: var(--primary); color: white; }
-    
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    
-    /* === CARDS === */
-    .card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
-    }
-    
-    .card:hover { box-shadow: 0 4px 16px rgba(45, 42, 38, 0.08); }
-    
-    .card-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .card-title { font-size: 0.9375rem; font-weight: 600; }
-    
-    .card-body { padding: 20px; }
-    .card-body p { font-size: 0.875rem; margin-bottom: 12px; }
-    .card-body p:last-child { margin-bottom: 0; }
-    
-    .highlight-box {
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 0.875rem;
-      margin-bottom: 16px;
-    }
-    
-    /* === EXCERPTS === */
-    .excerpt {
-      padding: 12px 16px;
-      background: var(--bg);
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .excerpt:last-child { margin-bottom: 0; }
-    .excerpt-time { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
-    .excerpt-text { font-size: 0.875rem; font-style: italic; }
-    
-    /* === FORMS === */
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .form-grid .full { grid-column: 1 / -1; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 0.8125rem; font-weight: 500; }
-    
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-family: inherit;
-    }
-    
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    
-    .form-group textarea { min-height: 80px; resize: vertical; }
-    .form-hint { font-size: 0.75rem; color: var(--text-muted); }
-    
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-    
-    /* === BUTTONS === */
-    .btn {
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-      border: none;
+      background: #dfe6d7;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      font-size: 16px;
+      color: #2f3a2b;
     }
-    
-    .btn svg { width: 16px; height: 16px; }
-    .btn-primary { background: var(--sage); color: white; }
-    .btn-primary:hover { background: var(--sage-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3); }
-    .btn-secondary { background: var(--warm-white); border: 1px solid var(--border); color: var(--text); }
-    .btn-secondary:hover { background: var(--sage-light); border-color: var(--sage); }
-    .btn-sm { padding: 6px 12px; font-size: 0.8125rem; }
-    .btn-full { width: 100%; justify-content: center; }
-    
-    /* === TEMPLATES === */
-    .templates { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    
-    .template-btn {
-      background: var(--bg);
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #111827;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .btn {
       border: 1px solid var(--border);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8125rem;
-      color: var(--text-light);
+      background: var(--card);
+      padding: 8px 10px;
+      border-radius: 10px;
       cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: var(--shadow);
     }
-    
-    .template-btn:hover { background: var(--primary); border-color: var(--primary); color: white; }
-    
-    /* === HOMEWORK === */
-    .homework-item {
+    .btn:hover { border-color: #d8d2c6; }
+
+    /* Notice banner */
+    .notice {
+      padding: 10px 16px;
+      background: var(--warn-bg);
+      border-bottom: 1px solid var(--warn-border);
+      color: #5b4a1b;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    /* Layout */
+    .page {
+      padding: 18px 16px 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* Header row (client name + edit) */
+    .client-header {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 16px;
-      background: var(--bg);
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    .homework-item:last-child { margin-bottom: 0; }
-    
-    .homework-status {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .homework-status.active { background: var(--warning-bg); color: var(--warning); }
-    .homework-status.completed { background: var(--success-bg); color: var(--success); }
-    .homework-status svg { width: 14px; height: 14px; }
-    
-    .homework-content { flex: 1; }
-    .homework-type { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
-    .homework-desc { font-size: 0.8125rem; color: var(--text-light); }
-    .homework-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
-    
-    /* === SESSION PREVIEW === */
-    .session-preview { padding: 12px 0; }
-    .session-preview-border { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 16px; }
-    .session-preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .session-preview-date { font-size: 0.875rem; font-weight: 600; }
-    .session-preview-type { font-size: 0.75rem; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border-radius: 4px; }
-    .session-preview-text { font-size: 0.8125rem; color: var(--text-light); margin-bottom: 4px; line-height: 1.5; }
-    .session-preview-text:last-child { margin-bottom: 0; }
-    .session-preview-text strong { color: var(--text); }
-    
-    /* === NOTES === */
-    .note-card { background: var(--bg); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .note-card:last-child { margin-bottom: 0; }
-    .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .note-date { font-size: 0.875rem; font-weight: 600; }
-    .note-content p { font-size: 0.8125rem; color: var(--text-light); margin-bottom: 8px; line-height: 1.6; }
-    .note-content p:last-child { margin-bottom: 0; }
-    .note-content strong { color: var(--text); }
-    
-    .copy-btn {
-      background: var(--white);
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      color: var(--text-light);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .copy-btn:hover { background: var(--bg); }
-    .copy-btn.copied { background: var(--success-bg); border-color: var(--success); color: var(--success); }
-    .copy-btn svg { width: 12px; height: 12px; }
-
-    /* === CRISIS ALERTS === */
-    .crisis-alert-item {
-      background: var(--danger-bg);
-      border: 1px solid var(--danger-border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 12px;
-    }
-    .crisis-alert-item:last-child { margin-bottom: 0; }
-    .crisis-alert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .crisis-alert-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-    .crisis-alert-severity { font-size: 0.75rem; font-weight: 600; }
-    .crisis-alert-detail { font-size: 0.875rem; color: var(--text); line-height: 1.5; }
-    
-    /* === INVITE CODE === */
-    .invite-display {
-      background: var(--bg);
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      margin: 16px 0;
-    }
-
-    .invite-code {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--primary);
-      margin: 8px 0;
-      cursor: pointer;
-    }
-
-    .invite-code:hover { color: var(--primary-hover); }
-
-    .invite-hint {
-      font-size: 0.8125rem;
-      color: var(--text-muted);
-    }
-    
-    /* === MODAL === */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal-overlay.show { display: flex; }
-    
-    .modal {
-      background: var(--white);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      animation: modalSlideIn 0.2s ease;
-    }
-    
-    @keyframes modalSlideIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
       justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 10px;
     }
-    .modal-header h3 { font-size: 1.125rem; font-weight: 600; }
-    .modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0; }
-    .modal-close:hover { color: var(--text); }
-    .modal-body { padding: 24px; }
-    .modal-body .form-group { margin-bottom: 16px; }
-    .modal-body .form-group:last-child { margin-bottom: 0; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
-    
-    /* === SETTINGS TOGGLES === */
-    .settings-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+    .client-title {
+      line-height: 1.1;
     }
-    .settings-section-title {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 12px;
+    .client-title h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: -0.02em;
+    }
+    .client-meta {
+      margin-top: 6px;
+      color: #b45309;
+      font-size: 13px;
       display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
     }
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--bg);
-    }
-    .setting-row:last-child { border-bottom: none; }
-    .setting-label {
-      font-size: 0.8rem;
-      color: var(--text);
-    }
-    .setting-hint {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    .toggle {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0;
-    }
-    .toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #ccc;
-      border-radius: 24px;
-      transition: 0.2s;
-    }
-    .toggle-slider:before {
-      content: "";
-      position: absolute;
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background: white;
-      border-radius: 50%;
-      transition: 0.2s;
-    }
-    .toggle input:checked + .toggle-slider {
-      background: var(--olive);
-    }
-    .toggle input:checked + .toggle-slider:before {
-      transform: translateX(20px);
-    }
-    .toggle input:disabled + .toggle-slider {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .settings-default-note {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      font-style: italic;
-      margin-top: 8px;
-      padding: 6px 8px;
-      background: var(--bg);
-      border-radius: 4px;
-    }
-
-    /* === SAVE INDICATOR === */
-    .save-status {
+    .pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
       padding: 4px 8px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
+      border-radius: 999px;
+      color: #9a3412;
+      font-weight: 600;
     }
-    .save-status.saving { color: var(--olive); }
-    .save-status.saved { color: #16a34a; }
-    .save-status.error { color: #dc2626; }
-    .save-status .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: currentColor;
-    }
-    .save-status.saving .dot {
-      animation: pulse 1s ease infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
-    /* === EHR FORMAT PICKER === */
-    .ehr-format-menu {
-      position: absolute;
-      bottom: 100%;
-      right: 0;
-      background: white;
+    /* Tabs */
+    .tabs {
+      display: flex;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      padding: 4px;
-      min-width: 160px;
-      z-index: 100;
-      margin-bottom: 4px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      margin: 14px 0 16px;
     }
-    .ehr-format-menu button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 8px 12px;
-      border: none;
+    .tab {
+      flex: 1;
+      padding: 12px 14px;
+      font-weight: 700;
+      color: var(--muted);
       background: transparent;
-      font-size: 0.8rem;
-      border-radius: 4px;
+      border: 0;
       cursor: pointer;
-      color: var(--text);
     }
-    .ehr-format-menu button:hover {
-      background: var(--bg-warm);
-    }
-    .ehr-format-menu button small {
-      display: block;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* === WHAT CHANGED BADGE === */
-    .change-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: 500;
-    }
-    .change-badge.new { background: #dcfce7; color: #166534; }
-    .change-badge.changed { background: #fef3c7; color: #92400e; }
-    .change-badge.alert { background: #fee2e2; color: #991b1b; }
-    .change-badge.unchanged { background: #f3f4f6; color: #6b7280; }
-
-    /* === TOAST === */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--text);
+    .tab.active {
+      background: var(--accent);
       color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: none;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .card h2 {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      letter-spacing: .02em;
+      text-transform: none;
+    }
+    .card .body {
+      padding: 14px 16px 16px;
+      color: var(--muted);
+      font-size: 14px;
+      border-top: 1px solid #f1eee6;
+      min-height: 64px;
+      display: flex;
       align-items: center;
+    }
+
+    /* Sidebar: Clients */
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: sticky;
+      top: 14px;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 12px;
+      border-bottom: 1px solid #f1eee6;
+    }
+    .sidebar-header h3 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: .01em;
+    }
+    .btn-small {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .client-list {
+      padding: 10px;
+      display: grid;
       gap: 8px;
-      z-index: 1000;
-      animation: slideUp 0.3s ease;
     }
-    .toast.show { display: flex; }
-    .toast svg { width: 18px; height: 18px; color: var(--success); }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* === TOOLTIP === */
-    .tooltip-trigger {
-      display: inline-flex;
+    .client-row {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 10px;
       align-items: center;
-      gap: 4px;
-      position: relative;
+      padding: 10px;
+      border-radius: 12px;
+      background: #f7f6f1;
+      border: 1px solid #f1eee6;
     }
-    .tooltip-icon {
-      width: 16px;
-      height: 16px;
-      background: var(--border);
-      border-radius: 50%;
+    .initials {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: #dfe6d7;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--text-light);
-      cursor: help;
-      flex-shrink: 0;
+      font-weight: 800;
+      color: #2f3a2b;
+      font-size: 12px;
     }
-    .tooltip-icon:hover { background: var(--stone); color: white; }
-    .tooltip-content {
-      display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--charcoal);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 400;
-      line-height: 1.5;
-      width: 260px;
-      z-index: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .tooltip-content::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 6px solid transparent;
-      border-top-color: var(--charcoal);
-    }
-    .tooltip-trigger:hover .tooltip-content { display: block; }
-
-    /* === INVITE BADGE === */
-    .invite-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-border);
+    .client-row .name {
+      font-weight: 800;
       color: var(--text);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      cursor: pointer;
+      margin: 0;
+      font-size: 14px;
     }
-    .invite-badge:hover { background: var(--warning-border); }
-    .invite-badge svg { width: 10px; height: 10px; }
-    .pending-label {
-      font-size: 0.7rem;
-      color: var(--warning);
-      font-weight: 500;
+    .client-row .status {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: #b45309;
+      font-weight: 700;
+    }
+    .code {
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      font-weight: 800;
+      font-size: 12px;
     }
 
-    .loading { text-align: center; padding: 32px; color: var(--text-muted); }
-    .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .sidebar { position: static; order: -1; }
-      .form-grid { grid-template-columns: 1fr; }
+    /* Responsive */
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .sidebar-card { position: static; }
     }
   </style>
 </head>
+
 <body>
-  <!-- ============================================ -->
-  <!-- LOGIN PAGE                                   -->
-  <!-- ============================================ -->
-  <div id="loginPage" class="login-page">
-    <div class="login-card">
-      <div class="login-logo">A</div>
-      <h1 class="login-title">Alo Dashboard</h1>
-      <p class="login-subtitle">Clinical companion management</p>
-      <div class="login-error" id="loginError"></div>
-      <div class="login-info" id="loginInfo"></div>
-
-      <!-- Sign In Form -->
-      <div class="login-form" id="signInForm">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="loginEmail" placeholder="you@practice.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary btn-full" onclick="handleLogin()" style="margin-top: 16px;">Sign In</button>
-        <p style="text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
-          New therapist? <a href="#" onclick="toggleAuthForm('signup'); return false;" style="color: var(--olive); font-weight: 600;">Create account</a>
-        </p>
-      </div>
-
-      <!-- Sign Up Form -->
-      <div class="login-form" id="signUpForm" style="display: none;">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="signupName" placeholder="Dr. Jane Smith">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="signupEmail" placeholder="you@practice.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="signupPassword" placeholder="Min. 6 characters">
-        </div>
-        <button class="btn btn-primary btn-full" onclick="handleSignup()" style="margin-top: 16px;">Create Account</button>
-        <p style="text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
-          Already have an account? <a href="#" onclick="toggleAuthForm('login'); return false;" style="color: var(--olive); font-weight: 600;">Sign in</a>
-        </p>
-      </div>
+  <header class="topbar" role="banner">
+    <div class="brand">
+      <span class="home" aria-hidden="true">⌂</span>
+      <span>Alo</span>
     </div>
+
+    <div class="topbar-right">
+      <span>Kano</span>
+      <span class="avatar" aria-label="User">K</span>
+      <button class="btn" type="button">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- ✅ No mojibake here; plain UTF-8 text -->
+  <div class="notice" role="status">
+    Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
   </div>
 
-  <!-- ============================================ -->
-  <!-- MAIN APP (hidden until authenticated)        -->
-  <!-- ============================================ -->
-  <div id="appContainer" style="display: none;">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <a href="#" class="home-link" onclick="showHomePage(); return false;">
-          <div class="home-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          </div>
-          <span class="logo-text">Alo</span>
-        </a>
-      </div>
-      <div class="header-right">
-        <span class="user-name" id="therapistName"></span>
-        <div class="user-avatar" id="therapistAvatar"></div>
-        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
-      </div>
-    </header>
-
-    <!-- Liability disclaimer banner -->
-    <div class="disclaimer-banner">
-      âš ï¸ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
-    </div>
-
-    <!-- ============================================ -->
-    <!-- HOMEPAGE                                     -->
-    <!-- ============================================ -->
-    <div class="layout" id="homePage">
-      <div class="main">
-        <!-- Crisis Alerts -->
-        <div class="section" id="alertsSection">
-          <div class="section-header">
-            <div class="section-icon danger">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+  <main class="page">
+    <div class="grid">
+      <!-- Main column -->
+      <section>
+        <div class="client-header">
+          <div class="client-title">
+            <h1>Sarah M.</h1>
+            <div class="client-meta">
+              <span class="pill">Pending signup</span>
+              <span>Invite: <span class="mono">ALO-64JX</span></span>
             </div>
-            <span class="section-title">Crisis Alerts</span>
-            <span class="section-count" id="alertsCount">0</span>
           </div>
-          <div class="section-body" id="alertsList">
-            <div class="loading"><div class="spinner"></div>Loading...</div>
+          <button class="btn" type="button">Edit</button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Client dashboard tabs">
+          <button class="tab active" role="tab" aria-selected="true" type="button">Session Prep</button>
+          <button class="tab" role="tab" aria-selected="false" type="button">Session Tools</button>
+        </div>
+
+        <div class="card">
+          <h2>Recent Session Notes</h2>
+          <div class="body">No session notes yet.</div>
+        </div>
+
+        <div class="card">
+          <h2>What Changed</h2>
+          <div class="body">
+            Client hasn't signed up yet. You can still write session notes and assign homework.
           </div>
         </div>
 
-        <!-- Messages from Clients -->
-        <div class="section" id="messagesSection">
-          <div class="section-header">
-            <div class="section-icon" style="background: #eff6ff; color: #1e40af;">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <span class="section-title">Messages from Clients</span>
-            <span class="section-count" id="messagesCount">0</span>
-          </div>
-          <div class="section-body" id="messagesList">
-            <div class="section-empty">No unread messages</div>
-          </div>
+        <div class="card">
+          <h2>Open Items</h2>
+          <div class="body">No open items.</div>
         </div>
 
-        <!-- Triage -->
-        <div class="section" id="triageSection">
-          <div class="section-header">
-            <div class="section-icon warning">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <span class="section-title">Clinical Triage</span>
-            <span class="section-count" id="triageCount">0</span>
-          </div>
-          <div class="section-body" id="triageList">
-            <div class="section-empty">All clients stable</div>
-          </div>
+        <div class="card">
+          <h2>Messages from Client</h2>
+          <div class="body">No messages.</div>
         </div>
-      </div>
+      </section>
 
-      <!-- Sidebar: Client List -->
-      <div class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-header">
-            <span class="sidebar-title">Clients</span>
-            <div style="display: flex; gap: 4px;">
-              <button class="btn btn-sm" onclick="showDefaultSettingsModal()" style="padding: 4px 8px; font-size: 0.75rem;" title="Default client settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </button>
-              <button class="btn btn-sm btn-primary" onclick="showInviteModal()" style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
-            </div>
-          </div>
-          <div class="sidebar-list" id="clientsList">
-            <div class="section-empty">No clients yet</div>
-          </div>
+      <!-- Sidebar -->
+      <aside class="sidebar-card" aria-label="Clients">
+        <div class="sidebar-header">
+          <h3>Clients</h3>
+          <button class="btn-small" type="button">+ Invite</button>
         </div>
-      </div>
-    </div>
 
-    <!-- ============================================ -->
-    <!-- CLIENT DETAIL PAGE                           -->
-    <!-- ============================================ -->
-    <div class="layout client-page" id="clientPage">
-      <div class="main">
-        <div class="page-header">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div class="client-list">
+          <div class="client-row">
+            <div class="initials">JO</div>
             <div>
-              <h1 class="page-title" id="clientName">Client</h1>
-              <p class="page-meta" id="clientMeta"></p>
+              <p class="name">John</p>
+              <p class="status">Pending signup</p>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <button class="btn" id="crisisAlertButton" onclick="goToCrisisAlerts()" style="display: none; background: var(--danger); color: white; border: none; animation: pulse 2s infinite;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span id="crisisAlertButtonText">Crisis Alert</span>
-              </button>
-              <button class="btn btn-secondary btn-sm" onclick="showEditClientModal()">Edit</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
-          <button class="tab" onclick="switchTab('tools', this)">Session Tools</button>
-        </div>
-
-        <!-- Session Prep Tab -->
-        <div class="tab-content active" id="tab-prep">
-          <div class="card" id="lastSessionsCard">
-            <div class="card-header">
-              <span class="card-title">Recent Session Notes</span>
-              <button class="btn btn-sm btn-secondary" onclick="switchTab('tools', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
-            </div>
-            <div class="card-body" id="lastSessionsPreview">
-              <p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>
-            </div>
+            <div class="code">ALO-NBF2</div>
           </div>
 
-          <div class="card">
-            <div class="card-header"><span class="card-title">What Changed</span></div>
-            <div class="card-body" id="prepSummary">
-              <div class="loading"><div class="spinner"></div></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><span class="card-title">Open Items</span></div>
-            <div class="card-body" id="prepOpenItems">
-              <p style="color: var(--text-muted);">No open items</p>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><span class="card-title">Messages from Client</span></div>
-            <div class="card-body" id="clientMessagesPrep">
-              <p style="color: var(--text-muted);">No messages</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Session Tools Tab (Notes + Homework + Activity) -->
-        <div class="tab-content" id="tab-tools">
-          <!-- Session Notes -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Session Notes</span>
-              <button class="btn btn-sm btn-primary" onclick="showNoteForm()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                Add Note
-              </button>
-            </div>
-            <div class="card-body" id="notesContainer">
-              <p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Assign Homework</span></div>
-            <div class="card-body">
-              <div class="templates">
-                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed')">Grounding</button>
-                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them')">Noticing</button>
-                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning')">Journaling</button>
-                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation')">Behavioral</button>
-                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily')">Breathing</button>
-              </div>
-              <form id="homeworkForm" onsubmit="submitHomework(event)">
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label>Type</label>
-                    <select id="hwType" required>
-                      <option value="grounding">Grounding Technique</option>
-                      <option value="noticing">Noticing Practice</option>
-                      <option value="journaling">Journaling Prompt</option>
-                      <option value="behavioral">Behavioral Experiment</option>
-                      <option value="cognitive">Cognitive Exercise</option>
-                      <option value="breathing">Breathing Exercise</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="tooltip-trigger">Sensitivity
-                      <span class="tooltip-icon">?</span>
-                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly "” works on the underlying skill only.</span>
-                    </label>
-                    <select id="hwSensitivity">
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                  <div class="form-group full">
-                    <label>Title</label>
-                    <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
-                  </div>
-                  <div class="form-group full">
-                    <label>Goal / Instructions</label>
-                    <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
-                  </div>
-                  <div class="form-group full">
-                    <label>Clinical Rationale (private)</label>
-                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                    <span class="form-hint">For your records only "” client never sees this</span>
-                  </div>
-                </div>
-                <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Assign Homework</button>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Homework History</span></div>
-            <div class="card-body" id="homeworkHistory">
-              <p style="color: var(--text-muted); text-align: center;">No homework yet</p>
-            </div>
-          </div>
-
-        <!-- Alo Activity (part of Session Tools) -->
-          <div class="card" id="crisisAlertsCard" style="display: none;">
-            <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
-              <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Crisis Alerts
-              </span>
-              <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
-            </div>
-            <div class="card-body" id="crisisAlertsList"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><span class="card-title">Messages from Client</span></div>
-            <div class="card-body" id="activityMessages">
-              <p style="color: var(--text-muted); text-align: center;">No messages</p>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><span class="card-title">Session History</span></div>
-            <div class="card-body" id="activitySessions">
-              <p style="color: var(--text-muted); text-align: center;">No sessions recorded yet</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sidebar (client page) -->
-      <div class="sidebar">
-        <div class="sidebar-section">
-          <div class="sidebar-header">
-            <span class="sidebar-title">Clients</span>
-            <button class="btn btn-sm btn-primary" onclick="showInviteModal()" style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
-          </div>
-          <div class="sidebar-list" id="clientsList2"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================ -->
-  <!-- INVITE CLIENT MODAL                          -->
-  <!-- ============================================ -->
-  <div class="modal-overlay" id="inviteModal" onclick="closeModal('inviteModal', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Invite Client</h3>
-        <button class="modal-close" onclick="closeModal('inviteModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Display Name (optional)</label>
-          <input type="text" id="inviteClientName" placeholder="e.g., Sarah M.">
-          <span class="form-hint">Friendly name visible only to you</span>
-        </div>
-        <div id="inviteResult" style="display: none;">
-          <div class="invite-display">
-            <div class="invite-hint">Share this code with your client</div>
-            <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
-            <div class="invite-hint">Expires in 7 days Â· Click to copy</div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('inviteModal')">Close</button>
-        <button class="btn btn-primary" id="generateInviteBtn" onclick="generateInvite()">Generate Invite Code</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================ -->
-  <!-- EDIT CLIENT MODAL                            -->
-  <!-- ============================================ -->
-  <div class="modal-overlay" id="editClientModal" onclick="closeModal('editClientModal', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Edit Client</h3>
-        <button class="modal-close" onclick="closeModal('editClientModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Display Name</label>
-          <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
-        </div>
-        
-        <!-- Chat Settings -->
-        <div class="settings-section">
-          <div class="settings-section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            Chat Settings
-          </div>
-          
-          <div class="setting-row">
+          <div class="client-row">
+            <div class="initials">SA</div>
             <div>
-              <div class="setting-label">Homework visibility</div>
-              <div class="setting-hint">Client can see assigned homework in chat</div>
+              <p class="name">Sarah M.</p>
+              <p class="status">Pending signup</p>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingHomework" checked>
-              <span class="toggle-slider"></span>
-            </label>
+            <div class="code">ALO-64JX</div>
           </div>
-          
-          <div class="setting-row">
+
+          <div class="client-row">
+            <div class="initials">TE</div>
             <div>
-              <div class="setting-label">Message to therapist</div>
-              <div class="setting-hint">Client can send you async messages</div>
+              <p class="name">Test Client</p>
+              <p class="status" style="color:#6b7280;">0 sessions · 1h ago</p>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingMessages" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          
-          <div class="setting-row">
-            <div>
-              <div class="setting-label">Share conversation summary</div>
-              <div class="setting-hint">Client can share AI-generated session summaries with you</div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingSummary" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          
-          <div class="setting-row">
-            <div>
-              <div class="setting-label">Conversation history</div>
-              <div class="setting-hint">Client can view their own past sessions</div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingHistory" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          
-          <div class="settings-default-note">
-            These settings control what features the client sees in their chat interface. Changes apply on client's next session.
+            <div class="code" style="background:#f3f4f6;border-color:#e5e7eb;color:#374151;">—</div>
           </div>
         </div>
-        
-        <!-- Danger Zone -->
-        <div class="form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
-          <label style="color: var(--danger);">Danger Zone</label>
-          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Remove Client</button>
-          <span class="form-hint">Unlinks client from your dashboard. Their Alo conversations are not deleted.</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('editClientModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
-      </div>
+      </aside>
     </div>
-  </div>
-
-  <!-- Default Client Settings Modal -->
-  <div class="modal-overlay" id="defaultSettingsModal" onclick="closeModal('defaultSettingsModal', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Default Client Settings</h3>
-        <button class="modal-close" onclick="closeModal('defaultSettingsModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">These defaults apply to all new clients. Override per-client in Edit.</p>
-        
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Homework visibility</div>
-            <div class="setting-hint">Client can see assigned homework in chat</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHomework" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Message to therapist</div>
-            <div class="setting-hint">Client can send async messages</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultMessages" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Share conversation summary</div>
-            <div class="setting-hint">Client can share AI-generated session summaries</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultSummary" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Conversation history</div>
-            <div class="setting-hint">Client can view their own past sessions</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHistory" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        
-        <div class="settings-default-note">
-          Changes here apply to future clients only. Existing clients keep their current settings unless edited individually.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-    <span id="toastMessage">Success</span>
-  </div>
-
-  <!-- ============================================ -->
-  <!-- JAVASCRIPT                                   -->
-  <!-- ============================================ -->
-  <script>
-    // =====================================================
-    // CONFIG "” UPDATE THESE
-    // =====================================================
-    const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
-
-    let session = null;       // Supabase auth session
-    let therapistId = null;   // UUID from auth
-    let currentClient = null; // Currently viewed client object
-    let allClients = [];      // Array of client objects
-    let clientNotes = {};     // client_id â†’ notes array cache
-
-    // =====================================================
-    // SUPABASE API HELPER
-    // =====================================================
-    async function api(endpoint, options = {}) {
-      const token = session?.access_token || SUPABASE_ANON_KEY;
-      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Prefer': options.prefer || 'return=representation',
-          ...options.headers
-        }
-      });
-      if (!res.ok) {
-        const body = await res.text();
-        throw new Error(`API ${res.status}: ${body}`);
-      }
-      const text = await res.text();
-      return text ? JSON.parse(text) : null;
-    }
-
-    async function apiMutate(endpoint, method, body) {
-      return api(endpoint, {
-        method,
-        body: JSON.stringify(body),
-        prefer: 'return=minimal'
-      });
-    }
-
-    // =====================================================
-    // AUTH
-    // =====================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Check for existing session
-      try {
-        const stored = localStorage.getItem('alo_session');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          // Try to refresh the session
-          const refreshed = await refreshSession(parsed.refresh_token);
-          if (refreshed) {
-            session = refreshed;
-            therapistId = refreshed.user.id;
-            localStorage.setItem('alo_session', JSON.stringify(refreshed));
-            showApp();
-            return;
-          }
-        }
-      } catch (e) {
-        console.log('No valid session, showing login');
-      }
-      showLogin();
-    });
-
-    // Allow Enter key to submit login
-    document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleLogin();
-    });
-
-    async function refreshSession(refreshToken) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ refresh_token: refreshToken })
-        });
-        if (!res.ok) return null;
-        return await res.json();
-      } catch { return null; }
-    }
-
-    function toggleAuthForm(mode) {
-      const errorEl = document.getElementById('loginError');
-      const infoEl = document.getElementById('loginInfo');
-      errorEl.style.display = 'none';
-      infoEl.style.display = 'none';
-      if (mode === 'signup') {
-        document.getElementById('signInForm').style.display = 'none';
-        document.getElementById('signUpForm').style.display = 'block';
-      } else {
-        document.getElementById('signInForm').style.display = 'block';
-        document.getElementById('signUpForm').style.display = 'none';
-      }
-    }
-
-    async function handleSignup() {
-      const name = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const errorEl = document.getElementById('loginError');
-      const infoEl = document.getElementById('loginInfo');
-      errorEl.style.display = 'none';
-      infoEl.style.display = 'none';
-
-      if (!name || !email || !password) {
-        errorEl.textContent = 'Please fill in all fields';
-        errorEl.style.display = 'block';
-        return;
-      }
-      if (password.length < 6) {
-        errorEl.textContent = 'Password must be at least 6 characters';
-        errorEl.style.display = 'block';
-        return;
-      }
-
-      try {
-        // Step 1: Create auth account
-        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            data: { display_name: name, role: 'therapist' }
-          })
-        });
-
-        if (!signupRes.ok) {
-          const body = await signupRes.json();
-          throw new Error(body.error_description || body.msg || 'Signup failed');
-        }
-
-        const signupData = await signupRes.json();
-
-        // Check if email confirmation is required
-        if (!signupData.access_token) {
-          // Auto-confirm may be off "” try signing in immediately
-          // (Supabase free tier has auto-confirm on by default)
-          infoEl.textContent = 'Account created! Check your email for a confirmation link, then sign in.';
-          infoEl.style.display = 'block';
-          toggleAuthForm('login');
-          return;
-        }
-
-        // Step 2: We have a session "” set it up
-        session = signupData;
-        therapistId = session.user.id;
-        localStorage.setItem('alo_session', JSON.stringify(session));
-
-        // Step 3: Create profile record
-        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            id: therapistId,
-            role: 'therapist',
-            display_name: name,
-            email: email
-          })
-        });
-
-        // Step 4: Create therapist record
-        await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            id: therapistId,
-            license_type: 'pending',
-            license_verified: false
-          })
-        });
-
-        showApp();
-      } catch (err) {
-        errorEl.textContent = err.message;
-        errorEl.style.display = 'block';
-      }
-    }
-
-    async function handleLogin() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const errorEl = document.getElementById('loginError');
-      errorEl.style.display = 'none';
-
-      if (!email || !password) {
-        errorEl.textContent = 'Please enter email and password';
-        errorEl.style.display = 'block';
-        return;
-      }
-
-      try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        if (!res.ok) {
-          const body = await res.json();
-          throw new Error(body.error_description || body.msg || 'Login failed');
-        }
-
-        session = await res.json();
-        therapistId = session.user.id;
-        localStorage.setItem('alo_session', JSON.stringify(session));
-
-        // Verify this is a therapist account
-        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
-        if (!profile?.[0] || profile[0].role !== 'therapist') {
-          throw new Error('This account is not a therapist account');
-        }
-
-        showApp();
-      } catch (err) {
-        errorEl.textContent = err.message;
-        errorEl.style.display = 'block';
-      }
-    }
-
-    function handleLogout() {
-      session = null;
-      therapistId = null;
-      localStorage.removeItem('alo_session');
-      showLogin();
-    }
-
-    function showLogin() {
-      document.getElementById('loginPage').style.display = 'flex';
-      document.getElementById('appContainer').style.display = 'none';
-    }
-
-    async function showApp() {
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'block';
-
-      // Load therapist profile
-      const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=display_name,email`);
-      const name = profile?.[0]?.display_name || profile?.[0]?.email || 'Therapist';
-      document.getElementById('therapistName').textContent = name;
-      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      document.getElementById('therapistAvatar').textContent = initials;
-
-      await loadDashboard();
-    }
-
-    // =====================================================
-    // DASHBOARD LOADING
-    // =====================================================
-    async function loadDashboard() {
-      try {
-        // Get all client relationships
-        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.active&select=*`);
-
-        if (!links?.length) {
-          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts</div>';
-          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items needing attention</div>';
-          document.getElementById('messagesList').innerHTML = '<div class="section-empty">No messages</div>';
-          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet. Click "+ Invite" to add one.</div>';
-          document.getElementById('clientsList2').innerHTML = '';
-          document.getElementById('alertsCount').textContent = '0';
-          document.getElementById('messagesCount').textContent = '0';
-          document.getElementById('triageCount').textContent = '0';
-          return;
-        }
-
-        const clientIds = links.map(l => l.client_id).filter(Boolean);
-        const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
-
-        // Load crisis events, messages, homework, sessions in parallel
-        const [crisisEvents, messages, homework, sessions] = await Promise.all([
-          api(`/rest/v1/crisis_events?acknowledged=eq.false&order=created_at.desc&limit=50`),
-          api(`/rest/v1/client_messages?read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`),
-          api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
-          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
-        ]);
-
-        const weekAgo = new Date(Date.now() - 7 * 86400000);
-
-        allClients = links.map(link => {
-          const clientCrisis = crisisEvents?.filter(e => e.client_id === link.client_id) || [];
-          const clientMessages = messages?.filter(m => m.client_id === link.client_id) || [];
-          const clientHw = homework?.filter(h => h.client_id === link.client_id) || [];
-          const clientSessions = sessions?.filter(s => s.client_id === link.client_id) || [];
-          const recentSessions = clientSessions.filter(s => new Date(s.created_at) > weekAgo);
-
-          let status = 'stable';
-          if (clientCrisis.length > 0) status = 'crisis';
-          else if (recentSessions.length === 0 && clientHw.length > 0) status = 'needs-attention';
-          else if (recentSessions.length === 0) status = 'dormant';
-
-          return {
-            ...link,
-            crisisCount: clientCrisis.length,
-            messageCount: clientMessages.length,
-            homeworkCount: clientHw.length,
-            sessionCount: recentSessions.length,
-            lastActivity: clientSessions[0]?.created_at || null,
-            status
-          };
-        });
-
-        renderAlerts(crisisEvents || []);
-        renderMessages(messages || []);
-        renderTriage();
-        renderClientsList();
-
-      } catch (err) {
-        console.error('Dashboard load error:', err);
-      }
-    }
-
-    // =====================================================
-    // HOME PAGE RENDERERS
-    // =====================================================
-    function renderAlerts(crisisEvents) {
-      const count = crisisEvents.length;
-      document.getElementById('alertsCount').textContent = count;
-
-      if (!count) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts "” all clear</div>';
-        return;
-      }
-
-      document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
-        const client = allClients.find(c => c.client_id === e.client_id);
-        const name = client?.display_name || 'Client';
-        return `
-          <div class="list-item" onclick="showClient('${e.client_id}')">
-            <div class="list-item-indicator danger"></div>
-            <div class="list-item-content">
-              <div class="list-item-title">${esc(name)}</div>
-              <div class="list-item-description">${esc(e.severity)} Â· ${esc(e.category)} Â· Alo: ${esc(e.alo_response_action)}</div>
-            </div>
-            <span class="list-item-meta">${timeAgo(new Date(e.created_at))}</span>
-            <button class="list-item-action" onclick="acknowledgeCrisis('${e.id}', event)">Acknowledge</button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderMessages(messages) {
-      document.getElementById('messagesCount').textContent = messages.length;
-
-      if (!messages.length) {
-        document.getElementById('messagesList').innerHTML = '<div class="section-empty">No unread messages</div>';
-        return;
-      }
-
-      document.getElementById('messagesList').innerHTML = messages.map(m => {
-        const client = allClients.find(c => c.client_id === m.client_id);
-        const name = client?.display_name || 'Client';
-        return `
-          <div class="list-item" onclick="showClient('${m.client_id}')">
-            <div class="list-item-indicator" style="background: #3b82f6;"></div>
-            <div class="list-item-content">
-              <div class="list-item-title">${esc(name)}</div>
-              <div class="list-item-description">${esc(truncate(m.message, 80))}</div>
-            </div>
-            <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
-            <button class="list-item-action" onclick="markMessageRead('${m.id}', event)">Mark Read</button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderTriage() {
-      const triage = allClients.filter(c =>
-        c.status !== 'crisis' && (c.sessionCount === 0 && c.homeworkCount > 0)
-      );
-      document.getElementById('triageCount').textContent = triage.length;
-
-      if (!triage.length) {
-        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable</div>';
-        return;
-      }
-
-      document.getElementById('triageList').innerHTML = triage.map(c => `
-        <div class="list-item" onclick="showClient('${c.client_id}')">
-          <div class="list-item-indicator warning"></div>
-          <div class="list-item-content">
-            <div class="list-item-title">${esc(c.display_name || 'Client')}</div>
-            <div class="list-item-description">Homework assigned but no Alo activity this week</div>
-          </div>
-          <button class="list-item-action">Review</button>
-        </div>
-      `).join('');
-    }
-
-    function renderClientsList() {
-      const sorted = [...allClients].sort((a, b) =>
-        (a.display_name || '').localeCompare(b.display_name || '')
-      );
-
-      const html = sorted.map(c => {
-        const name = c.display_name || 'Client';
-        const initials = name.substring(0, 2).toUpperCase();
-        const clientKey = c.client_id || c.id; // use record id for pending clients
-        const isActive = currentClient && (currentClient.client_id === c.client_id || currentClient.id === c.id);
-        const isPending = !c.client_id;
-
-        return `
-          <div class="client-item ${isActive ? 'active' : ''}" onclick="showClient('${clientKey}', ${isPending})">
-            <div class="client-avatar">
-              ${initials}
-              <div class="status-badge ${isPending ? 'dormant' : c.status}"></div>
-            </div>
-            <div class="client-info">
-              <div class="client-name">${esc(name)}</div>
-              ${isPending
-                ? `<div class="client-meta"><span class="pending-label">Pending signup</span></div>`
-                : `<div class="client-meta">${c.sessionCount} sessions Â· ${c.homeworkCount} hw</div>`
-              }
-            </div>
-            ${isPending && c.invite_code ? `<span class="invite-badge" onclick="event.stopPropagation(); copyCode('${c.invite_code}')" title="Click to copy">${esc(c.invite_code)}</span>` : ''}
-          </div>
-        `;
-      }).join('');
-
-      document.getElementById('clientsList').innerHTML = html || '<div class="section-empty">No clients yet</div>';
-      document.getElementById('clientsList2').innerHTML = html;
-    }
-
-    function copyCode(code) {
-      navigator.clipboard.writeText(code).then(() => toast(`Copied: ${code}`));
-    }
-
-    // =====================================================
-    // CLIENT DETAIL
-    // =====================================================
-    async function showClient(clientKey, isPending = false) {
-      if (isPending) {
-        currentClient = allClients.find(c => c.id === clientKey);
-      } else {
-        currentClient = allClients.find(c => c.client_id === clientKey);
-      }
-      if (!currentClient) return;
-
-      document.getElementById('homePage').style.display = 'none';
-      document.getElementById('clientPage').classList.add('active');
-      renderClientsList();
-      switchTab('prep', document.querySelector('.tab'));
-
-      const name = currentClient.display_name || 'Client';
-      document.getElementById('clientName').textContent = name;
-
-      if (!currentClient.client_id) {
-        // Pending client "” show invite info instead of stats
-        document.getElementById('clientMeta').innerHTML =
-          `<span class="pending-label">â³ Pending signup</span>${currentClient.invite_code ? ` Â· Invite: <strong>${esc(currentClient.invite_code)}</strong>` : ''}`;
-        // Show empty state for all tabs
-        document.getElementById('prepSummary').innerHTML = '<p style="color: var(--text-muted);">Client hasn\'t signed up yet. You can still write session notes and assign homework.</p>';
-        document.getElementById('prepOpenItems').innerHTML = '<p style="color: var(--text-muted);">No open items</p>';
-        document.getElementById('clientMessagesPrep').innerHTML = '<p style="color: var(--text-muted);">No messages</p>';
-        document.getElementById('activityMessages').innerHTML = '<p style="color: var(--text-muted);">No messages</p>';
-        document.getElementById('activitySessions').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions recorded</p>';
-        document.getElementById('crisisAlertsCard').style.display = 'none';
-        document.getElementById('crisisAlertButton').style.display = 'none';
-        // Load notes and homework using therapist_clients.id as reference
-        await loadPendingClientData();
-      } else {
-        document.getElementById('clientMeta').textContent =
-          `${currentClient.sessionCount} sessions this week Â· ${currentClient.homeworkCount} active homework`;
-        await loadClientData(currentClient.client_id);
-      }
-    }
-
-    async function loadPendingClientData() {
-      // For pending clients, load notes and homework using therapist_client_id
-      const tcId = currentClient.id;
-      try {
-        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
-        clientNotes[tcId] = notes || [];
-        renderNotesPreview(tcId);
-        renderNotes(tcId);
-
-        const homework = await api(`/rest/v1/homework_cards?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=created_at.desc`);
-        document.getElementById('homeworkHistory').innerHTML = homework?.length
-          ? homework.map(h => `
-              <div class="homework-item">
-                <div class="homework-status ${h.is_active ? 'active' : 'completed'}">
-                  ${h.is_active
-                    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
-                    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
-                  }
-                </div>
-                <div class="homework-content">
-                  <div class="homework-type">${esc(h.title)}</div>
-                  <div class="homework-desc">${esc(h.goal)}</div>
-                  <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
-                </div>
-                ${h.is_active ? `<button class="btn btn-sm btn-secondary" onclick="completeHomework('${h.id}')">Complete</button>` : ''}
-              </div>
-            `).join('')
-          : '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
-
-        // Update open items
-        const activeHw = homework?.filter(h => h.is_active) || [];
-        document.getElementById('prepOpenItems').innerHTML = activeHw.length
-          ? activeHw.map(h => `<p>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
-          : '<p style="color: var(--text-muted);">No open items</p>';
-      } catch (err) {
-        console.error('Pending client data error:', err);
-      }
-    }
-
-    async function loadClientData(clientId) {
-      try {
-        const [crisisEvents, messages, homework, sessions, notes] = await Promise.all([
-          api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
-          api(`/rest/v1/client_messages?client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc&limit=20`),
-          api(`/rest/v1/homework_cards?therapist_client_id=eq.${currentClient.id}&therapist_id=eq.${therapistId}&order=created_at.desc`),
-          api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc&limit=20`),
-          api(`/rest/v1/session_notes?therapist_client_id=eq.${currentClient.id}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`)
-        ]);
-
-        clientNotes[clientId] = notes || [];
-
-        // Crisis alerts
-        displayCrisisAlerts(crisisEvents || []);
-
-        // Session notes preview
-        renderNotesPreview(clientId);
-
-        // Session prep: "What Changed" diff view
-        const weekSessions = sessions?.filter(s => new Date(s.created_at) > new Date(Date.now() - 7 * 86400000)) || [];
-        const unresolvedCrisis = crisisEvents?.filter(e => !e.acknowledged) || [];
-        const activeHw = homework?.filter(h => h.is_active) || [];
-        const completedHwThisWeek = homework?.filter(h => !h.is_active && h.completed_at && new Date(h.completed_at) > new Date(Date.now() - 7 * 86400000)) || [];
-        const recentMessages = messages?.filter(m => new Date(m.created_at) > new Date(Date.now() - 7 * 86400000)) || [];
-        
-        let changes = [];
-        
-        if (unresolvedCrisis.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge alert">ðŸ”´ Alert</span><span>Unacknowledged crisis alert${unresolvedCrisis.length > 1 ? 's' : ''} "” review before session</span></div>`);
-        }
-        if (recentMessages.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">ðŸŸ¢ New</span><span>${recentMessages.length} message${recentMessages.length > 1 ? 's' : ''} from client this week</span></div>`);
-        }
-        if (weekSessions.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge new">ðŸŸ¢ New</span><span>${weekSessions.length} Alo session${weekSessions.length > 1 ? 's' : ''} this week</span></div>`);
-        }
-        if (completedHwThisWeek.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge changed">ðŸŸ¡ Updated</span><span>Completed: ${completedHwThisWeek.map(h => esc(h.title)).join(', ')}</span></div>`);
-        }
-        if (activeHw.length) {
-          changes.push(`<div style="display: flex; align-items: start; gap: 8px; padding: 8px 0;"><span class="change-badge unchanged">âšª Open</span><span>Active homework: ${activeHw.map(h => esc(h.title)).join(', ')}</span></div>`);
-        }
-        if (!changes.length) {
-          changes.push(`<div style="padding: 8px 0; color: var(--text-muted);">No between-session activity this week.</div>`);
-        }
-        
-        document.getElementById('prepSummary').innerHTML = changes.join('');
-
-        // Open items (now integrated into What Changed above, keep card for detailed view)
-        document.getElementById('prepOpenItems').innerHTML = activeHw.length
-          ? activeHw.map(h => `<p>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</p>`).join('')
-          : '<p style="color: var(--text-muted);">No open items</p>';
-
-        // Messages in prep and activity tabs
-        const msgHtml = messages?.length
-          ? messages.map(m => `<div class="excerpt"><div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div><div class="excerpt-text">"${esc(truncate(m.message, 300))}"</div></div>`).join('')
-          : '<p style="color: var(--text-muted);">No messages from client</p>';
-        document.getElementById('clientMessagesPrep').innerHTML = msgHtml;
-        document.getElementById('activityMessages').innerHTML = msgHtml;
-
-        // Session history in activity tab
-        document.getElementById('activitySessions').innerHTML = sessions?.length
-          ? sessions.slice(0, 10).map(s => `<div class="excerpt"><div class="excerpt-time">${timeAgo(new Date(s.created_at))}</div><div class="excerpt-text">${s.turn_count || 0} turns Â· Mode: ${esc(s.primary_mode || 'unknown')}</div></div>`).join('')
-          : '<p style="color: var(--text-muted); text-align: center;">No sessions recorded</p>';
-
-        // Homework history
-        document.getElementById('homeworkHistory').innerHTML = homework?.length
-          ? homework.map(h => `
-              <div class="homework-item">
-                <div class="homework-status ${h.is_active ? 'active' : 'completed'}">
-                  ${h.is_active
-                    ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
-                    : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>'
-                  }
-                </div>
-                <div class="homework-content">
-                  <div class="homework-type">${esc(h.title)}</div>
-                  <div class="homework-desc">${esc(h.goal)}</div>
-                  <div class="homework-meta">Assigned ${timeAgo(new Date(h.created_at))}</div>
-                </div>
-                ${h.is_active ? `<button class="btn btn-sm btn-secondary" onclick="completeHomework('${h.id}')">Complete</button>` : ''}
-              </div>
-            `).join('')
-          : '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
-
-        // Render full notes in notes tab
-        renderNotes(clientId);
-
-      } catch (err) {
-        console.error('Client data error:', err);
-      }
-    }
-
-    // =====================================================
-    // CRISIS ALERTS
-    // =====================================================
-    function displayCrisisAlerts(alerts) {
-      const card = document.getElementById('crisisAlertsCard');
-      const btn = document.getElementById('crisisAlertButton');
-      const btnText = document.getElementById('crisisAlertButtonText');
-
-      const unread = alerts.filter(a => !a.acknowledged);
-
-      if (!unread.length) {
-        card.style.display = 'none';
-        btn.style.display = 'none';
-        return;
-      }
-
-      btn.style.display = 'inline-flex';
-      btnText.textContent = unread.length === 1 ? 'Crisis Alert' : `${unread.length} Crisis Alerts`;
-      card.style.display = 'block';
-      document.getElementById('crisisAlertCount').textContent = unread.length;
-
-      document.getElementById('crisisAlertsList').innerHTML = alerts.map(a => `
-        <div class="crisis-alert-item">
-          <div class="crisis-alert-header">
-            <span class="crisis-alert-time">${timeAgo(new Date(a.created_at))}</span>
-            <span class="crisis-alert-severity" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px;">${esc(a.severity)}</span>
-          </div>
-          <div class="crisis-alert-detail">
-            <strong>Category:</strong> ${esc(a.category?.replace(/_/g, ' '))}<br>
-            <strong>Alo response:</strong> ${esc(a.alo_response_action)}
-          </div>
-          ${!a.acknowledged_at ? `
-            <div style="margin-top: 8px; display: flex; gap: 8px;">
-              <button class="btn btn-sm" onclick="acknowledgeCrisis('${a.id}')" style="background: var(--danger); color: white; border: none;">Acknowledge</button>
-              <button class="btn btn-sm btn-secondary" onclick="markFalsePositive('${a.id}')">False Positive</button>
-            </div>
-          ` : `<div style="margin-top: 8px; font-size: 0.75rem; color: var(--success);">âœ“ Acknowledged ${timeAgo(new Date(a.acknowledged_at))}</div>`}
-        </div>
-      `).join('');
-    }
-
-    async function acknowledgeCrisis(id, event) {
-      if (event) event.stopPropagation();
-      try {
-        await apiMutate(`/rest/v1/crisis_events?id=eq.${id}`, 'PATCH', {
-          acknowledged: true,
-          acknowledged_at: new Date().toISOString(),
-          acknowledged_by: therapistId
-        });
-        toast('Crisis alert acknowledged');
-        await loadDashboard();
-        if (currentClient) await loadClientData(currentClient.client_id);
-      } catch (err) { console.error(err); }
-    }
-
-    async function markFalsePositive(id) {
-      try {
-        await apiMutate(`/rest/v1/crisis_events?id=eq.${id}`, 'PATCH', {
-          acknowledged: true,
-          false_positive: true,
-          acknowledged_at: new Date().toISOString(),
-          acknowledged_by: therapistId
-        });
-        toast('Marked as false positive');
-        if (currentClient) await loadClientData(currentClient.client_id);
-      } catch (err) { console.error(err); }
-    }
-
-    // =====================================================
-    // MESSAGES
-    // =====================================================
-    async function markMessageRead(id, event) {
-      if (event) event.stopPropagation();
-      try {
-        await apiMutate(`/rest/v1/client_messages?id=eq.${id}`, 'PATCH', {
-          read: true,
-          read_at: new Date().toISOString()
-        });
-        toast('Message marked as read');
-        await loadDashboard();
-      } catch (err) { console.error(err); }
-    }
-
-    // =====================================================
-    // INVITE CODE
-    // =====================================================
-    async function generateInvite() {
-      try {
-        // Generate code client-side (server-side would be better but this works for pilot)
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let code = 'ALO-';
-        for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
-
-        const displayName = document.getElementById('inviteClientName').value.trim() || 'New Client';
-        const expires = new Date(Date.now() + 7 * 86400000).toISOString();
-
-        // Create invite record
-        await api('/rest/v1/invites', {
-          method: 'POST',
-          body: JSON.stringify({
-            therapist_id: therapistId,
-            code,
-            max_uses: 1,
-            expires_at: expires,
-            status: 'active'
-          }),
-          prefer: 'return=minimal'
-        });
-
-        // Create placeholder client record immediately so therapist can start documenting
-        await api('/rest/v1/therapist_clients', {
-          method: 'POST',
-          body: JSON.stringify({
-            therapist_id: therapistId,
-            client_id: null,
-            display_name: displayName,
-            invite_code: code,
-            status: 'active'
-          }),
-          prefer: 'return=minimal'
-        });
-
-        document.getElementById('inviteCodeDisplay').textContent = code;
-        document.getElementById('inviteResult').style.display = 'block';
-        document.getElementById('generateInviteBtn').style.display = 'none';
-
-        toast('Client added & invite code generated');
-        await loadDashboard();
-      } catch (err) {
-        console.error(err);
-        alert('Error generating invite code');
-      }
-    }
-
-    function copyInviteCode() {
-      const code = document.getElementById('inviteCodeDisplay').textContent;
-      navigator.clipboard.writeText(code).then(() => toast(`Copied: ${code}`));
-    }
-
-    function showInviteModal() {
-      document.getElementById('inviteClientName').value = '';
-      document.getElementById('inviteResult').style.display = 'none';
-      document.getElementById('generateInviteBtn').style.display = 'inline-flex';
-      document.getElementById('inviteModal').classList.add('show');
-    }
-
-    // =====================================================
-    // SESSION NOTES
-    // =====================================================
-    function renderNotesPreview(clientId) {
-      const notes = clientNotes[clientId] || [];
-      const preview = notes.slice(0, 3);
-      const container = document.getElementById('lastSessionsPreview');
-      const viewAllBtn = document.getElementById('viewAllNotesBtn');
-
-      if (!notes.length) {
-        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>';
-        viewAllBtn.style.display = 'none';
-        return;
-      }
-
-      viewAllBtn.style.display = notes.length > 3 ? 'inline-flex' : 'none';
-
-      container.innerHTML = preview.map((n, i) => `
-        <div class="session-preview ${i > 0 ? 'session-preview-border' : ''}">
-          <div class="session-preview-header">
-            <span class="session-preview-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-            <span class="session-preview-type">${esc(n.session_type || 'Session')}</span>
-          </div>
-          ${n.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${esc(truncate(n.themes, 100))}</p>` : ''}
-          ${n.plan ? `<p class="session-preview-text"><strong>Plan:</strong> ${esc(truncate(n.plan, 100))}</p>` : ''}
-        </div>
-      `).join('');
-    }
-
-    function renderNotes(clientId) {
-      const notes = clientNotes[clientId] || [];
-      const container = document.getElementById('notesContainer');
-
-      if (!notes.length) {
-        container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet. Click "Add Note" to create one.</p>';
-        return;
-      }
-
-      container.innerHTML = notes.map(n => `
-        <div class="note-card">
-          <div class="note-header">
-            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} "” ${esc(n.session_type || 'Session')}</span>
-            <div style="display: flex; gap: 8px;">
-              <button class="copy-btn" onclick="copyNote('${n.id}', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                Copy for EHR
-              </button>
-              <button class="copy-btn" onclick="deleteNote('${n.id}')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
-            </div>
-          </div>
-          <div class="note-content">
-            ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S')">Copy S</button></div>` : ''}
-            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O')">Copy O</button></div>` : ''}
-            ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A')">Copy A</button></div>` : ''}
-            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p>` : ''}
-            ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P')">Copy P</button></div>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function showNoteForm() {
-      const today = new Date().toISOString().split('T')[0];
-      const cacheKey = currentClient.client_id || currentClient.id;
-      
-      // Restore auto-saved draft if exists
-      let draft = {};
-      try {
-        const saved = localStorage.getItem(`alo_note_draft_${cacheKey}`);
-        if (saved) draft = JSON.parse(saved);
-      } catch(e) {}
-      
-      document.getElementById('notesContainer').innerHTML = `
-        <div class="form-grid">
-          <div class="form-group"><label>Session Date</label><input type="date" id="noteDate" value="${draft.date || today}"></div>
-          <div class="form-group"><label>Session Type</label><select id="noteType"><option value="Individual" ${draft.type === 'Individual' ? 'selected' : ''}>Individual</option><option value="Couples" ${draft.type === 'Couples' ? 'selected' : ''}>Couples</option><option value="Family" ${draft.type === 'Family' ? 'selected' : ''}>Family</option></select></div>
-          <div class="form-group full"><label>Themes Discussed</label><textarea id="noteThemes" placeholder="Main topics...">${esc(draft.themes || '')}</textarea></div>
-          <div class="form-group full"><label>Interventions Used</label><textarea id="noteInterventions" placeholder="Techniques used...">${esc(draft.interventions || '')}</textarea></div>
-          <div class="form-group full"><label>Clinical Observations</label><textarea id="noteObservations" placeholder="Affect, engagement, progress...">${esc(draft.observations || '')}</textarea></div>
-          <div class="form-group full"><label>Plan / Next Steps</label><textarea id="notePlan" placeholder="Goals for next session...">${esc(draft.plan || '')}</textarea></div>
-        </div>
-        <div class="form-actions" style="display: flex; align-items: center; justify-content: space-between;">
-          <span class="save-status" id="autoSaveStatus"></span>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary" onclick="clearNoteDraft(); renderNotes('${cacheKey}')">Cancel</button>
-            <button class="btn btn-primary" onclick="saveNote()" id="saveNoteBtn">Save Note</button>
-          </div>
-        </div>
-      `;
-      
-      // Start auto-save interval
-      startNoteAutoSave(cacheKey);
-    }
-    
-    let autoSaveInterval = null;
-    
-    function startNoteAutoSave(cacheKey) {
-      if (autoSaveInterval) clearInterval(autoSaveInterval);
-      autoSaveInterval = setInterval(() => {
-        const themes = document.getElementById('noteThemes');
-        if (!themes) { clearInterval(autoSaveInterval); return; }
-        
-        const draft = {
-          date: document.getElementById('noteDate')?.value,
-          type: document.getElementById('noteType')?.value,
-          themes: themes.value,
-          interventions: document.getElementById('noteInterventions')?.value,
-          observations: document.getElementById('noteObservations')?.value,
-          plan: document.getElementById('notePlan')?.value
-        };
-        
-        // Only save if there's content
-        if (draft.themes || draft.interventions || draft.observations || draft.plan) {
-          localStorage.setItem(`alo_note_draft_${cacheKey}`, JSON.stringify(draft));
-          const status = document.getElementById('autoSaveStatus');
-          if (status) {
-            status.className = 'save-status saved';
-            status.innerHTML = '<span class="dot"></span> Draft saved';
-            setTimeout(() => { if (status) status.innerHTML = ''; }, 2000);
-          }
-        }
-      }, 5000);
-    }
-    
-    function clearNoteDraft() {
-      if (autoSaveInterval) clearInterval(autoSaveInterval);
-      const cacheKey = currentClient?.client_id || currentClient?.id;
-      if (cacheKey) localStorage.removeItem(`alo_note_draft_${cacheKey}`);
-    }
-
-    async function saveNote() {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const tcId = currentClient.id;
-      const saveBtn = document.getElementById('saveNoteBtn');
-      const status = document.getElementById('autoSaveStatus');
-      
-      // Show saving state
-      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
-      if (status) { status.className = 'save-status saving'; status.innerHTML = '<span class="dot"></span> Saving...'; }
-      
-      try {
-        await api('/rest/v1/session_notes', {
-          method: 'POST',
-          body: JSON.stringify({
-            therapist_id: therapistId,
-            client_id: currentClient.client_id || null,
-            therapist_client_id: tcId,
-            session_date: document.getElementById('noteDate').value,
-            session_type: document.getElementById('noteType').value,
-            themes: document.getElementById('noteThemes').value || null,
-            interventions: document.getElementById('noteInterventions').value || null,
-            observations: document.getElementById('noteObservations').value || null,
-            plan: document.getElementById('notePlan').value || null
-          }),
-          prefer: 'return=minimal'
-        });
-
-        // Clear draft and auto-save
-        clearNoteDraft();
-        
-        // Reload notes using therapist_client_id
-        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
-        clientNotes[cacheKey] = notes || [];
-        renderNotes(cacheKey);
-        renderNotesPreview(cacheKey);
-        toast('Note saved');
-      } catch (err) {
-        console.error(err);
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Note'; }
-        if (status) { status.className = 'save-status error'; status.innerHTML = '<span class="dot"></span> Save failed "” try again'; }
-      }
-    }
-
-    function copyNote(noteId, btn) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-      
-      // Toggle format menu
-      const existing = btn.parentNode.querySelector('.ehr-format-menu');
-      if (existing) { existing.remove(); return; }
-      
-      // Close any other open menus
-      document.querySelectorAll('.ehr-format-menu').forEach(m => m.remove());
-      
-      const menu = document.createElement('div');
-      menu.className = 'ehr-format-menu';
-      menu.innerHTML = `
-        <button onclick="copyNoteFormat('${noteId}', 'soap', this)">SOAP Format<small>Subjective Â· Objective Â· Assessment Â· Plan</small></button>
-        <button onclick="copyNoteFormat('${noteId}', 'dap', this)">DAP Format<small>Data Â· Assessment Â· Plan</small></button>
-        <button onclick="copyNoteFormat('${noteId}', 'narrative', this)">Narrative<small>Free-form clinical summary</small></button>
-      `;
-      btn.style.position = 'relative';
-      btn.parentNode.style.position = 'relative';
-      btn.parentNode.appendChild(menu);
-      
-      // Close on outside click
-      setTimeout(() => {
-        document.addEventListener('click', function closeMenu(e) {
-          if (!menu.contains(e.target) && e.target !== btn) {
-            menu.remove();
-            document.removeEventListener('click', closeMenu);
-          }
-        });
-      }, 10);
-    }
-    
-    function copyNoteFormat(noteId, format, menuBtn) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-      
-      const clientName = currentClient.display_name || 'Client';
-      const dateStr = new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      let text = '';
-      
-      if (format === 'soap') {
-        text = `SOAP Note "” ${clientName} "” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nS (Subjective):\n${n.themes || 'N/A'}\n\nO (Objective):\n${n.observations || 'N/A'}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
-      } else if (format === 'dap') {
-        text = `DAP Note "” ${clientName} "” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nD (Data):\n${n.themes || 'N/A'}${n.observations ? '\n' + n.observations : ''}\n\nA (Assessment):\n${n.interventions || 'N/A'}\n\nP (Plan):\n${n.plan || 'N/A'}`;
-      } else {
-        text = `Session Note "” ${clientName} "” ${dateStr}\nSession Type: ${n.session_type || 'Individual'}\n\nThemes Discussed: ${n.themes || 'N/A'}\nInterventions Used: ${n.interventions || 'N/A'}\nClinical Observations: ${n.observations || 'N/A'}\nPlan / Next Steps: ${n.plan || 'N/A'}`;
-      }
-      
-      // Add between-session addendum if we have metadata
-      text += '\n\n"” Exported from Alo Clinical Dashboard';
-      
-      navigator.clipboard.writeText(text).then(() => {
-        // Close menu and show confirmation
-        const menu = menuBtn.closest('.ehr-format-menu');
-        if (menu) menu.remove();
-        toast(`Copied as ${format.toUpperCase()}`);
-      });
-    }
-
-    
-    // =====================================================
-    // SIMPLEPRACTICE INTEGRATION
-    // =====================================================
-    
-    function copySoapSection(noteId, section) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-      
-      const clientName = currentClient.display_name || 'Client';
-      const dateStr = new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      let text = '';
-      
-      if (section === 'S') {
-        text = n.themes || '';
-      } else if (section === 'O') {
-        text = n.observations || '';
-      } else if (section === 'A') {
-        text = n.interventions || '';
-      } else if (section === 'P') {
-        text = n.plan || '';
-        if (n.next_session_date) {
-          const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-          text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
-        }
-        if (n.billing_justification) {
-          text += (text ? '\n\n' : '') + 'Continued therapeutic support medically necessary for symptom management and functional improvement.';
-        }
-      }
-      
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.classList.add('copied');
-        btn.textContent = '✓ Copied';
-        setTimeout(() => {
-          btn.classList.remove('copied');
-          btn.textContent = originalText;
-        }, 2000);
-      });
-    }
-    
-    function generateAddendum(format = 'full') {
-      if (!currentClient) return '';
-      
-      const clientName = currentClient.display_name || 'Client';
-      const cacheKey = currentClient.client_id || currentClient.id;
-      
-      // Get data
-      const sessions = clientSessions[cacheKey] || [];
-      const homework = (clientHomework[cacheKey] || []).filter(h => h.is_active);
-      const messages = clientMessages[cacheKey] || [];
-      const crisis = clientCrisis[cacheKey] || [];
-      
-      const weekAgo = new Date(Date.now() - 7 * 86400000);
-      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
-      const recentMessages = messages.filter(m => new Date(m.created_at) > weekAgo);
-      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
-      
-      const lastSession = recentSessions[0] ? new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
-      
-      const dateRange = recentSessions.length 
-        ? new Date(recentSessions[recentSessions.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' - ' + new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        : 'Past 7 days';
-      
-      if (format === 'brief') {
-        const hwStatus = homework.length ? homework[0].title + ' (' + (homework[0].completed_at ? 'completed' : 'in progress') + ')' : 'none';
-        return 'Between-session (Alo): ' + recentSessions.length + ' check-in' + (recentSessions.length !== 1 ? 's' : '') + '; HW ' + hwStatus + '; messages ' + (recentMessages.length ? 'Y' : 'N') + '; alerts ' + (unresolvedCrisis.length ? 'Y' : 'N') + '.';
-      }
-      
-      // Full format
-      let text = 'BETWEEN-SESSION DATA (Source: Alo Clinical Dashboard, ' + dateRange + ')\n\n';
-      text += 'Source: Client self-directed use of an emotional support tool. No session transcript available.\n\n';
-      text += 'Engagement: Client engaged in ' + recentSessions.length + ' Alo session' + (recentSessions.length !== 1 ? 's' : '') + ' (last: ' + lastSession + ').\n\n';
-      
-      const themes = recentSessions.map(s => s.primary_mode || 'emotional processing').filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'general emotional processing';
-      text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
-      
-      if (homework.length) {
-        text += 'Homework: ' + homework.map(h => h.title + ' — Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
-      } else {
-        text += 'Homework: None assigned.\n\n';
-      }
-      
-      text += 'Client Messages: ' + recentMessages.length + ' message' + (recentMessages.length !== 1 ? 's' : '') + ' received';
-      if (recentMessages.length) {
-        text += '; subject: ' + truncate(recentMessages[0].message, 50);
-      }
-      text += '.\n\n';
-      
-      if (unresolvedCrisis.length) {
-        text += 'Safety: ' + unresolvedCrisis.map(c => {
-          const date = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          return 'Alert on ' + date + ': ' + c.category + '; resolved via ' + c.alo_response_action;
-        }).join('. ') + '.';
-      } else {
-        text += 'Safety: No alerts.';
-      }
-      
-      return text;
-    }
-    
-    function copyPrepPack() {
-      const clientName = currentClient?.display_name || 'Client';
-      const cacheKey = currentClient?.client_id || currentClient?.id;
-      
-      const addendum = generateAddendum('full');
-      const notes = clientNotes[cacheKey] || [];
-      const recentNote = notes[0];
-      
-      let prepPack = 'SESSION PREP PACK — ' + clientName + ' — ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '\n\n';
-      prepPack += addendum;
-      
-      if (recentNote) {
-        const noteDate = new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        prepPack += '\n\n—————————————————————————————————————————\n\nLAST SESSION NOTE (' + noteDate + '):\n';
-        if (recentNote.themes) prepPack += 'Themes: ' + recentNote.themes + '\n';
-        if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
-      }
-      
-      navigator.clipboard.writeText(prepPack).then(() => {
-        const btn = document.getElementById('copyPrepPackBtn');
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
-        setTimeout(() => {
-          btn.innerHTML = originalHTML;
-        }, 2000);
-        toast('Prep Pack copied to clipboard');
-      });
-    }
-
-    async function deleteNote(noteId) {
-      if (!confirm('Delete this session note?')) return;
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const tcId = currentClient.id;
-      try {
-        await apiMutate(`/rest/v1/session_notes?id=eq.${noteId}`, 'DELETE', null);
-        const notes = await api(`/rest/v1/session_notes?therapist_client_id=eq.${tcId}&therapist_id=eq.${therapistId}&order=session_date.desc,created_at.desc`);
-        clientNotes[cacheKey] = notes || [];
-        renderNotes(cacheKey);
-        renderNotesPreview(cacheKey);
-        toast('Note deleted');
-      } catch (err) { console.error(err); }
-    }
-
-    // =====================================================
-    // HOMEWORK
-    // =====================================================
-    function useTemplate(type, title, goal) {
-      document.getElementById('hwType').value = type;
-      document.getElementById('hwTitle').value = title;
-      document.getElementById('hwGoal').value = goal;
-    }
-
-    async function submitHomework(e) {
-      e.preventDefault();
-      try {
-        await api('/rest/v1/homework_cards', {
-          method: 'POST',
-          body: JSON.stringify({
-            therapist_id: therapistId,
-            client_id: currentClient.client_id || null,
-            therapist_client_id: currentClient.id,
-            title: document.getElementById('hwTitle').value,
-            homework_type: document.getElementById('hwType').value,
-            goal: document.getElementById('hwGoal').value,
-            sensitivity: document.getElementById('hwSensitivity').value,
-            therapist_notes: document.getElementById('hwRationale').value || null,
-            is_active: true
-          }),
-          prefer: 'return=minimal'
-        });
-
-        document.getElementById('homeworkForm').reset();
-        if (currentClient.client_id) {
-          await loadClientData(currentClient.client_id);
-        } else {
-          await loadPendingClientData();
-        }
-        toast('Homework assigned');
-      } catch (err) {
-        console.error(err);
-        if (err.message.includes('one_active_homework_per_client')) {
-          alert('This client already has active homework. Complete or remove it first.');
-        } else {
-          alert('Error assigning homework');
-        }
-      }
-    }
-
-    async function completeHomework(id) {
-      try {
-        await apiMutate(`/rest/v1/homework_cards?id=eq.${id}`, 'PATCH', {
-          is_active: false,
-          completed_at: new Date().toISOString()
-        });
-        if (currentClient.client_id) {
-          await loadClientData(currentClient.client_id);
-        } else {
-          await loadPendingClientData();
-        }
-        toast('Homework completed');
-      } catch (err) { console.error(err); }
-    }
-
-    // =====================================================
-    // CLIENT MANAGEMENT
-    // =====================================================
-    // Default settings stored in localStorage
-    function getDefaultSettings() {
-      try {
-        const saved = localStorage.getItem(`alo_default_settings_${therapistId}`);
-        if (saved) return JSON.parse(saved);
-      } catch(e) {}
-      return { homework: true, messages: true, summary: true, history: true };
-    }
-    
-    function showDefaultSettingsModal() {
-      const defaults = getDefaultSettings();
-      document.getElementById('defaultHomework').checked = defaults.homework;
-      document.getElementById('defaultMessages').checked = defaults.messages;
-      document.getElementById('defaultSummary').checked = defaults.summary;
-      document.getElementById('defaultHistory').checked = defaults.history;
-      document.getElementById('defaultSettingsModal').classList.add('show');
-    }
-    
-    function saveDefaultSettings() {
-      const settings = {
-        homework: document.getElementById('defaultHomework').checked,
-        messages: document.getElementById('defaultMessages').checked,
-        summary: document.getElementById('defaultSummary').checked,
-        history: document.getElementById('defaultHistory').checked
-      };
-      localStorage.setItem(`alo_default_settings_${therapistId}`, JSON.stringify(settings));
-      closeModal('defaultSettingsModal');
-      toast('Default settings saved');
-    }
-    
-    // Per-client settings stored in localStorage (will move to DB later)
-    function getClientSettings(clientKey) {
-      try {
-        const saved = localStorage.getItem(`alo_client_settings_${clientKey}`);
-        if (saved) return JSON.parse(saved);
-      } catch(e) {}
-      return getDefaultSettings(); // Fall back to defaults
-    }
-    
-    function showEditClientModal() {
-      if (!currentClient) return;
-      document.getElementById('editClientName').value = currentClient.display_name || '';
-      
-      // Load per-client settings
-      const clientKey = currentClient.client_id || currentClient.id;
-      const settings = getClientSettings(clientKey);
-      document.getElementById('settingHomework').checked = settings.homework;
-      document.getElementById('settingMessages').checked = settings.messages;
-      document.getElementById('settingSummary').checked = settings.summary;
-      document.getElementById('settingHistory').checked = settings.history;
-      
-      document.getElementById('editClientModal').classList.add('show');
-    }
-
-    async function saveClientEdit() {
-      const name = document.getElementById('editClientName').value.trim();
-      const filter = currentClient.client_id
-        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
-        : `id=eq.${currentClient.id}`;
-      try {
-        await apiMutate(
-          `/rest/v1/therapist_clients?${filter}`,
-          'PATCH',
-          { display_name: name || null }
-        );
-        
-        // Save per-client chat settings (localStorage for now, DB later)
-        const clientKey = currentClient.client_id || currentClient.id;
-        const settings = {
-          homework: document.getElementById('settingHomework').checked,
-          messages: document.getElementById('settingMessages').checked,
-          summary: document.getElementById('settingSummary').checked,
-          history: document.getElementById('settingHistory').checked
-        };
-        localStorage.setItem(`alo_client_settings_${clientKey}`, JSON.stringify(settings));
-        
-        currentClient.display_name = name || null;
-        document.getElementById('clientName').textContent = name || 'Client';
-        renderClientsList();
-        closeModal('editClientModal');
-        toast('Client updated');
-      } catch (err) { console.error(err); alert('Error updating'); }
-    }
-
-    function confirmDeleteClient() {
-      const name = currentClient?.display_name || 'this client';
-      if (confirm(`Remove "${name}" from your dashboard?\n\nTheir Alo conversations are not deleted.`)) {
-        deleteClient();
-      }
-    }
-
-    async function deleteClient() {
-      const filter = currentClient.client_id
-        ? `therapist_id=eq.${therapistId}&client_id=eq.${currentClient.client_id}`
-        : `id=eq.${currentClient.id}`;
-      try {
-        await apiMutate(
-          `/rest/v1/therapist_clients?${filter}`,
-          'DELETE',
-          null
-        );
-        closeModal('editClientModal');
-        showHomePage();
-        toast('Client removed');
-        await loadDashboard();
-      } catch (err) { console.error(err); }
-    }
-
-    // =====================================================
-    // NAVIGATION
-    // =====================================================
-    function showHomePage() {
-      currentClient = null;
-      document.getElementById('clientPage').classList.remove('active');
-      document.getElementById('homePage').style.display = 'grid';
-      renderClientsList();
-    }
-
-    function switchTab(tab, btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-${tab}`).classList.add('active');
-    }
-
-    function goToCrisisAlerts() {
-      const toolsTab = document.querySelectorAll('.tab')[1];
-      switchTab('tools', toolsTab);
-      document.getElementById('crisisAlertsCard')?.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // =====================================================
-    // UTILITIES
-    // =====================================================
-    function closeModal(id, event) {
-      if (event && event.target !== event.currentTarget) return;
-      document.getElementById(id).classList.remove('show');
-    }
-
-    function timeAgo(date) {
-      const s = Math.floor((Date.now() - date) / 1000);
-      if (s < 60) return 'Just now';
-      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-      if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-      if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-
-    function truncate(str, len) {
-      if (!str) return '';
-      return str.length > len ? str.substring(0, len) + '...' : str;
-    }
-
-    function esc(str) {
-      if (!str) return '';
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      document.getElementById('toastMessage').textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-  </script>
+  </main>
 </body>
 </html>
