@@ -2424,7 +2424,8 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
     // =====================================================
     async function loadDashboard() {
       try {
-        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.active&select=*`);
+        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=in.(active,pending)&select=*`);
+
 
         if (!links?.length) {
           document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts</div>';
@@ -2441,9 +2442,10 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
         const clientIds = links.map(l => l.client_id).filter(Boolean);
         const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
 
-        const [crisisEvents, messages, homework, sessions] = await Promise.all([
-          api(`/rest/v1/crisis_events?acknowledged=eq.false&order=created_at.desc&limit=50`),
-          api(`/rest/v1/client_messages?read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`),
+               const [crisisEvents, messages, homework, sessions] = await Promise.all([
+          clientIds.length ? api(`/rest/v1/crisis_events?client_id=in.(${idFilter})&acknowledged=eq.false&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          clientIds.length ? api(`/rest/v1/client_messages?client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
+
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
           clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
         ]);
@@ -2641,7 +2643,8 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
       const isPending = !client.client_id;
       document.getElementById('clientMeta').innerHTML = isPending 
         ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(client.invite_code)}</span>`
-        : `${client.sessionCount} sessions this week · 1 active homework`;
+               : `${client.sessionCount} sessions this week · ${client.homeworkCount} active homework`;
+
 
       renderClientsList();
 
@@ -2781,10 +2784,11 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
             <span style="color: var(--text-muted); font-size: 0.75rem;">${esc(n.session_type || 'Individual')}</span>
           </div>
           <div class="note-content">
-            ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S')">Copy S</button></div>` : ''}
-            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O')">Copy O</button></div>` : ''}
-            ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A')">Copy A</button></div>` : ''}
-            ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P')">Copy P</button></div>` : ''}
+                       ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button></div>` : ''}
+            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button></div>` : ''}
+            ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button></div>` : ''}
+                      ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button></div>` : ''}
+
           </div>
         </div>
       `).join('');
@@ -2930,7 +2934,8 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
     // SIMPLEPRACTICE INTEGRATION
 
     // =====================================================
-    function copySoapSection(noteId, section) {
+       function copySoapSection(noteId, section, event) {
+
       const cacheKey = currentClient.client_id || currentClient.id;
       const notes = clientNotes[cacheKey] || [];
       const n = notes.find(note => note.id === noteId);
@@ -3184,11 +3189,13 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
     // =====================================================
     // INVITE & CLIENT MANAGEMENT
     // =====================================================
-    function showInviteModal() {
+       function showInviteModal() {
       document.getElementById('inviteModal').classList.add('show');
       document.getElementById('inviteResult').style.display = 'none';
       document.getElementById('inviteClientName').value = '';
+      document.getElementById('generateInviteBtn').style.display = 'inline-flex';
     }
+
 
     async function generateInvite() {
       const name = document.getElementById('inviteClientName').value.trim();
