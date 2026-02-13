@@ -2147,6 +2147,38 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
     <span id="toastMessage">Success</span>
   </div>
 <script>
+// === PASSWORD RESET HANDLER ===
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    if (accessToken) {
+      document.addEventListener('DOMContentLoaded', function() {
+        const newPass = prompt('Enter your new password (min 6 characters):');
+        if (newPass && newPass.length >= 6) {
+          fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
+            method: 'PUT',
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
+              'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password: newPass })
+          }).then(r => {
+            if (r.ok) {
+              alert('Password updated! You can now sign in.');
+              window.location.href = window.location.pathname;
+            } else {
+              r.text().then(t => alert('Error: ' + t));
+            }
+          });
+        }
+      });
+    }
+  }
+})();
+
     // =====================================================
     // CONFIG
     // =====================================================
