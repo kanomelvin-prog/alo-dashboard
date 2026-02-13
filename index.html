@@ -165,13 +165,19 @@
       gap: 12px;
     }
     
-    .home-link {
+       .home-link,
+    .home-link:link,
+    .home-link:visited,
+    .home-link:hover,
+    .home-link:active {
       display: flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
       color: var(--text);
+      -webkit-tap-highlight-color: transparent;
     }
+
     
     .home-icon {
       width: 36px;
@@ -186,7 +192,8 @@
       font-size: 18px;
     }
 
-    .home-icon svg { width: 20px; height: 20px; }
+       .home-icon svg { width: 20px; height: 20px; display: block; flex: 0 0 auto; }
+
     
     .logo-text {
       font-size: 1.25rem;
@@ -288,7 +295,8 @@
     
     .section-icon.danger { background: var(--danger-bg); color: var(--danger); }
     .section-icon.warning { background: var(--warning-bg); color: var(--warning); }
-    .section-icon svg { width: 18px; height: 18px; }
+       .section-icon svg { width: 18px; height: 18px; display: block; flex: 0 0 auto; }
+
     
     .section-title { font-size: 0.9375rem; font-weight: 600; }
     
@@ -1557,8 +1565,10 @@
       <div class="header-left">
         <a href="#" class="home-link" onclick="showHomePage(); return false;">
           <div class="home-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+
             </svg>
           </div>
           <span class="logo-text">Alo</span>
