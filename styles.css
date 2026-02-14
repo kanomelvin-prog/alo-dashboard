@@ -1501,16 +1501,5 @@ body {
   .client-signals { display: none; }
 }
 
-/* === iOS HORIZONTAL OVERFLOW FIX === */
-@media (max-width: 767px) {
-  .layout {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
 
-  .form-actions {
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
 
