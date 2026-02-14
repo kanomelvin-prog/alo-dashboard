@@ -1,1472 +1,3383 @@
-- { margin: 0; padding: 0; box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  body { overflow-x: hidden; }
-
-:root {
-–cream: #FDFBF7;
-–warm-white: #FAF8F5;
-–sage: #8B9A7D;
-–sage-light: #E8EDE4;
-–sage-hover: #7a8a6d;
-–charcoal: #2D2A26;
-–stone: #9C9589;
-–border: rgba(156, 149, 137, 0.2);
-–bg: var(–cream);
-–white: #ffffff;
-–text: var(–charcoal);
-–text-light: var(–stone);
-–text-muted: var(–stone);
-–primary: var(–sage);
-–primary-hover: var(–sage-hover);
-–danger: #d97706;
-–danger-bg: #fef3c7;
-–danger-border: #fde68a;
-–warning: #f59e0b;
-–warning-bg: #fffbeb;
-–warning-border: #fde68a;
-–success: #10b981;
-–success-bg: #ecfdf5;
-–info-bg: var(–sage-light);
-}
-
-body {
-font-family: ‘Inter’, -apple-system, sans-serif;
-background: var(–bg);
-color: var(–text);
-line-height: 1.5;
-min-height: 100vh;
-}
-
-/* === LOGIN PAGE === */
-.login-page {
-display: flex;
-align-items: center;
-justify-content: center;
-min-height: 100vh;
-padding: 24px;
-}
-
-.login-card {
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 16px;
-padding: 40px;
-max-width: 400px;
-width: 100%;
-text-align: center;
-box-shadow: 0 4px 24px rgba(45, 42, 38, 0.06);
-}
-
-.login-logo {
-width: 56px;
-height: 56px;
-background: var(–sage);
-border-radius: 12px;
-display: flex;
-align-items: center;
-justify-content: center;
-color: white;
-font-weight: 700;
-font-size: 24px;
-margin: 0 auto 16px;
-}
-
-.login-title {
-font-size: 1.5rem;
-font-weight: 700;
-margin-bottom: 4px;
-}
-
-.login-subtitle {
-font-size: 0.875rem;
-color: var(–text-light);
-margin-bottom: 24px;
-}
-
-.login-form { text-align: left; }
-
-.login-form .form-group {
-margin-bottom: 16px;
-}
-
-.login-form label {
-display: block;
-font-size: 0.8125rem;
-font-weight: 500;
-margin-bottom: 6px;
-}
-
-.login-form input {
-width: 100%;
-padding: 10px 12px;
-border: 1px solid var(–border);
-border-radius: 8px;
-font-size: 0.875rem;
-font-family: inherit;
-}
-
-.login-form input:focus {
-outline: none;
-border-color: var(–primary);
-}
-
-.login-error {
-background: #fef2f2;
-border: 1px solid #fecaca;
-color: #dc2626;
-padding: 8px 12px;
-border-radius: 8px;
-font-size: 0.8125rem;
-margin-bottom: 16px;
-display: none;
-}
-
-.login-info {
-background: var(–sage-light);
-padding: 8px 12px;
-border-radius: 8px;
-font-size: 0.8125rem;
-color: var(–text);
-margin-bottom: 16px;
-display: none;
-}
-
-/* === HEADER === */
-.header {
-background: var(–warm-white);
-border-bottom: 1px solid var(–border);
-padding: 0 24px;
-height: 60px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-z-index: 100;
-}
-
-.header-left {
-display: flex;
-align-items: center;
-gap: 12px;
-}
-
-.home-link,
-.home-link:link,
-.home-link:visited,
-.home-link:hover,
-.home-link:active {
-display: flex;
-align-items: center;
-gap: 10px;
-text-decoration: none;
-color: var(–text);
--webkit-tap-highlight-color: transparent;
-}
-
-.home-icon {
-width: 36px;
-height: 36px;
-background: var(–sage);
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-color: white;
-font-weight: 700;
-font-size: 18px;
-}
-
-.home-icon svg { width: 20px; height: 20px; display: block; flex: 0 0 auto; }
-
-.logo-text {
-font-size: 1.25rem;
-font-weight: 700;
-color: var(–text);
-}
-
-.header-right {
-display: flex;
-align-items: center;
-gap: 12px;
-}
-
-.user-name {
-font-size: 0.875rem;
-font-weight: 500;
-}
-
-.user-avatar {
-width: 32px;
-height: 32px;
-background: var(–text);
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-color: white;
-font-size: 0.75rem;
-font-weight: 600;
-}
-
-.logout-btn {
-background: none;
-border: 1px solid var(–border);
-padding: 4px 10px;
-border-radius: 6px;
-font-size: 0.75rem;
-color: var(–text-light);
-cursor: pointer;
-}
-
-.logout-btn:hover { background: var(–bg); }
-
-/* === DISCLAIMER BANNER === */
-.disclaimer-banner {
-background: var(–danger-bg);
-border-bottom: 1px solid var(–danger-border);
-padding: 6px 24px;
-font-size: 0.75rem;
-color: var(–text);
-text-align: center;
-position: fixed;
-top: 60px;
-left: 0;
-right: 0;
-z-index: 99;
-}
-
-/* === LAYOUT === */
-.layout {
-display: grid;
-grid-template-columns: 1fr 280px;
-gap: 24px;
-max-width: 1400px;
-margin: 0 auto;
-padding: 108px 24px 24px;
-}
-
-.main {
-display: flex;
-flex-direction: column;
-gap: 24px;
-}
-
-/* === SECTIONS === */
-.section {
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 12px;
-overflow: hidden;
-}
-
-.section-header {
-padding: 16px 20px;
-border-bottom: 1px solid var(–border);
-display: flex;
-align-items: center;
-gap: 10px;
-}
-
-.section-icon {
-width: 32px;
-height: 32px;
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.section-icon.danger { background: var(–danger-bg); color: var(–danger); }
-.section-icon.warning { background: var(–warning-bg); color: var(–warning); }
-.section-icon svg { width: 18px; height: 18px; display: block; flex: 0 0 auto; }
-
-.section-title { font-size: 0.9375rem; font-weight: 600; }
-
-.section-count {
-margin-left: auto;
-background: var(–bg);
-padding: 2px 10px;
-border-radius: 12px;
-font-size: 0.75rem;
-font-weight: 600;
-color: var(–text-light);
-}
-
-.section-body { padding: 8px; }
-
-.section-empty {
-padding: 32px;
-text-align: center;
-color: var(–text-muted);
-font-size: 0.875rem;
-}
-
-/* === LIST ITEMS === */
-.list-item {
-display: flex;
-align-items: center;
-gap: 16px;
-padding: 12px 16px;
-border-radius: 8px;
-cursor: pointer;
-transition: background 0.15s;
-}
-
-.list-item:hover { background: var(–bg); }
-
-.list-item-indicator {
-width: 10px;
-height: 10px;
-border-radius: 50%;
-flex-shrink: 0;
-}
-
-.list-item-indicator.danger { background: var(–danger); }
-.list-item-indicator.warning { background: var(–warning); }
-.list-item-indicator.success { background: var(–success); }
-
-.list-item-content { flex: 1; min-width: 0; }
-
-.list-item-title {
-font-size: 0.875rem;
-font-weight: 600;
-margin-bottom: 2px;
-}
-
-.list-item-description {
-font-size: 0.8125rem;
-color: var(–text-light);
-}
-
-.list-item-meta {
-font-size: 0.75rem;
-color: var(–text-muted);
-flex-shrink: 0;
-}
-
-.list-item-action {
-background: var(–bg);
-border: 1px solid var(–border);
-padding: 6px 12px;
-border-radius: 6px;
-font-size: 0.75rem;
-font-weight: 500;
-color: var(–text);
-cursor: pointer;
-flex-shrink: 0;
-}
-
-.list-item-action:hover { background: var(–border); }
-
-/* === SIDEBAR === */
-.sidebar {
-position: sticky;
-top: 108px;
-height: fit-content;
-}
-
-.sidebar-section {
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 12px;
-overflow: hidden;
-}
-
-.sidebar-header {
-padding: 16px;
-border-bottom: 1px solid var(–border);
-display: flex;
-align-items: center;
-justify-content: space-between;
-}
-
-.sidebar-title { font-size: 0.875rem; font-weight: 600; }
-
-.sidebar-list {
-max-height: calc(100vh - 240px);
-overflow-y: auto;
-}
-
-.client-item {
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 12px 16px;
-cursor: pointer;
-transition: background 0.15s;
-border-bottom: 1px solid var(–border);
-}
-
-.client-item:last-child { border-bottom: none; }
-.client-item:hover { background: var(–bg); }
-.client-item.active { background: var(–primary); color: white; }
-.client-item.active .client-name { color: white; }
-.client-item.active .client-meta { color: rgba(255,255,255,0.8); }
-
-.client-avatar {
-width: 40px;
-height: 40px;
-background: var(–bg);
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 0.8rem;
-font-weight: 600;
-color: var(–text-light);
-flex-shrink: 0;
-position: relative;
-}
-
-.client-item.active .client-avatar { background: rgba(255,255,255,0.2); color: white; }
-
-.status-badge {
-position: absolute;
-bottom: -2px;
-right: -2px;
-width: 14px;
-height: 14px;
-border-radius: 50%;
-border: 2px solid var(–white);
-}
-
-.client-item.active .status-badge { border-color: var(–primary); }
-.status-badge.crisis { background: var(–danger); animation: pulse 2s infinite; }
-.status-badge.needs-attention { background: var(–warning); }
-.status-badge.stable { background: var(–success); }
-.status-badge.dormant { background: var(–text-muted); }
-
-@keyframes pulse {
-0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
-}
-
-.client-info { flex: 1; min-width: 0; }
-.client-name { font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.client-meta { font-size: 0.75rem; color: var(–text-muted); }
-
-/* === CLIENT PAGE === */
-.client-page { display: none; }
-.client-page.active { display: block; }
-
-
-.page-header { margin-bottom: 24px; }
-.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-.page-meta { font-size: 0.875rem; color: var(–text-light); }
-
-/* === TABS === */
-.tabs {
-display: flex;
-gap: 4px;
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 12px;
-padding: 6px;
-margin-bottom: 24px;
-}
-
-.tab {
-flex: 1;
-padding: 10px 16px;
-border: none;
-background: none;
-border-radius: 8px;
-font-size: 0.875rem;
-font-weight: 500;
-color: var(–text-light);
-cursor: pointer;
-transition: all 0.15s;
-}
-
-.tab:hover { background: var(–bg); color: var(–text); }
-.tab.active { background: var(–primary); color: white; }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* === CARDS === */
-.card {
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 12px;
-margin-bottom: 16px;
-box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
-}
-
-.card:hover { box-shadow: 0 4px 16px rgba(45, 42, 38, 0.08); }
-
-.card-header {
-padding: 16px 20px;
-border-bottom: 1px solid var(–border);
-display: flex;
-align-items: center;
-justify-content: space-between;
-}
-
-.card-title { font-size: 0.9375rem; font-weight: 600; }
-
-.card-body { padding: 20px; }
-.card-body p { font-size: 0.875rem; margin-bottom: 12px; }
-.card-body p:last-child { margin-bottom: 0; }
-
-.highlight-box {
-background: var(–warning-bg);
-border: 1px solid var(–warning-border);
-border-radius: 8px;
-padding: 12px 16px;
-font-size: 0.875rem;
-margin-bottom: 16px;
-}
-
-/* === EXCERPTS === */
-.excerpt {
-padding: 12px 16px;
-background: var(–bg);
-border-radius: 8px;
-margin-bottom: 8px;
-}
-.excerpt:last-child { margin-bottom: 0; }
-.excerpt-time { font-size: 0.75rem; color: var(–text-muted); margin-bottom: 4px; }
-.excerpt-text { font-size: 0.875rem; font-style: italic; }
-
-/* === FORMS === */
-.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.form-grid .full { grid-column: 1 / -1; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 0.8125rem; font-weight: 500; }
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-padding: 10px 12px;
-border: 1px solid var(–border);
-border-radius: 8px;
-font-size: 0.875rem;
-font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-outline: none;
-border-color: var(–primary);
-}
-
-.form-group textarea { min-height: 80px; resize: vertical; }
-.form-hint { font-size: 0.75rem; color: var(–text-muted); }
-
-.form-actions {
-display: flex;
-justify-content: flex-end;
-gap: 8px;
-margin-top: 16px;
-padding-top: 16px;
-border-top: 1px solid var(–border);
-}
-
-/* === BUTTONS === */
-.btn {
-padding: 10px 16px;
-border-radius: 8px;
-font-size: 0.875rem;
-font-weight: 500;
-cursor: pointer;
-transition: all 0.15s;
-border: none;
-display: inline-flex;
-align-items: center;
-gap: 6px;
-}
-
-.btn svg { width: 16px; height: 16px; }
-.btn-primary { background: var(–sage); color: white; }
-.btn-primary:hover { background: var(–sage-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3); }
-.btn-secondary { background: var(–warm-white); border: 1px solid var(–border); color: var(–text); }
-.btn-secondary:hover { background: var(–sage-light); border-color: var(–sage); }
-.btn-sm { padding: 6px 12px; font-size: 0.8125rem; }
-.btn-full { width: 100%; justify-content: center; }
-
-/* === TEMPLATES === */
-.templates { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-
-.template-btn {
-background: var(–bg);
-border: 1px solid var(–border);
-padding: 6px 14px;
-border-radius: 20px;
-font-size: 0.8125rem;
-color: var(–text-light);
-cursor: pointer;
-}
-
-.template-btn:hover { background: var(–primary); border-color: var(–primary); color: white; }
-
-/* === HOMEWORK === */
-.homework-item {
-display: flex;
-align-items: flex-start;
-gap: 12px;
-padding: 16px;
-background: var(–bg);
-border-radius: 8px;
-margin-bottom: 8px;
-}
-.homework-item:last-child { margin-bottom: 0; }
-
-.homework-status {
-width: 24px;
-height: 24px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-flex-shrink: 0;
-}
-
-.homework-status.active { background: var(–warning-bg); color: var(–warning); }
-.homework-status.completed { background: var(–success-bg); color: var(–success); }
-.homework-status svg { width: 14px; height: 14px; }
-
-.homework-content { flex: 1; }
-.homework-type { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
-.homework-desc { font-size: 0.8125rem; color: var(–text-light); }
-.homework-meta { font-size: 0.75rem; color: var(–text-muted); margin-top: 6px; }
-
-/* === SESSION PREVIEW === */
-.session-preview { padding: 12px 0; }
-.session-preview-border { border-top: 1px solid var(–border); margin-top: 12px; padding-top: 16px; }
-.session-preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.session-preview-date { font-size: 0.875rem; font-weight: 600; }
-.session-preview-type { font-size: 0.75rem; color: var(–text-muted); background: var(–bg); padding: 2px 8px; border-radius: 4px; }
-.session-preview-text { font-size: 0.8125rem; color: var(–text-light); margin-bottom: 4px; line-height: 1.5; }
-.session-preview-text:last-child { margin-bottom: 0; }
-.session-preview-text strong { color: var(–text); }
-
-/* === NOTES === */
-.note-card { background: var(–bg); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-.note-card:last-child { margin-bottom: 0; }
-.note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.note-date { font-size: 0.875rem; font-weight: 600; }
-.note-content p { font-size: 0.8125rem; color: var(–text-light); margin-bottom: 8px; line-height: 1.6; }
-.note-content p:last-child { margin-bottom: 0; }
-.note-content strong { color: var(–text); }
-
-.copy-btn {
-background: var(–white);
-border: 1px solid var(–border);
-padding: 4px 10px;
-border-radius: 4px;
-font-size: 0.75rem;
-color: var(–text-light);
-cursor: pointer;
-display: flex;
-align-items: center;
-gap: 4px;
-}
-.copy-btn:hover { background: var(–bg); }
-.copy-btn.copied { background: var(–success-bg); border-color: var(–success); color: var(–success); }
-.copy-btn svg { width: 12px; height: 12px; }
-
-/* === SIMPLEPRACTICE SECTION COPY BUTTONS === */
-.sp-section-buttons {
-display: flex;
-gap: 4px;
-flex-wrap: wrap;
-margin-top: 8px;
-}
-.sp-section-btn {
-background: var(–white);
-border: 1px solid var(–border);
-padding: 3px 8px;
-border-radius: 4px;
-font-size: 0.7rem;
-font-weight: 600;
-color: var(–text-light);
-cursor: pointer;
-transition: all 0.15s;
-}
-.sp-section-btn:hover {
-background: var(–sage-light);
-border-color: var(–sage);
-color: var(–sage);
-}
-.sp-section-btn.copied {
-background: var(–success-bg);
-border-color: var(–success);
-color: var(–success);
-}
-
-/* === CRISIS ALERTS === */
-.crisis-alert-item {
-background: var(–danger-bg);
-border: 1px solid var(–danger-border);
-border-radius: 8px;
-padding: 12px 16px;
-margin-bottom: 12px;
-}
-.crisis-alert-item:last-child { margin-bottom: 0; }
-.crisis-alert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.crisis-alert-time { font-size: 0.75rem; color: var(–text-muted); font-weight: 500; }
-.crisis-alert-severity { font-size: 0.75rem; font-weight: 600; }
-.crisis-alert-detail { font-size: 0.875rem; color: var(–text); line-height: 1.5; }
-
-/* === INVITE CODE === */
-.invite-display {
-background: var(–bg);
-border: 2px dashed var(–border);
-border-radius: 12px;
-padding: 20px;
-text-align: center;
-margin: 16px 0;
-}
-
-.invite-code {
-font-size: 2rem;
-font-weight: 700;
-letter-spacing: 0.1em;
-color: var(–primary);
-margin: 8px 0;
-cursor: pointer;
-}
-
-.invite-code:hover { color: var(–primary-hover); }
-
-.invite-hint {
-font-size: 0.8125rem;
-color: var(–text-muted);
-}
-
-/* === MODAL === */
-.modal-overlay {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: rgba(0, 0, 0, 0.5);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 1000;
-}
-.modal-overlay.show { display: flex; }
-
-.modal {
-background: var(–white);
-border-radius: 12px;
-width: 100%;
-max-width: 480px;
-box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-animation: modalSlideIn 0.2s ease;
-}
-
-@keyframes modalSlideIn {
-from { opacity: 0; transform: translateY(-20px); }
-to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-header {
-padding: 20px 24px;
-border-bottom: 1px solid var(–border);
-display: flex;
-align-items: center;
-justify-content: space-between;
-}
-.modal-header h3 { font-size: 1.125rem; font-weight: 600; }
-.modal-close { background: none; border: none; font-size: 1.5rem; color: var(–text-muted); cursor: pointer; padding: 0; }
-.modal-close:hover { color: var(–text); }
-.modal-body { padding: 24px; }
-.modal-body .form-group { margin-bottom: 16px; }
-.modal-body .form-group:last-child { margin-bottom: 0; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(–border); display: flex; justify-content: flex-end; gap: 8px; }
-
-/* === SETTINGS TOGGLES === */
-.settings-section {
-margin-top: 20px;
-padding-top: 16px;
-border-top: 1px solid var(–border);
-}
-.settings-section-title {
-font-size: 0.8rem;
-font-weight: 600;
-color: var(–text);
-margin-bottom: 12px;
-display: flex;
-align-items: center;
-gap: 6px;
-}
-.setting-row {
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 10px 0;
-border-bottom: 1px solid var(–bg);
-}
-.setting-row:last-child { border-bottom: none; }
-.setting-label {
-font-size: 0.8rem;
-color: var(–text);
-}
-.setting-hint {
-font-size: 0.7rem;
-color: var(–text-muted);
-margin-top: 2px;
-}
-.toggle {
-position: relative;
-width: 44px;
-height: 24px;
-flex-shrink: 0;
-}
-.toggle input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-.toggle-slider {
-position: absolute;
-cursor: pointer;
-top: 0; left: 0; right: 0; bottom: 0;
-background: #ccc;
-border-radius: 24px;
-transition: 0.2s;
-}
-.toggle-slider:before {
-content: “”;
-position: absolute;
-height: 18px;
-width: 18px;
-left: 3px;
-bottom: 3px;
-background: white;
-border-radius: 50%;
-transition: 0.2s;
-}
-.toggle input:checked + .toggle-slider {
-background: var(–sage);
-}
-.toggle input:checked + .toggle-slider:before {
-transform: translateX(20px);
-}
-.toggle input:disabled + .toggle-slider {
-opacity: 0.5;
-cursor: not-allowed;
-}
-.settings-default-note {
-font-size: 0.7rem;
-color: var(–text-muted);
-font-style: italic;
-margin-top: 8px;
-padding: 6px 8px;
-background: var(–bg);
-border-radius: 4px;
-}
-
-/* === SAVE INDICATOR === */
-.save-status {
-display: inline-flex;
-align-items: center;
-gap: 6px;
-font-size: 0.75rem;
-color: var(–text-muted);
-padding: 4px 8px;
-border-radius: 4px;
-transition: all 0.3s ease;
-}
-.save-status.saving { color: var(–sage); }
-.save-status.saved { color: #16a34a; }
-.save-status.error { color: #dc2626; }
-.save-status .dot {
-width: 6px; height: 6px; border-radius: 50%;
-background: currentColor;
-}
-.save-status.saving .dot {
-animation: pulseDot 1s ease infinite;
-}
-@keyframes pulseDot {
-0%, 100% { opacity: 1; }
-50% { opacity: 0.3; }
-}
-
-/* === WHAT CHANGED BADGE === */
-.change-badge {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-font-size: 0.75rem;
-padding: 2px 8px;
-border-radius: 10px;
-font-weight: 500;
-}
-.change-badge.new { background: #dcfce7; color: #166534; }
-.change-badge.changed { background: #fef3c7; color: #92400e; }
-.change-badge.alert { background: #fee2e2; color: #991b1b; }
-.change-badge.unchanged { background: #f3f4f6; color: #6b7280; }
-
-/* === TOAST === */
-.toast {
-position: fixed;
-bottom: 24px;
-right: 24px;
-background: var(–text);
-color: white;
-padding: 12px 20px;
-border-radius: 8px;
-font-size: 0.875rem;
-font-weight: 500;
-display: none;
-align-items: center;
-gap: 8px;
-z-index: 1000;
-animation: slideUp 0.3s ease;
-}
-.toast.show { display: flex; }
-.toast svg { width: 18px; height: 18px; color: var(–success); }
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* === TOOLTIP === */
-.tooltip-trigger {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-position: relative;
-}
-.tooltip-icon {
-width: 16px;
-height: 16px;
-background: var(–border);
-border-radius: 50%;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-font-size: 0.65rem;
-font-weight: 700;
-color: var(–text-light);
-cursor: help;
-flex-shrink: 0;
-}
-.tooltip-icon:hover { background: var(–stone); color: white; }
-.tooltip-content {
-display: none;
-position: absolute;
-bottom: calc(100% + 8px);
-left: 50%;
-transform: translateX(-50%);
-background: var(–charcoal);
-color: white;
-padding: 10px 14px;
-border-radius: 8px;
-font-size: 0.75rem;
-font-weight: 400;
-line-height: 1.5;
-width: 260px;
-z-index: 500;
-box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.tooltip-content::after {
-content: ‘’;
-position: absolute;
-top: 100%;
-left: 50%;
-transform: translateX(-50%);
-border: 6px solid transparent;
-border-top-color: var(–charcoal);
-}
-.tooltip-trigger:hover .tooltip-content { display: block; }
-
-/* === INVITE BADGE === */
-.invite-badge {
-display: inline-flex;
-align-items: center;
-gap: 4px;
-background: var(–warning-bg);
-border: 1px solid var(–warning-border);
-color: var(–text);
-padding: 2px 8px;
-border-radius: 4px;
-font-size: 0.7rem;
-font-weight: 600;
-letter-spacing: 0.05em;
-cursor: pointer;
-}
-.invite-badge:hover { background: var(–warning-border); }
-.invite-badge svg { width: 10px; height: 10px; }
-.pending-label {
-font-size: 0.7rem;
-color: var(–warning);
-font-weight: 500;
-}
-
-.loading { text-align: center; padding: 32px; color: var(–text-muted); }
-.spinner { width: 24px; height: 24px; border: 2px solid var(–border); border-top-color: var(–primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* === QUICK WIN 1: LEFT-EDGE COLOR BARS === */
-.client-item {
-border-left: 3px solid transparent;
-transition: background 0.15s, border-left-color 0.15s;
-}
-.client-item.status-crisis {
-border-left-color: #DC2626;
-background: rgba(220, 38, 38, 0.04);
-}
-.client-item.status-attention,
-.client-item.status-needs-attention {
-border-left-color: #D97706;
-}
-.client-item.status-stable { border-left-color: transparent; }
-.client-item.status-dormant { border-left-color: transparent; }
-.client-item.active { border-left-color: transparent; }
-
-/* === QUICK WIN 2: TYPOGRAPHY REFINEMENT === */
-.page-title {
-font-size: 1.375rem;
-letter-spacing: -0.02em;
-}
-.section-title { font-size: 1rem; }
-
-/* === QUICK WIN 3: UNDERLINE TABS === */
-.tabs {
-background: transparent;
-border: none;
-border-bottom: 1px solid var(–border);
-border-radius: 0;
-padding: 0;
-gap: 0;
-}
-.tab {
-border-radius: 0;
-border-bottom: 2px solid transparent;
-padding: 12px 16px;
-color: var(–text-muted);
-font-weight: 500;
-}
-.tab:hover {
-background: transparent;
-color: var(–text);
-}
-.tab.active {
-background: transparent;
-color: var(–charcoal);
-border-bottom-color: var(–sage);
-font-weight: 600;
-}
-
-/* === QUICK WIN 5: EMPTY STATES === */
-.section-empty {
-border: 1px dashed var(–border);
-background: var(–warm-white);
-border-radius: 8px;
-margin: 8px;
-padding: 24px;
-text-align: center;
-color: var(–text-muted);
-font-size: 0.875rem;
-}
-
-/* === QUICK WIN 6: “WHAT CHANGED” DIFFERENTIATION === */
-#prepSummary {
-border-left: 3px solid var(–sage);
-}
-.card:has(#prepSummary) {
-box-shadow: 0 4px 16px rgba(45, 42, 38, 0.1);
-}
-
-/* === QUICK WIN 9: CARD HOVER LIFT === */
-.card {
-transition: transform 140ms ease-out, box-shadow 140ms ease-out;
-}
-@media (hover: hover) {
-.card:hover {
-transform: translateY(-1px);
-box-shadow: 0 4px 16px rgba(45, 42, 38, 0.1);
-}
-}
-
-/* === PREP SUMMARY STRIP (NEW ELEMENT) === */
-.prep-summary-strip {
-display: flex;
-gap: 12px;
-padding: 14px 16px;
-background: var(–warm-white);
-border: 1px solid var(–border);
-border-radius: 12px;
-margin-bottom: 16px;
-align-items: center;
-}
-.prep-signal {
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 4px;
-flex: 1;
-min-width: 0;
-}
-.prep-signal-value {
-font-size: 1.25rem;
-font-weight: 700;
-color: var(–charcoal);
-}
-.prep-signal-value.danger { color: #DC2626; }
-.prep-signal-value.warning { color: #D97706; }
-.prep-signal-label {
-font-size: 0.6875rem;
-color: var(–text-muted);
-text-transform: uppercase;
-letter-spacing: 0.05em;
-text-align: center;
-}
-
-/* === MORNING GREETING (NEW ELEMENT) === */
-.morning-greeting {
-font-size: 1.375rem;
-font-weight: 700;
-color: var(–charcoal);
-letter-spacing: -0.02em;
-margin-bottom: 4px;
-}
-.morning-summary {
-font-size: 0.875rem;
-color: var(–text-muted);
-margin-bottom: 20px;
-}
-
-/* === SIDEBAR BACKDROP OVERLAY === */
-.sidebar-backdrop {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(45, 42, 38, 0.3);
-z-index: 199;
-opacity: 0;
-transition: opacity 0.3s;
-}
-.sidebar-backdrop.show {
-display: block;
-opacity: 1;
-}
-
-/* === HEADER CLIENTS BUTTON (hidden on desktop) === */
-.header-clients-btn { display: none; }
-.sidebar-close-btn { display: none; }
-
-/* === PHONE-ONLY ELEMENTS (hidden on desktop) === */
-.homework-mobile-hint { display: none; }
-.note-quick-capture { display: none; }
-
-/* === TABLET LANDSCAPE === */
-@media (min-width: 1024px) and (max-width: 1199px) {
-.layout {
-grid-template-columns: 1fr 240px;
-gap: 20px;
-padding: 108px 20px 20px;
-}
-}
-
-/* === TABLET PORTRAIT === */
-@media (min-width: 768px) and (max-width: 1023px) {
-.layout {
-grid-template-columns: 1fr;
-gap: 20px;
-padding: 88px 20px 20px;
-}
-
-.sidebar {
-position: fixed;
-right: -320px;
-top: 0;
-width: 320px;
-height: 100vh;
-z-index: 200;
-background: var(–white);
-border-left: 1px solid var(–border);
-box-shadow: -8px 0 24px rgba(45, 42, 38, 0.1);
-transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-overflow-y: auto;
-padding-top: 16px;
-}
-.sidebar.open { right: 0; }
-
-.header-clients-btn { display: inline-flex; }
-.sidebar-close-btn { display: block; }
-
-.btn { min-height: 44px; padding: 12px 16px; }
-.client-item { min-height: 56px; padding: 14px 16px; }
-.tab { min-height: 44px; }
-input, select, textarea {
-font-size: 16px;
-min-height: 44px;
-}
-
-.tabs {
-position: sticky;
-top: 88px;
-z-index: 50;
-background: var(–bg);
-}
-
-.form-actions {
-position: sticky;
-bottom: 0;
-background: rgba(253, 251, 247, 0.92);
-backdrop-filter: blur(6px);
-padding: 12px 16px;
-border-radius: 12px;
-z-index: 10;
-}
-}
-
-/* === PHONE === */
-@media (max-width: 767px) {
-.layout {
-grid-template-columns: 1fr;
-gap: 16px;
-padding: 72px 16px 16px;
-}
-.main { gap: 16px; }
-
-.header {
-height: 52px;
-padding: 0 16px;
-}
-.disclaimer-banner {
-top: 52px;
-padding: 4px 16px;
-font-size: 0.6875rem;
-}
-.logo-text { font-size: 1.125rem; }
-.home-icon { width: 32px; height: 32px; font-size: 16px; }
-.home-icon svg { width: 18px; height: 18px; }
-.user-name { display: none; }
-.logout-btn { font-size: 0.6875rem; padding: 4px 8px; }
-
-.header-clients-btn {
-display: inline-flex;
-align-items: center;
-gap: 6px;
-background: none;
-border: 1px solid var(–border);
-padding: 6px 12px;
-border-radius: 8px;
-font-size: 0.8125rem;
-font-weight: 500;
-color: var(–text);
-cursor: pointer;
-min-height: 36px;
-}
-.header-clients-btn.has-alerts::after {
-content: ‘’;
-width: 8px;
-height: 8px;
-background: #DC2626;
-border-radius: 50%;
-}
-
-.sidebar {
-position: fixed;
-inset: 0;
-z-index: 300;
-background: var(–bg);
-transform: translateX(100%);
-transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-overflow-y: auto;
-padding: 0;
-}
-.sidebar.open { transform: translateX(0); }
-.sidebar-section {
-border-radius: 0;
-border: none;
-min-height: 100vh;
-}
-.sidebar-close-btn {
-display: block;
-background: none;
-border: none;
-font-size: 1.5rem;
-color: var(–text-muted);
-cursor: pointer;
-padding: 4px;
-}
-
-.client-item {
-padding: 16px;
-min-height: 64px;
-gap: 14px;
-align-items: flex-start;
-}
-.client-avatar { width: 44px; height: 44px; font-size: 0.875rem; }
-.client-name { font-size: 0.9375rem; font-weight: 600; }
-.client-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.client-signal-chip {
-font-size: 0.6875rem;
-padding: 2px 6px;
-border-radius: 4px;
-font-weight: 600;
-background: var(–bg);
-}
-
-.morning-greeting {
-font-size: 1.125rem;
-margin-bottom: 2px;
-}
-.morning-summary {
-font-size: 0.8125rem;
-margin-bottom: 16px;
-}
-
-.section.is-empty { display: none; }
-
-.prep-summary-strip {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 10px;
-padding: 12px;
-}
-.prep-signal {
-padding: 10px 8px;
-background: var(–white);
-border: 1px solid var(–border);
-border-radius: 8px;
-min-height: 44px;
-}
-.prep-signal-value { font-size: 1.125rem; }
-
-.tabs {
-position: sticky;
-top: 82px;
-z-index: 50;
-background: var(–bg);
-margin-bottom: 16px;
-}
-.tab {
-padding: 14px 8px;
-font-size: 0.8125rem;
-min-height: 44px;
-}
-
-.section-header { padding: 12px 16px; }
-.section-title { font-size: 0.875rem; }
-
-.card { margin-bottom: 12px; }
-.card-header { padding: 14px 16px; }
-.card-body { padding: 16px; }
-
-.btn {
-min-height: 44px;
-padding: 12px 16px;
-font-size: 0.875rem;
-}
-.btn-sm {
-min-height: 40px;
-padding: 10px 14px;
-}
-.list-item {
-padding: 14px 16px;
-min-height: 52px;
-}
-.homework-item { padding: 16px; }
-.template-btn {
-padding: 10px 16px;
-min-height: 40px;
-font-size: 0.875rem;
-}
-.copy-btn {
-padding: 8px 12px;
-min-height: 36px;
-}
-.change-badge {
-font-size: 0.8125rem;
-padding: 4px 10px;
-}
-.toggle { margin: 4px 0; }
-
-.form-grid { grid-template-columns: 1fr; gap: 12px; }
-.form-group textarea { min-height: 100px; }
-.form-group input,
-.form-group select,
-.form-group textarea {
-font-size: 16px;
-padding: 12px;
-min-height: 44px;
-}
-.form-group label { font-size: 0.875rem; }
-
-.form-actions {
-position: sticky;
-bottom: 0;
-background: var(–white);
-padding: 12px 16px;
-margin: 0 -16px;
-border-top: 1px solid var(–border);
-z-index: 10;
-flex-direction: column-reverse;
-}
-.form-actions .btn { width: 100%; }
-
-.note-quick-capture {
-display: block;
-border: 1px dashed var(–border);
-background: var(–warm-white);
-border-radius: 12px;
-padding: 16px;
-text-align: center;
-color: var(–text-muted);
-font-size: 0.8125rem;
-}
-
-#homeworkForm .form-grid { display: none; }
-#homeworkForm .form-actions { display: none; }
-.homework-mobile-hint {
-display: block;
-font-size: 0.8125rem;
-color: var(–text-muted);
-text-align: center;
-padding: 12px;
-font-style: italic;
-}
-
-.copy-btn:has(svg) { display: none; }
-.ehr-format-menu { display: none; }
-.note-header .copy-btn:last-child { display: flex; }
-
-.modal-overlay { align-items: flex-end; }
-.modal {
-max-width: 100%;
-border-radius: 16px 16px 0 0;
-max-height: 85vh;
-overflow-y: auto;
-animation: sheetSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.modal-header::before {
-content: ‘’;
-display: block;
-width: 36px;
-height: 4px;
-background: #D1D5DB;
-border-radius: 2px;
-margin: 0 auto 12px;
-}
-.modal-header { padding: 12px 20px 16px; }
-.modal-body { padding: 16px 20px; }
-.modal-footer {
-padding: 12px 20px;
-padding-bottom: calc(12px + env(safe-area-inset-bottom));
-flex-direction: column-reverse;
-}
-.modal-footer .btn { width: 100%; }
-
-.toast { bottom: 16px; right: 16px; left: 16px; }
-
-@keyframes sheetSlideUp {
-from { transform: translateY(100%); }
-to { transform: translateY(0); }
-}
-
-.page-header { margin-bottom: 16px; }
-.page-title { font-size: 1.125rem; }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <title>Alo Clinical Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { overflow-x: clip; }
+@supports not (overflow-x: clip) {
+  html, body { overflow-x: hidden; }
+}
+
+
+    
+    :root {
+      --cream: #FDFBF7;
+      --warm-white: #FAF8F5;
+      --sage: #8B9A7D;
+      --sage-light: #E8EDE4;
+      --sage-hover: #7a8a6d;
+      --charcoal: #2D2A26;
+      --stone: #9C9589;
+      --border: rgba(156, 149, 137, 0.2);
+      --bg: var(--cream);
+      --white: #ffffff;
+      --text: var(--charcoal);
+      --text-light: var(--stone);
+      --text-muted: var(--stone);
+      --primary: var(--sage);
+      --primary-hover: var(--sage-hover);
+      --danger: #d97706;
+      --danger-bg: #fef3c7;
+      --danger-border: #fde68a;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --info-bg: var(--sage-light);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* === LOGIN PAGE === */
+    .login-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(45, 42, 38, 0.06);
+    }
+
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      background: var(--sage);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 24px;
+      margin: 0 auto 16px;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+
+    .login-form { text-align: left; }
+
+    .login-form .form-group {
+      margin-bottom: 16px;
+    }
+
+    .login-form label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .login-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .login-info {
+      background: var(--sage-light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: none;
+    }
+    
+    /* === HEADER === */
+    .header {
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+       .home-link,
+    .home-link:link,
+    .home-link:visited,
+    .home-link:hover,
+    .home-link:active {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    
+    .home-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--sage);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+       .home-icon svg { width: 20px; height: 20px; display: block; flex: 0 0 auto; }
+
+    
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--text);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+
+    .logout-btn:hover { background: var(--bg); }
+
+    /* === DISCLAIMER BANNER === */
+    .disclaimer-banner {
+      background: var(--danger-bg);
+      border-bottom: 1px solid var(--danger-border);
+      padding: 6px 24px;
+      font-size: 0.75rem;
+      color: var(--text);
+      text-align: center;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+    
+    /* === LAYOUT === */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 108px 24px 24px;
+    }
+    
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    /* === SECTIONS === */
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .section-icon.danger { background: var(--danger-bg); color: var(--danger); }
+    .section-icon.warning { background: var(--warning-bg); color: var(--warning); }
+       .section-icon svg { width: 18px; height: 18px; display: block; flex: 0 0 auto; }
+
+    
+    .section-title { font-size: 0.9375rem; font-weight: 600; }
+    
+    .section-count {
+      margin-left: auto;
+      background: var(--bg);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+    
+    .section-body { padding: 8px; }
+    
+    .section-empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    /* === LIST ITEMS === */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .list-item:hover { background: var(--bg); }
+    
+    .list-item-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .list-item-indicator.danger { background: var(--danger); }
+    .list-item-indicator.warning { background: var(--warning); }
+    .list-item-indicator.success { background: var(--success); }
+    
+    .list-item-content { flex: 1; min-width: 0; }
+    
+    .list-item-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .list-item-description {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+    }
+    
+    .list-item-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    
+    .list-item-action {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .list-item-action:hover { background: var(--border); }
+    
+    /* === SIDEBAR === */
+    .sidebar {
+      position: sticky;
+      top: 108px;
+      height: fit-content;
+    }
+    
+    .sidebar-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-title { font-size: 0.875rem; font-weight: 600; }
+    
+    .sidebar-list {
+      max-height: calc(100vh - 240px);
+      overflow-y: auto;
+    }
+    
+    .client-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .client-item:last-child { border-bottom: none; }
+    .client-item:hover { background: var(--bg); }
+    .client-item.active { background: var(--primary); color: white; }
+    .client-item.active .client-name { color: white; }
+    .client-item.active .client-meta { color: rgba(255,255,255,0.8); }
+    
+    .client-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      flex-shrink: 0;
+      position: relative;
+    }
+    
+    .client-item.active .client-avatar { background: rgba(255,255,255,0.2); color: white; }
+    
+    .status-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+    }
+    
+    .client-item.active .status-badge { border-color: var(--primary); }
+    .status-badge.crisis { background: var(--danger); animation: pulse 2s infinite; }
+    .status-badge.needs-attention { background: var(--warning); }
+    .status-badge.stable { background: var(--success); }
+    .status-badge.dormant { background: var(--text-muted); }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+    }
+    
+    .client-info { flex: 1; min-width: 0; }
+    .client-name { font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .client-meta { font-size: 0.75rem; color: var(--text-muted); }
+    
+    /* === CLIENT PAGE === */
+    .client-page { display: none; }
+    .client-page.active { display: grid; }
+    
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .page-meta { font-size: 0.875rem; color: var(--text-light); }
+    
+    /* === TABS === */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 24px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .tab:hover { background: var(--bg); color: var(--text); }
+    .tab.active { background: var(--primary); color: white; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* === CARDS === */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+    }
+    
+    .card:hover { box-shadow: 0 4px 16px rgba(45, 42, 38, 0.08); }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .card-title { font-size: 0.9375rem; font-weight: 600; }
+    
+    .card-body { padding: 20px; }
+    .card-body p { font-size: 0.875rem; margin-bottom: 12px; }
+    .card-body p:last-child { margin-bottom: 0; }
+    
+    .highlight-box {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+    }
+    
+    /* === EXCERPTS === */
+    .excerpt {
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .excerpt:last-child { margin-bottom: 0; }
+    .excerpt-time { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+    .excerpt-text { font-size: 0.875rem; font-style: italic; }
+    
+    /* === FORMS === */
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.8125rem; font-weight: 500; }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-hint { font-size: 0.75rem; color: var(--text-muted); }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* === BUTTONS === */
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--sage); color: white; }
+    .btn-primary:hover { background: var(--sage-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3); }
+    .btn-secondary { background: var(--warm-white); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--sage-light); border-color: var(--sage); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8125rem; }
+    .btn-full { width: 100%; justify-content: center; }
+    
+    /* === TEMPLATES === */
+    .templates { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    
+    .template-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      cursor: pointer;
+    }
+    
+    .template-btn:hover { background: var(--primary); border-color: var(--primary); color: white; }
+    
+    /* === HOMEWORK === */
+    .homework-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .homework-item:last-child { margin-bottom: 0; }
+    
+    .homework-status {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .homework-status.active { background: var(--warning-bg); color: var(--warning); }
+    .homework-status.completed { background: var(--success-bg); color: var(--success); }
+    .homework-status svg { width: 14px; height: 14px; }
+    
+    .homework-content { flex: 1; }
+    .homework-type { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
+    .homework-desc { font-size: 0.8125rem; color: var(--text-light); }
+    .homework-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+    
+    /* === SESSION PREVIEW === */
+    .session-preview { padding: 12px 0; }
+    .session-preview-border { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 16px; }
+    .session-preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .session-preview-date { font-size: 0.875rem; font-weight: 600; }
+    .session-preview-type { font-size: 0.75rem; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border-radius: 4px; }
+    .session-preview-text { font-size: 0.8125rem; color: var(--text-light); margin-bottom: 4px; line-height: 1.5; }
+    .session-preview-text:last-child { margin-bottom: 0; }
+    .session-preview-text strong { color: var(--text); }
+    
+    /* === NOTES === */
+    .note-card { background: var(--bg); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .note-card:last-child { margin-bottom: 0; }
+    .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .note-date { font-size: 0.875rem; font-weight: 600; }
+    .note-content p { font-size: 0.8125rem; color: var(--text-light); margin-bottom: 8px; line-height: 1.6; }
+    .note-content p:last-child { margin-bottom: 0; }
+    .note-content strong { color: var(--text); }
+    
+    .copy-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .copy-btn:hover { background: var(--bg); }
+    .copy-btn.copied { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+    .copy-btn svg { width: 12px; height: 12px; }
+
+    /* === SIMPLEPRACTICE SECTION COPY BUTTONS === */
+    .sp-section-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .sp-section-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sp-section-btn:hover {
+      background: var(--sage-light);
+      border-color: var(--sage);
+      color: var(--sage);
+    }
+    .sp-section-btn.copied {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* === CRISIS ALERTS === */
+    .crisis-alert-item {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+    .crisis-alert-item:last-child { margin-bottom: 0; }
+    .crisis-alert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .crisis-alert-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .crisis-alert-severity { font-size: 0.75rem; font-weight: 600; }
+    .crisis-alert-detail { font-size: 0.875rem; color: var(--text); line-height: 1.5; }
+    
+    /* === INVITE CODE === */
+    .invite-display {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .invite-code {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      margin: 8px 0;
+      cursor: pointer;
+    }
+
+    .invite-code:hover { color: var(--primary-hover); }
+
+    .invite-hint {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+    
+    /* === MODAL === */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.show { display: flex; }
+    
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: modalSlideIn 0.2s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 24px; }
+    .modal-body .form-group { margin-bottom: 16px; }
+    .modal-body .form-group:last-child { margin-bottom: 0; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    
+    /* === SETTINGS TOGGLES === */
+    .settings-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .settings-section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--bg);
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label {
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .setting-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc;
+      border-radius: 24px;
+      transition: 0.2s;
+    }
+    .toggle-slider:before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .toggle-slider {
+      background: var(--sage);
+    }
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    .toggle input:disabled + .toggle-slider {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .settings-default-note {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: var(--bg);
+      border-radius: 4px;
+    }
+
+    /* === SAVE INDICATOR === */
+    .save-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    .save-status.saving { color: var(--sage); }
+    .save-status.saved { color: #16a34a; }
+    .save-status.error { color: #dc2626; }
+    .save-status .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor;
+    }
+    .save-status.saving .dot {
+      animation: pulseDot 1s ease infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* === WHAT CHANGED BADGE === */
+    .change-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .change-badge.new { background: #dcfce7; color: #166534; }
+    .change-badge.changed { background: #fef3c7; color: #92400e; }
+    .change-badge.alert { background: #fee2e2; color: #991b1b; }
+    .change-badge.unchanged { background: #f3f4f6; color: #6b7280; }
+
+    /* === TOAST === */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    .toast.show { display: flex; }
+    .toast svg { width: 18px; height: 18px; color: var(--success); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* === TOOLTIP === */
+    .tooltip-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+    .tooltip-icon {
+      width: 16px;
+      height: 16px;
+      background: var(--border);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-light);
+      cursor: help;
+      flex-shrink: 0;
+    }
+    .tooltip-icon:hover { background: var(--stone); color: white; }
+    .tooltip-content {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--charcoal);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      line-height: 1.5;
+      width: 260px;
+      z-index: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .tooltip-content::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--charcoal);
+    }
+    .tooltip-trigger:hover .tooltip-content { display: block; }
+
+    /* === INVITE BADGE === */
+    .invite-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--text);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+    .invite-badge:hover { background: var(--warning-border); }
+    .invite-badge svg { width: 10px; height: 10px; }
+    .pending-label {
+      font-size: 0.7rem;
+      color: var(--warning);
+      font-weight: 500;
+    }
+
+    .loading { text-align: center; padding: 32px; color: var(--text-muted); }
+    .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+     /* === QUICK WIN 1: LEFT-EDGE COLOR BARS === */
+    .client-item {
+      border-left: 3px solid transparent;
+      transition: background 0.15s, border-left-color 0.15s;
+    }
+    .client-item.status-crisis {
+      border-left-color: #DC2626;
+      background: rgba(220, 38, 38, 0.04);
+    }
+    .client-item.status-attention,
+    .client-item.status-needs-attention {
+      border-left-color: #D97706;
+    }
+    .client-item.status-stable { border-left-color: transparent; }
+    .client-item.status-dormant { border-left-color: transparent; }
+    .client-item.active { border-left-color: transparent; }
+
+    /* === QUICK WIN 2: TYPOGRAPHY REFINEMENT === */
+    .page-title {
+      font-size: 1.375rem;
+      letter-spacing: -0.02em;
+    }
+    .section-title { font-size: 1rem; }
+
+    /* === QUICK WIN 3: UNDERLINE TABS === */
+    .tabs {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      padding: 0;
+      gap: 0;
+    }
+    .tab {
+      border-radius: 0;
+      border-bottom: 2px solid transparent;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .tab:hover {
+      background: transparent;
+      color: var(--text);
+    }
+    .tab.active {
+      background: transparent;
+      color: var(--charcoal);
+      border-bottom-color: var(--sage);
+      font-weight: 600;
+    }
+
+    /* === QUICK WIN 5: EMPTY STATES === */
+    .section-empty {
+      border: 1px dashed var(--border);
+      background: var(--warm-white);
+      border-radius: 8px;
+      margin: 8px;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* === QUICK WIN 6: "WHAT CHANGED" DIFFERENTIATION === */
+    #prepSummary {
+      border-left: 3px solid var(--sage);
+    }
+    .card:has(#prepSummary) {
+      box-shadow: 0 4px 16px rgba(45, 42, 38, 0.1);
+    }
+
+    /* === QUICK WIN 9: CARD HOVER LIFT === */
+    .card {
+      transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+    }
+    @media (hover: hover) {
+      .card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(45, 42, 38, 0.1);
+      }
+    }
+
+    /* === PREP SUMMARY STRIP (NEW ELEMENT) === */
+    .prep-summary-strip {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .prep-signal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .prep-signal-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+    .prep-signal-value.danger { color: #DC2626; }
+    .prep-signal-value.warning { color: #D97706; }
+    .prep-signal-label {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    /* === MORNING GREETING (NEW ELEMENT) === */
+    .morning-greeting {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--charcoal);
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .morning-summary {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* === SIDEBAR BACKDROP OVERLAY === */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(45, 42, 38, 0.3);
+      z-index: 199;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .sidebar-backdrop.show {
+      display: block;
+      opacity: 1;
+    }
+
+    /* === HEADER CLIENTS BUTTON (hidden on desktop) === */
+    .header-clients-btn { display: none; }
+    .sidebar-close-btn { display: none; }
+
+    /* === PHONE-ONLY ELEMENTS (hidden on desktop) === */
+    .homework-mobile-hint { display: none; }
+    .note-quick-capture { display: none; }
+   /* === TABLET LANDSCAPE === */
+    @media (min-width: 1024px) and (max-width: 1199px) {
+      .layout {
+        grid-template-columns: 1fr 240px;
+        gap: 20px;
+        padding: 108px 20px 20px;
+      }
+    }
+   /* === TABLET PORTRAIT === */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 88px 20px 20px;
+      }
+
+      /* Sidebar becomes slide-out drawer */
+      .sidebar {
+        position: fixed;
+        right: -320px;
+        top: 0;
+        width: 320px;
+        height: 100vh;
+        z-index: 200;
+        background: var(--white);
+        border-left: 1px solid var(--border);
+        box-shadow: -8px 0 24px rgba(45, 42, 38, 0.1);
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        padding-top: 16px;
+      }
+      .sidebar.open { right: 0; }
+
+      /* Show toggle button */
+      .header-clients-btn { display: inline-flex; }
+      .sidebar-close-btn { display: block; }
+
+      /* Touch targets */
+      .btn { min-height: 44px; padding: 12px 16px; }
+      .client-item { min-height: 56px; padding: 14px 16px; }
+      .tab { min-height: 44px; }
+      input, select, textarea {
+        font-size: 16px;
+        min-height: 44px;
+      }
+
+      /* Sticky tabs */
+      .tabs {
+        position: sticky;
+        top: 88px;
+        z-index: 50;
+        background: var(--bg);
+      }
+
+      /* Sticky save button */
+      .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: rgba(253, 251, 247, 0.92);
+        backdrop-filter: blur(6px);
+        padding: 12px 16px;
+        border-radius: 12px;
+        z-index: 10;
+      }
+    }
+   /* === PHONE === */
+    @media (max-width: 767px) {
+      /* Layout */
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 72px 16px 16px;
+      }
+      .main { gap: 16px; }
+
+      /* Header compact */
+      .header {
+        height: 52px;
+        padding: 0 16px;
+      }
+      .disclaimer-banner {
+        top: 52px;
+        padding: 4px 16px;
+        font-size: 0.6875rem;
+      }
+      .logo-text { font-size: 1.125rem; }
+      .home-icon { width: 32px; height: 32px; font-size: 16px; }
+      .home-icon svg { width: 18px; height: 18px; }
+      .user-name { display: none; }
+      .logout-btn { font-size: 0.6875rem; padding: 4px 8px; }
+
+      /* Show clients toggle */
+      .header-clients-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1px solid var(--border);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text);
+        cursor: pointer;
+        min-height: 36px;
+      }
+      .header-clients-btn.has-alerts::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #DC2626;
+        border-radius: 50%;
+      }
+
+      /* Sidebar becomes full-screen */
+      .sidebar {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        background: var(--bg);
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        padding: 0;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-section {
+        border-radius: 0;
+        border: none;
+        min-height: 100vh;
+      }
+      .sidebar-close-btn {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      /* Richer client cards on phone */
+      .client-item {
+        padding: 16px;
+        min-height: 64px;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .client-avatar { width: 44px; height: 44px; font-size: 0.875rem; }
+      .client-name { font-size: 0.9375rem; font-weight: 600; }
+      .client-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+      .client-signal-chip {
+        font-size: 0.6875rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        background: var(--bg);
+      }
+
+      /* Morning greeting compact */
+      .morning-greeting {
+        font-size: 1.125rem;
+        margin-bottom: 2px;
+      }
+      .morning-summary {
+        font-size: 0.8125rem;
+        margin-bottom: 16px;
+      }
+
+      /* Hide empty sections */
+      .section.is-empty { display: none; }
+
+      /* Prep summary strip: 2x2 grid */
+      .prep-summary-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .prep-signal {
+        padding: 10px 8px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        min-height: 44px;
+      }
+      .prep-signal-value { font-size: 1.125rem; }
+
+      /* Tabs: sticky, full-width, larger targets */
+      .tabs {
+        position: sticky;
+        top: 82px;
+        z-index: 50;
+        background: var(--bg);
+        margin-bottom: 16px;
+      }
+      .tab {
+        padding: 14px 8px;
+        font-size: 0.8125rem;
+        min-height: 44px;
+      }
+
+      /* Sections compact */
+      .section-header { padding: 12px 16px; }
+      .section-title { font-size: 0.875rem; }
+
+      /* Cards compact */
+      .card { margin-bottom: 12px; }
+      .card-header { padding: 14px 16px; }
+      .card-body { padding: 16px; }
+
+      /* Touch targets: all interactive elements */
+      .btn {
+        min-height: 44px;
+        padding: 12px 16px;
+        font-size: 0.875rem;
+      }
+      .btn-sm {
+        min-height: 40px;
+        padding: 10px 14px;
+      }
+      .list-item {
+        padding: 14px 16px;
+        min-height: 52px;
+      }
+      .homework-item { padding: 16px; }
+      .template-btn {
+        padding: 10px 16px;
+        min-height: 40px;
+        font-size: 0.875rem;
+      }
+      .copy-btn {
+        padding: 8px 12px;
+        min-height: 36px;
+      }
+      .change-badge {
+        font-size: 0.8125rem;
+        padding: 4px 10px;
+      }
+      .toggle { margin: 4px 0; }
+
+      /* Forms: single column, prevent iOS zoom */
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .form-group textarea { min-height: 100px; }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px;
+        padding: 12px;
+        min-height: 44px;
+      }
+      .form-group label { font-size: 0.875rem; }
+
+      /* Sticky save button */
+      .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: var(--white);
+        padding: 12px 16px;
+        margin: 0 -16px;
+        border-top: 1px solid var(--border);
+        z-index: 10;
+        flex-direction: column-reverse;
+      }
+      .form-actions .btn { width: 100%; }
+
+      /* Note editor: read-only mode */
+      .note-quick-capture {
+        display: block;
+        border: 1px dashed var(--border);
+        background: var(--warm-white);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+      }
+
+      /* Homework: hide custom form, keep templates */
+      #homeworkForm .form-grid { display: none; }
+      #homeworkForm .form-actions { display: none; }
+      .homework-mobile-hint {
+        display: block;
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        text-align: center;
+        padding: 12px;
+        font-style: italic;
+      }
+
+      /* Copy-for-EHR: hide on phone */
+      .copy-btn:has(svg) { display: none; }
+      .ehr-format-menu { display: none; }
+      /* Keep delete button visible */
+      .note-header .copy-btn:last-child { display: flex; }
+
+      /* Modals: convert to bottom sheets */
+      .modal-overlay { align-items: flex-end; }
+      .modal {
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+        max-height: 85vh;
+        overflow-y: auto;
+        animation: sheetSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .modal-header::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        background: #D1D5DB;
+        border-radius: 2px;
+        margin: 0 auto 12px;
+      }
+      .modal-header { padding: 12px 20px 16px; }
+      .modal-body { padding: 16px 20px; }
+      .modal-footer {
+        padding: 12px 20px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        flex-direction: column-reverse;
+      }
+      .modal-footer .btn { width: 100%; }
+
+      /* Toast: move above bottom sheet area */
+      .toast { bottom: 16px; right: 16px; left: 16px; }
+
+      @keyframes sheetSlideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+
+      /* Page header compact */
+      .page-header { margin-bottom: 16px; }
+      .page-title { font-size: 1.125rem; }
+    }
+
+    /* Hide signal chips on desktop — sidebar too narrow */
+    @media (min-width: 768px) {
+      .client-signals { display: none; }
+    }
+/* === iOS DIAGNOSTIC — REMOVE AFTER TESTING === */
+body::before {
+  content: "CSS v2-TEST";
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  background: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+.home-icon svg {
+  outline: 3px solid lime !important;
+}
+.section-icon svg {
+  outline: 3px solid cyan !important;
+}
+
+  </style>
+</head>
+<body>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="login-logo">A</div>
+      <h1 class="login-title">Alo Dashboard</h1>
+      <p class="login-subtitle">Clinical companion management</p>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-info" id="loginInfo"></div>
+
+      <!-- Sign In Form -->
+      <div class="login-form" id="signInForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="you@practice.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleLogin()" style="margin-top: 16px;">Sign In</button>
+        <p style="text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
+          New therapist? <a href="#" onclick="toggleAuthForm('signup'); return false;" style="color: var(--sage); font-weight: 600;">Create account</a>
+        </p>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div class="login-form" id="signUpForm" style="display: none;">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="signupName" placeholder="Dr. Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="signupEmail" placeholder="you@practice.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleSignup()" style="margin-top: 16px;">Create Account</button>
+        <p style="text-align: center; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted);">
+          Already have an account? <a href="#" onclick="toggleAuthForm('login'); return false;" style="color: var(--sage); font-weight: 600;">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP (hidden until authenticated) -->
+  <div id="appContainer" style="display: none;">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <a href="#" class="home-link" onclick="showHomePage(); return false;">
+          <div class="home-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#FFFFFF" stroke-width="2" style="width:18px;height:18px;display:block;flex:0 0 auto;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+   
+          </div>
+          <span class="logo-text">Alo</span>
+        </a>
+      </div>
+<button class="header-clients-btn" onclick="toggleSidebar()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+  Clients
+</button>
+
+      <div class="header-right">
+        <span class="user-name" id="therapistName"></span>
+        <div class="user-avatar" id="therapistAvatar"></div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Disclaimer Banner - CLEAN UTF-8 -->
+    <div class="disclaimer-banner">
+      ⚠️ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
+    </div>
+
+       <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <!-- HOMEPAGE -->
+    <div class="layout" id="homePage">
+      <div class="main">
+        <div>
+          <div class="morning-greeting" id="morningGreeting">Good morning</div>
+          <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
+        </div>
+
+        <!-- Crisis Alerts -->
+
+        <div class="section" id="alertsSection">
+          <div class="section-header">
+            <div class="section-icon danger">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <span class="section-title">Crisis Alerts</span>
+            <span class="section-count" id="alertsCount">0</span>
+          </div>
+          <div class="section-body" id="alertsList">
+            <div class="loading"><div class="spinner"></div>Loading...</div>
+          </div>
+        </div>
+
+        <!-- Messages from Clients -->
+        <div class="section" id="messagesSection">
+          <div class="section-header">
+            <div class="section-icon" style="background: #eff6ff; color: #1e40af;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span class="section-title">Messages from Clients</span>
+            <span class="section-count" id="messagesCount">0</span>
+          </div>
+          <div class="section-body" id="messagesList">
+            <div class="section-empty">No unread messages</div>
+          </div>
+        </div>
+
+        <!-- Triage -->
+        <div class="section" id="triageSection">
+          <div class="section-header">
+            <div class="section-icon warning">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <span class="section-title">Clinical Triage</span>
+            <span class="section-count" id="triageCount">0</span>
+          </div>
+          <div class="section-body" id="triageList">
+            <div class="section-empty">All clients stable</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Client List -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+                   <div class="sidebar-header">
+            <div style="display: flex; align-items: center; gap: 8px;"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-sm" onclick="showDefaultSettingsModal()" style="padding: 4px 8px; font-size: 0.75rem;" title="Default client settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </button>
+              <button class="btn btn-sm btn-primary" onclick="showInviteModal()" style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
+            </div>
+          </div>
+
+          <div class="sidebar-list" id="clientsList">
+            <div class="section-empty">No clients yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT DETAIL PAGE -->
+    <div class="layout client-page" id="clientPage">
+      <div class="main">
+        <div class="page-header">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h1 class="page-title" id="clientName">Client</h1>
+              <p class="page-meta" id="clientMeta"></p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn" id="crisisAlertButton" onclick="goToCrisisAlerts()" style="display: none; background: var(--danger); color: white; border: none; animation: pulse 2s infinite;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span id="crisisAlertButtonText">Crisis Alert</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showEditClientModal()">Edit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+          <button class="tab" onclick="switchTab('tools', this)">Session Tools</button>
+        </div>
+
+        <!-- Session Prep Tab -->
+               <div class="tab-content active" id="tab-prep">
+          <div class="prep-summary-strip" id="prepStrip" style="display: none;">
+            <div class="prep-signal">
+              <span class="prep-signal-value" id="prepAlerts">0</span>
+              <span class="prep-signal-label">Alerts</span>
+            </div>
+            <div class="prep-signal">
+              <span class="prep-signal-value" id="prepMessages">0</span>
+              <span class="prep-signal-label">Messages</span>
+            </div>
+            <div class="prep-signal">
+              <span class="prep-signal-value" id="prepHomework">0</span>
+              <span class="prep-signal-label">Homework</span>
+            </div>
+            <div class="prep-signal">
+              <span class="prep-signal-value" id="prepSessions">0</span>
+              <span class="prep-signal-label">Sessions</span>
+            </div>
+          </div>
+
+          <div class="card" id="lastSessionsCard">
+
+            <div class="card-header">
+              <span class="card-title">Recent Session Notes</span>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('tools', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
+            </div>
+            <div class="card-body" id="lastSessionsPreview">
+              <p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">What Changed</span>
+              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                Copy Prep Pack
+              </button>
+            </div>
+            <div class="card-body" id="prepSummary">
+              <div class="loading"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Open Items</span></div>
+            <div class="card-body" id="prepOpenItems">
+              <p style="color: var(--text-muted);">No open items</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Messages from Client</span></div>
+            <div class="card-body" id="clientMessagesPrep">
+              <p style="color: var(--text-muted);">No messages</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Tools Tab -->
+        <div class="tab-content" id="tab-tools">
+          <!-- Session Notes -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Session Notes</span>
+                           <button class="btn btn-sm btn-primary add-note-btn" onclick="showNoteForm()">
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                Add Note
+              </button>
+            </div>
+                       <div class="card-body" id="notesContainer">
+              <p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>
+            </div>
+            <div class="note-quick-capture" id="quickNoteCapture">
+              <div style="padding: 16px; border-top: 1px solid var(--border);">
+                <label style="font-size: 0.8125rem; font-weight: 500; display: block; margin-bottom: 6px;">Quick Note</label>
+                <textarea id="quickNoteText" placeholder="Jot a quick thought..." style="width: 100%; min-height: 60px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical;"></textarea>
+                <button class="btn btn-primary btn-sm" onclick="saveQuickNote()" style="margin-top: 8px;">Save Quick Note</button>
+                <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">Full note editing available on desktop/tablet</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assign Homework -->
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Assign Homework</span></div>
+            <div class="card-body">
+              <div class="templates">
+                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
+                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
+                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
+                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
+                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
+              </div>
+              <form id="homeworkForm" onsubmit="submitHomework(event)">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select id="hwType" required>
+                      <option value="grounding">Grounding Technique</option>
+                      <option value="noticing">Noticing Practice</option>
+                      <option value="journaling">Journaling Prompt</option>
+                      <option value="behavioral">Behavioral Experiment</option>
+                      <option value="cognitive">Cognitive Exercise</option>
+                      <option value="breathing">Breathing Exercise</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="tooltip-trigger">Sensitivity
+                      <span class="tooltip-icon">?</span>
+                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly — works on the underlying skill only.</span>
+                    </label>
+                    <select id="hwSensitivity">
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label>Title</label>
+                    <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
+                  </div>
+                  <div class="form-group full">
+                    <label>Goal / Instructions</label>
+                    <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
+                  </div>
+                  <div class="form-group full">
+                    <label>Treatment Plan Goal (SimplePractice)</label>
+                    <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                    <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                  </div>
+                  <div class="form-group full">
+                    <label>Clinical Rationale (private)</label>
+                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                    <span class="form-hint">For your records only — client never sees this</span>
+                  </div>
+                </div>
+                <div class="form-actions">
+                                   <button type="submit" class="btn btn-primary">Assign Homework</button>
+                </div>
+              </form>
+              <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
+            </div>
+          </div>
+
+          <!-- Homework History -->
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Homework History</span></div>
+            <div class="card-body" id="homeworkHistory">
+              <p style="color: var(--text-muted); text-align: center;">No homework yet</p>
+            </div>
+          </div>
+
+          <!-- Crisis Alerts Card -->
+          <div class="card" id="crisisAlertsCard" style="display: none;">
+            <div class="card-header" style="background: var(--danger-bg); border-bottom: 1px solid var(--danger-border);">
+              <span class="card-title" style="color: var(--danger); display: flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Crisis Alerts
+              </span>
+              <span id="crisisAlertCount" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;"></span>
+            </div>
+            <div class="card-body" id="crisisAlertsList"></div>
+          </div>
+
+          <!-- Messages from Client -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Messages from Client</span></div>
+            <div class="card-body" id="activityMessages">
+              <p style="color: var(--text-muted); text-align: center;">No messages</p>
+            </div>
+          </div>
+
+          <!-- Session History -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Session History</span></div>
+            <div class="card-body" id="activitySessions">
+              <p style="color: var(--text-muted); text-align: center;">No sessions recorded yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar (client page) -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+                       <div style="display: flex; align-items: center; gap: 8px;"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
+            <button class="btn btn-sm btn-primary" onclick="showInviteModal()"
+
+style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
+          </div>
+          <div class="sidebar-list" id="clientsList2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  
+  <!-- Invite Client Modal -->
+  <div class="modal-overlay" id="inviteModal" onclick="closeModal('inviteModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Invite Client</h3>
+        <button class="modal-close" onclick="closeModal('inviteModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Display Name (optional)</label>
+          <input type="text" id="inviteClientName" placeholder="e.g., Sarah M.">
+          <span class="form-hint">Friendly name visible only to you</span>
+        </div>
+        <div id="inviteResult" style="display: none;">
+          <div class="invite-display">
+            <div class="invite-hint">Share this code with your client</div>
+            <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
+            <div class="invite-hint">Expires in 7 days • Click to copy</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('inviteModal')">Close</button>
+        <button class="btn btn-primary" id="generateInviteBtn" onclick="generateInvite()">Generate Invite Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Client Modal -->
+  <div class="modal-overlay" id="editClientModal" onclick="closeModal('editClientModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Client</h3>
+        <button class="modal-close" onclick="closeModal('editClientModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label>Next Session Date</label>
+          <input type="date" id="editNextSession">
+          <span class="form-hint">Used for session prep and Alo context</span>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="settings-section" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div class="settings-section-title" style="color: var(--danger);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Emergency Contact Information
+          </div>
+          <div class="form-hint" style="margin-bottom: 12px; font-size: 0.75rem;">
+            Displayed only during crisis alerts for immediate action
+          </div>
+          
+          <div class="form-group">
+            <label>Client Phone</label>
+            <input type="tel" id="editClientPhone" placeholder="(555) 123-4567">
+          </div>
+          
+          <div class="form-group">
+            <label>Emergency Contact Name</label>
+            <input type="text" id="editEmergencyName" placeholder="e.g., Spouse, Parent">
+          </div>
+          
+          <div class="form-group">
+            <label>Emergency Contact Phone</label>
+            <input type="tel" id="editEmergencyPhone" placeholder="(555) 987-6543">
+          </div>
+          
+          <div class="form-group">
+            <label>Safety Notes (private)</label>
+            <textarea id="editSafetyNotes" placeholder="Safety plan details, risk factors, instructions for crisis..."></textarea>
+            <span class="form-hint">Never shared with client. For therapist reference only.</span>
+          </div>
+        </div>
+
+        <!-- Chat Settings -->
+        <div class="settings-section">
+          <div class="settings-section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Chat Settings
+          </div>
+          
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Homework visibility</div>
+              <div class="setting-hint">Client can see assigned homework in chat</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingHomework" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Message to therapist</div>
+              <div class="setting-hint">Client can send you async messages</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingMessages" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Share conversation summary</div>
+              <div class="setting-hint">Client can share AI-generated session summaries with you</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingSummary" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Conversation history</div>
+              <div class="setting-hint">Client can view their own past sessions</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingHistory" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="settings-default-note">
+            These settings control what features the client sees in their chat interface. Changes apply on client's next session.
+          </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <label style="color: var(--danger);">Danger Zone</label>
+          <button class="btn btn-sm" onclick="confirmDeleteClient()" style="background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); margin-top: 8px;">Archive Client</button>
+          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('editClientModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Default Client Settings Modal -->
+  <div class="modal-overlay" id="defaultSettingsModal" onclick="closeModal('defaultSettingsModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Default Client Settings</h3>
+        <button class="modal-close" onclick="closeModal('defaultSettingsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">These defaults apply to all new clients. Override per-client in Edit.</p>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Homework visibility</div>
+            <div class="setting-hint">Client can see assigned homework in chat</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultHomework" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Message to therapist</div>
+            <div class="setting-hint">Client can send async messages</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultMessages" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Share conversation summary</div>
+            <div class="setting-hint">Client can share AI-generated session summaries</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultSummary" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Conversation history</div>
+            <div class="setting-hint">Client can view their own past sessions</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultHistory" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        
+        <div class="settings-default-note">
+          Changes here apply to future clients only. Existing clients keep their current settings unless edited individually.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toastMessage">Success</span>
+  </div>
+<script>
+// === PASSWORD RESET HANDLER ===
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    if (accessToken) {
+      document.addEventListener('DOMContentLoaded', function() {
+        const newPass = prompt('Enter your new password (min 6 characters):');
+        if (newPass && newPass.length >= 6) {
+          fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
+            method: 'PUT',
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
+              'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password: newPass })
+          }).then(r => {
+            if (r.ok) {
+              alert('Password updated! You can now sign in.');
+              window.location.href = window.location.pathname;
+            } else {
+              r.text().then(t => alert('Error: ' + t));
+            }
+          });
+        }
+      });
+    }
+  }
+})();
+
+    // =====================================================
+    // CONFIG
+    // =====================================================
+    const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
+
+    let session = null;
+    let therapistId = null;
+    let currentClient = null;
+    let allClients = [];
+    let clientNotes = {};
+    let clientHomework = {};
+    let clientMessages = {};
+    let clientSessions = {};
+    let clientCrisis = {};
+
+    // =====================================================
+    // SUPABASE API HELPER
+    // =====================================================
+    async function api(endpoint, options = {}) {
+      const token = session?.access_token || SUPABASE_ANON_KEY;
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Prefer': options.prefer || 'return=representation',
+          ...options.headers
+        }
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`API ${res.status}: ${body}`);
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    }
+
+    async function apiMutate(endpoint, method, body) {
+      return api(endpoint, {
+        method,
+        body: JSON.stringify(body),
+        prefer: 'return=minimal'
+      });
+    }
+
+    // =====================================================
+    // AUTH
+    // =====================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const stored = localStorage.getItem('alo_session');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const refreshed = await refreshSession(parsed.refresh_token);
+          if (refreshed) {
+            session = refreshed;
+            therapistId = refreshed.user.id;
+            localStorage.setItem('alo_session', JSON.stringify(refreshed));
+            showApp();
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('No valid session, showing login');
+      }
+      showLogin();
+    });
+
+    document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    async function refreshSession(refreshToken) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refresh_token: refreshToken })
+        });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch { return null; }
+    }
+
+    function toggleAuthForm(mode) {
+      const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
+      errorEl.style.display = 'none';
+      infoEl.style.display = 'none';
+      if (mode === 'signup') {
+        document.getElementById('signInForm').style.display = 'none';
+        document.getElementById('signUpForm').style.display = 'block';
+      } else {
+        document.getElementById('signInForm').style.display = 'block';
+        document.getElementById('signUpForm').style.display = 'none';
+      }
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
+      errorEl.style.display = 'none';
+      infoEl.style.display = 'none';
+
+      if (!name || !email || !password) {
+        errorEl.textContent = 'Please fill in all fields';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (password.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            data: { display_name: name, role: 'therapist' }
+          })
+        });
+
+        if (!signupRes.ok) {
+          const body = await signupRes.json();
+          throw new Error(body.error_description || body.msg || 'Signup failed');
+        }
+
+        const signupData = await signupRes.json();
+
+        if (!signupData.access_token) {
+          infoEl.textContent = 'Account created! Check your email for a confirmation link, then sign in.';
+          infoEl.style.display = 'block';
+          toggleAuthForm('login');
+          return;
+        }
+
+        session = signupData;
+        therapistId = session.user.id;
+        localStorage.setItem('alo_session', JSON.stringify(session));
+
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            id: therapistId,
+            role: 'therapist',
+            display_name: name,
+            email: email
+          })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            id: therapistId,
+            license_type: 'pending',
+            license_verified: false
+          })
+        });
+
+        showApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.style.display = 'none';
+
+      if (!email || !password) {
+        errorEl.textContent = 'Please enter email and password';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+          const body = await res.json();
+          throw new Error(body.error_description || body.msg || 'Login failed');
+        }
+
+        session = await res.json();
+        therapistId = session.user.id;
+        localStorage.setItem('alo_session', JSON.stringify(session));
+
+        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
+        if (!profile?.[0] || profile[0].role !== 'therapist') {
+          throw new Error('This account is not a therapist account');
+        }
+
+        showApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    function handleLogout() {
+      session = null;
+      therapistId = null;
+      localStorage.removeItem('alo_session');
+      showLogin();
+    }
+
+    function showLogin() {
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+    }
+
+    async function showApp() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+
+      const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=display_name,email`);
+      const name = profile?.[0]?.display_name || profile?.[0]?.email || 'Therapist';
+      document.getElementById('therapistName').textContent = name;
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('therapistAvatar').textContent = initials;
+
+           // Morning greeting
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      const firstName = name.split(' ')[0];
+      document.getElementById('morningGreeting').textContent = greeting + ', ' + firstName;
+
+      await loadDashboard();
+    }
+
+    // =====================================================
+    // UTILITY FUNCTIONS
+
+    // =====================================================
+    function esc(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+      return date.toLocaleDateString();
+    }
+
+    function truncate(str, len) {
+      if (!str || str.length <= len) return str;
+      return str.substring(0, len) + '...';
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function closeModal(id, event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById(id).classList.remove('show');
+    }
+
+    // =====================================================
+    // DASHBOARD LOADING
+    // =====================================================
+    async function loadDashboard() {
+      try {
+        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=in.(active,pending)&select=*`);
+
+
+        if (!links?.length) {
+          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts</div>';
+          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items needing attention</div>';
+          document.getElementById('messagesList').innerHTML = '<div class="section-empty">No messages</div>';
+          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet. Click "+ Invite" to add one.</div>';
+          document.getElementById('clientsList2').innerHTML = '';
+          document.getElementById('alertsCount').textContent = '0';
+          document.getElementById('messagesCount').textContent = '0';
+          document.getElementById('triageCount').textContent = '0';
+          return;
+        }
+
+        const clientIds = links.map(l => l.client_id).filter(Boolean);
+        const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
+
+               const [crisisEvents, messages, homework, sessions] = await Promise.all([
+          clientIds.length ? api(`/rest/v1/crisis_events?client_id=in.(${idFilter})&acknowledged=eq.false&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          clientIds.length ? api(`/rest/v1/client_messages?client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
+
+          api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
+          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
+        ]);
+
+        const weekAgo = new Date(Date.now() - 7 * 86400000);
+
+        allClients = links.map(link => {
+          const clientCrisis = crisisEvents?.filter(e => e.client_id === link.client_id) || [];
+          const clientMessages = messages?.filter(m => m.client_id === link.client_id) || [];
+          const clientHw = homework?.filter(h => h.client_id === link.client_id) || [];
+          const clientSessions = sessions?.filter(s => s.client_id === link.client_id) || [];
+          const recentSessions = clientSessions.filter(s => new Date(s.created_at) > weekAgo);
+
+          let status = 'stable';
+          if (clientCrisis.length > 0) status = 'crisis';
+          else if (recentSessions.length === 0 && clientHw.length > 0) status = 'needs-attention';
+          else if (recentSessions.length === 0) status = 'dormant';
+
+          return {
+            ...link,
+            crisisCount: clientCrisis.length,
+            messageCount: clientMessages.length,
+            homeworkCount: clientHw.length,
+            sessionCount: recentSessions.length,
+            lastActivity: clientSessions[0]?.created_at || null,
+            status
+          };
+        });
+
+        renderAlerts(crisisEvents || []);
+        renderMessages(messages || []);
+        renderTriage();
+               renderClientsList();
+
+        // Morning summary
+        const totalAlerts = (crisisEvents || []).length;
+        const totalMessages = (messages || []).length;
+        const stableCount = allClients.filter(c => c.status === 'stable').length;
+        const summaryEl = document.getElementById('morningSummary');
+        if (totalAlerts > 0) {
+          summaryEl.textContent = totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : '') + ' need your attention.';
+        } else if (totalMessages > 0) {
+          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients. ' + stableCount + ' stable.';
+        } else {
+          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', ' + stableCount + ' stable.';
+        }
+
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+      }
+    }
+
+// =====================================================
+    // HOME PAGE RENDERERS
+    // =====================================================
+    function renderAlerts(crisisEvents) {
+      const count = crisisEvents.length;
+      document.getElementById('alertsCount').textContent = count;
+
+      if (!count) {
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        return;
+      }
+
+      document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
+        const client = allClients.find(c => c.client_id === e.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div class="list-item" onclick="showClient('${e.client_id}')">
+            <div class="list-item-indicator danger"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(name)}</div>
+              <div class="list-item-description">${esc(e.severity)} · ${esc(e.category)} · Alo: ${esc(e.alo_response_action)}</div>
+            </div>
+            <span class="list-item-meta">${timeAgo(new Date(e.created_at))}</span>
+            <button class="list-item-action" onclick="acknowledgeCrisis('${e.id}', event)">Acknowledge</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMessages(messages) {
+      document.getElementById('messagesCount').textContent = messages.length;
+
+      if (!messages.length) {
+        document.getElementById('messagesList').innerHTML = '<div class="section-empty">No unread messages</div>';
+        return;
+      }
+
+      document.getElementById('messagesList').innerHTML = messages.map(m => {
+        const client = allClients.find(c => c.client_id === m.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div class="list-item" onclick="showClient('${m.client_id}')">
+            <div class="list-item-indicator" style="background: #3b82f6;"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(name)}</div>
+              <div class="list-item-description">${esc(truncate(m.message, 60))}</div>
+            </div>
+            <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTriage() {
+      const needsAttention = allClients.filter(c => c.status === 'needs-attention');
+      document.getElementById('triageCount').textContent = needsAttention.length;
+
+      if (!needsAttention.length) {
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable</div>';
+        return;
+      }
+
+      document.getElementById('triageList').innerHTML = needsAttention.map(c => {
+        return `
+          <div class="list-item" onclick="showClient('${c.client_id || c.id}')">
+            <div class="list-item-indicator warning"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(c.display_name || 'Client')}</div>
+              <div class="list-item-description">No activity this week · ${c.homeworkCount} open homework</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+        function renderClientsList() {
+      // Sort clients by urgency
+      const statusOrder = { crisis: 0, 'needs-attention': 1, stable: 2, dormant: 3 };
+      allClients.sort((a, b) => {
+        const isPendingA = !a.client_id;
+        const isPendingB = !b.client_id;
+        const sa = statusOrder[isPendingA ? 'dormant' : a.status] ?? 4;
+        const sb = statusOrder[isPendingB ? 'dormant' : b.status] ?? 4;
+        if (sa !== sb) return sa - sb;
+        if ((b.messageCount || 0) !== (a.messageCount || 0)) return (b.messageCount || 0) - (a.messageCount || 0);
+        return (a.display_name || '').localeCompare(b.display_name || '');
+      });
+
+      const html = allClients.map(c => {
+        const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const isPending = !c.client_id;
+        const isActive = currentClient && ((currentClient.client_id && currentClient.client_id === c.client_id) || (!currentClient.client_id && currentClient.id === c.id));
+        
+
+       
+        return `
+         <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')">
+            <div class="client-avatar">
+              ${initials}
+              ${!isPending ? `<div class="status-badge ${c.status}"></div>` : ''}
+            </div>
+            <div class="client-info">
+              <div class="client-name">${esc(c.display_name || 'Client')}</div>
+              <div class="client-meta">
+                ${isPending ? '<span class="pending-label">Pending signup</span>' : `${c.sessionCount} sessions · ${timeAgo(new Date(c.lastActivity || c.created_at))}`}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('clientsList').innerHTML = html || '<div class="section-empty">No clients yet</div>';
+      document.getElementById('clientsList2').innerHTML = html;
+    }
+
+    async function acknowledgeCrisis(eventId, e) {
+      e.stopPropagation();
+      try {
+        await apiMutate(`/rest/v1/crisis_events?id=eq.${eventId}`, 'PATCH', { acknowledged: true });
+        toast('Crisis alert acknowledged');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error acknowledging alert');
+      }
+    }
+
+    // =====================================================
+    // CLIENT PAGE
+    // =====================================================
+    async function showClient(clientIdOrLinkId) {
+      const client = allClients.find(c => c.client_id === clientIdOrLinkId || c.id === clientIdOrLinkId);
+      if (!client) return;
+
+      currentClient = client;
+      const cacheKey = client.client_id || client.id;
+
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('clientPage').classList.add('active');
+
+      document.getElementById('clientName').textContent = client.display_name || 'Client';
+      
+      const isPending = !client.client_id;
+      document.getElementById('clientMeta').innerHTML = isPending 
+        ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(client.invite_code)}</span>`
+               : `${client.sessionCount} sessions this week · ${client.homeworkCount} active homework`;
+
+
+      renderClientsList();
+
+      if (!clientNotes[cacheKey]) await loadClientData(cacheKey);
+      
+      renderSessionPrep(cacheKey);
+      renderNotes(cacheKey);
+      renderHomework(cacheKey);
+      renderCrisisAlerts(cacheKey);
+      renderClientMessages(cacheKey);
+      renderSessionHistory(cacheKey);
+    }
+
+    function showHomePage() {
+      document.getElementById('homePage').style.display = 'grid';
+      document.getElementById('clientPage').classList.remove('active');
+      currentClient = null;
+      renderClientsList();
+    }
+
+    async function loadClientData(cacheKey) {
+      const clientId = currentClient.client_id || currentClient.id;
+      
+      const [notes, homework, messages, sessions, crisis] = await Promise.all([
+        api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
+        api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
+        api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
+        api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc`),
+        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`)
+      ]);
+
+      clientNotes[cacheKey] = notes || [];
+      clientHomework[cacheKey] = homework || [];
+      clientMessages[cacheKey] = messages || [];
+      clientSessions[cacheKey] = sessions || [];
+      clientCrisis[cacheKey] = crisis || [];
+    }
+
+    function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    // =====================================================
+    // SESSION PREP
+    // =====================================================
+       function renderSessionPrep(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+      const homework = clientHomework[cacheKey] || [];
+      const messages = clientMessages[cacheKey] || [];
+      const sessions = clientSessions[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+
+      // Populate prep strip
+      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
+      const recentMessages = messages.filter(m => !m.read);
+      const activeHwAll = homework.filter(h => h.is_active && !h.completed_at);
+      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
+
+      const stripEl = document.getElementById('prepStrip');
+      if (stripEl) {
+        stripEl.style.display = 'flex';
+        const alertEl = document.getElementById('prepAlerts');
+        const msgEl = document.getElementById('prepMessages');
+        const hwEl = document.getElementById('prepHomework');
+        const sessEl = document.getElementById('prepSessions');
+        alertEl.textContent = unresolvedCrisis.length;
+        alertEl.className = 'prep-signal-value' + (unresolvedCrisis.length > 0 ? ' danger' : '');
+        msgEl.textContent = recentMessages.length;
+        msgEl.className = 'prep-signal-value' + (recentMessages.length > 0 ? ' warning' : '');
+        hwEl.textContent = activeHwAll.length;
+        sessEl.textContent = recentSessions.length;
+      }
+
+      if (notes.length > 0) {
+
+        document.getElementById('viewAllNotesBtn').style.display = 'inline-flex';
+        const lastNote = notes[0];
+        document.getElementById('lastSessionsPreview').innerHTML = `
+          <div class="session-preview">
+            <div class="session-preview-header">
+              <span class="session-preview-date">${new Date(lastNote.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+              <span class="session-preview-type">${esc(lastNote.session_type || 'Individual')}</span>
+            </div>
+            ${lastNote.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${esc(lastNote.themes)}</p>` : ''}
+            ${lastNote.plan ? `<p class="session-preview-text"><strong>Plan:</strong> ${esc(lastNote.plan)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      const activeHw = homework.filter(h => h.is_active && !h.completed_at);
+      const isPending = !currentClient.client_id;
+
+      if (isPending) {
+        document.getElementById('prepSummary').innerHTML = `<p style="color: var(--text-muted);">Client hasn't signed up yet. You can still write session notes and assign homework.</p>`;
+      } else {
+        const changes = [];
+        if (activeHw.length) changes.push(`<div><span class="change-badge changed">Open</span> Active homework: ${esc(activeHw[0].title)}</div>`);
+        document.getElementById('prepSummary').innerHTML = changes.length ? changes.join('') : '<p style="color: var(--text-muted);">No changes since last session</p>';
+      }
+
+      if (activeHw.length) {
+        document.getElementById('prepOpenItems').innerHTML = activeHw.map(h => 
+          `<div>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</div>`
+        ).join('');
+      }
+
+      const unreadMessages = messages.filter(m => !m.read);
+      if (unreadMessages.length) {
+        document.getElementById('clientMessagesPrep').innerHTML = unreadMessages.map(m =>
+          `<div class="excerpt">
+            <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+            <div class="excerpt-text">${esc(m.message)}</div>
+          </div>`
+        ).join('');
+      }
+    }
+
+    // =====================================================
+    // NOTES
+    // =====================================================
+    function renderNotes(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+      
+      if (!notes.length) {
+        document.getElementById('notesContainer').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No session notes yet.</p>';
+        return;
+      }
+
+      document.getElementById('notesContainer').innerHTML = notes.map(n => `
+        <div class="note-card">
+          <div class="note-header">
+            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">${esc(n.session_type || 'Individual')}</span>
+          </div>
+          <div class="note-content">
+                       ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button></div>` : ''}
+            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button></div>` : ''}
+            ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button></div>` : ''}
+                      ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button></div>` : ''}
+
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showNoteForm() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Add Session Note</h3>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="noteForm" onsubmit="saveNote(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Session Date</label>
+                  <input type="date" id="noteDate" value="${new Date().toISOString().split('T')[0]}" required>
+                </div>
+                <div class="form-group">
+                  <label>Session Type</label>
+                  <select id="noteType">
+                    <option value="Individual">Individual</option>
+                    <option value="Couples">Couples</option>
+                    <option value="Family">Family</option>
+                    <option value="Group">Group</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label>Themes (Subjective)</label>
+                  <textarea id="noteThemes" placeholder="What did the client share?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Observations (Objective)</label>
+                  <textarea id="noteObs" placeholder="What did you observe?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Interventions (Assessment)</label>
+                  <textarea id="noteInt" placeholder="What did you do?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Plan</label>
+                  <textarea id="notePlan" placeholder="Next steps..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Next Session Date</label>
+                  <input type="date" id="noteNextSession">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" id="noteBilling" style="width: auto;">
+                  <label for="noteBilling" style="margin: 0;">Include billing justification</label>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Note</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
+
+    async function saveNote(e) {
+      e.preventDefault();
+      const cacheKey = currentClient.client_id || currentClient.id;
+      
+      try {
+        await apiMutate('/rest/v1/session_notes', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          session_date: document.getElementById('noteDate').value,
+          session_type: document.getElementById('noteType').value,
+          themes: document.getElementById('noteThemes').value,
+          observations: document.getElementById('noteObs').value,
+          interventions: document.getElementById('noteInt').value,
+          plan: document.getElementById('notePlan').value,
+          next_session_date: document.getElementById('noteNextSession').value || null,
+          billing_justification: document.getElementById('noteBilling').checked
+        });
+
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+        
+        e.target.closest('.modal-overlay').remove();
+        toast('Note saved');
+      } catch (err) {
+        console.error(err);
+        toast('Error saving note');
+      }
+    }
+
+    // 
+   // =====================================================
+    // RESPONSIVE SIDEBAR
+    // =====================================================
+    function toggleSidebar() {
+      const sidebars = document.querySelectorAll('.sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const isOpen = sidebars[0]?.classList.contains('open');
+      sidebars.forEach(s => s.classList.toggle('open', !isOpen));
+      backdrop?.classList.toggle('show', !isOpen);
+      document.body.style.overflow = isOpen ? '' : 'hidden';
+    }
+
+    // =====================================================
+    // QUICK NOTE (PHONE)
+    // =====================================================
+    async function saveQuickNote() {
+      const text = document.getElementById('quickNoteText')?.value?.trim();
+      if (!text || !currentClient) return;
+      const cacheKey = currentClient.client_id || currentClient.id;
+      try {
+        await apiMutate('/rest/v1/session_notes', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          session_date: new Date().toISOString().split('T')[0],
+          session_type: 'Quick Note',
+          themes: text,
+          observations: '',
+          interventions: '',
+          plan: ''
+        });
+        document.getElementById('quickNoteText').value = '';
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+        toast('Quick note saved');
+      } catch (err) {
+        console.error(err);
+        toast('Error saving note');
+      }
+    }
+
+    // =====================================================
+    // SIMPLEPRACTICE INTEGRATION
+
+    // =====================================================
+       function copySoapSection(noteId, section, event) {
+
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
+      const n = notes.find(note => note.id === noteId);
+      if (!n) return;
+      
+      let text = '';
+      
+      if (section === 'S') {
+        text = n.themes || '';
+      } else if (section === 'O') {
+        text = n.observations || '';
+      } else if (section === 'A') {
+        text = n.interventions || '';
+      } else if (section === 'P') {
+        text = n.plan || '';
+        if (n.next_session_date) {
+          const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+          text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
+        }
+        if (n.billing_justification) {
+          text += (text ? '\n\n' : '') + 'Continued therapeutic support medically necessary for symptom management and functional improvement.';
+        }
+      }
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.classList.add('copied');
+        btn.textContent = '✓ Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    }
+    
+    function generateAddendum(format = 'full') {
+      if (!currentClient) return '';
+      
+      const cacheKey = currentClient.client_id || currentClient.id;
+      
+      const sessions = clientSessions[cacheKey] || [];
+      const homework = (clientHomework[cacheKey] || []).filter(h => h.is_active);
+      const messages = clientMessages[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
+      const recentMessages = messages.filter(m => new Date(m.created_at) > weekAgo);
+      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
+      
+      const lastSession = recentSessions[0] ? new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+      
+      const dateRange = recentSessions.length 
+        ? new Date(recentSessions[recentSessions.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' - ' + new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : 'Past 7 days';
+      
+      if (format === 'brief') {
+        const hwStatus = homework.length ? homework[0].title + ' (' + (homework[0].completed_at ? 'completed' : 'in progress') + ')' : 'none';
+        return 'Between-session (Alo): ' + recentSessions.length + ' check-in' + (recentSessions.length !== 1 ? 's' : '') + '; HW ' + hwStatus + '; messages ' + (recentMessages.length ? 'Y' : 'N') + '; alerts ' + (unresolvedCrisis.length ? 'Y' : 'N') + '.';
+      }
+      
+      let text = 'BETWEEN-SESSION DATA (Source: Alo Clinical Dashboard, ' + dateRange + ')\n\n';
+      text += 'Source: Client self-directed use of an emotional support tool. No session transcript available.\n\n';
+      text += 'Engagement: Client engaged in ' + recentSessions.length + ' Alo session' + (recentSessions.length !== 1 ? 's' : '') + ' (last: ' + lastSession + ').\n\n';
+      
+      const themes = recentSessions.map(s => s.primary_mode || 'emotional processing').filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'general emotional processing';
+      text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
+      
+      if (homework.length) {
+        text += 'Homework: ' + homework.map(h => h.title + ' — Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
+      } else {
+        text += 'Homework: None assigned.\n\n';
+      }
+      
+      text += 'Client Messages: ' + recentMessages.length + ' message' + (recentMessages.length !== 1 ? 's' : '') + ' received';
+      if (recentMessages.length) {
+        text += '; subject: ' + truncate(recentMessages[0].message, 50);
+      }
+      text += '.\n\n';
+      
+      if (unresolvedCrisis.length) {
+        text += 'Safety: ' + unresolvedCrisis.map(c => {
+          const date = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          return 'Alert on ' + date + ': ' + c.category + '; resolved via ' + c.alo_response_action;
+        }).join('. ') + '.';
+      } else {
+        text += 'Safety: No alerts.';
+      }
+      
+      return text;
+    }
+    
+    function copyPrepPack() {
+      const clientName = currentClient?.display_name || 'Client';
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      
+      const addendum = generateAddendum('full');
+      const notes = clientNotes[cacheKey] || [];
+      const recentNote = notes[0];
+      
+      let prepPack = 'SESSION PREP PACK — ' + clientName + ' — ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '\n\n';
+      prepPack += addendum;
+      
+      if (recentNote) {
+        const noteDate = new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        prepPack += '\n\n—————————————————————————————————————————\n\nLAST SESSION NOTE (' + noteDate + '):\n';
+        if (recentNote.themes) prepPack += 'Themes: ' + recentNote.themes + '\n';
+        if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
+      }
+      
+      navigator.clipboard.writeText(prepPack).then(() => {
+        const btn = document.getElementById('copyPrepPackBtn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+        toast('Prep Pack copied to clipboard');
+      });
+    }
+
+    // =====================================================
+    // HOMEWORK
+    // =====================================================
+    function renderHomework(cacheKey) {
+      const homework = clientHomework[cacheKey] || [];
+      
+      if (!homework.length) {
+        document.getElementById('homeworkHistory').innerHTML = '<p style="color: var(--text-muted); text-align: center;">No homework yet</p>';
+        return;
+      }
+
+      document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
+        <div class="homework-item">
+          <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
+            ${h.completed_at ? '✓' : '○'}
+          </div>
+          <div class="homework-content">
+            <div class="homework-type">${esc(h.title)}</div>
+            <div class="homework-desc">${esc(h.goal)}</div>
+            ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
+            <div class="homework-meta">Assigned ${new Date(h.created_at).toLocaleDateString()}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function useTemplate(type, title, goal, rationale) {
+      document.getElementById('hwType').value = type;
+      document.getElementById('hwTitle').value = title;
+      document.getElementById('hwGoal').value = goal;
+      document.getElementById('hwRationale').value = rationale;
+    }
+
+    async function submitHomework(e) {
+      e.preventDefault();
+      const cacheKey = currentClient.client_id || currentClient.id;
+      
+      try {
+        await apiMutate('/rest/v1/homework_cards', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          homework_type: document.getElementById('hwType').value,
+          title: document.getElementById('hwTitle').value,
+          goal: document.getElementById('hwGoal').value,
+          clinical_rationale: document.getElementById('hwRationale').value,
+          sensitivity_level: document.getElementById('hwSensitivity').value,
+          treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
+          is_active: true
+        });
+
+        delete clientHomework[cacheKey];
+        await loadClientData(cacheKey);
+        renderHomework(cacheKey);
+        renderSessionPrep(cacheKey);
+        
+        e.target.reset();
+        toast('Homework assigned');
+      } catch (err) {
+        console.error(err);
+        toast('Error assigning homework');
+      }
+    }
+
+    // =====================================================
+    // CRISIS & MESSAGES & SESSIONS
+    // =====================================================
+    function renderCrisisAlerts(cacheKey) {
+      const crisis = clientCrisis[cacheKey] || [];
+      const unacknowledged = crisis.filter(c => !c.acknowledged);
+
+      if (!unacknowledged.length) {
+        document.getElementById('crisisAlertsCard').style.display = 'none';
+        document.getElementById('crisisAlertButton').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('crisisAlertsCard').style.display = 'block';
+      document.getElementById('crisisAlertButton').style.display = 'inline-flex';
+      document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
+      document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
+
+      document.getElementById('crisisAlertsList').innerHTML = unacknowledged.map(c => `
+        <div class="crisis-alert-item">
+          <div class="crisis-alert-header">
+            <span class="crisis-alert-time">${timeAgo(new Date(c.created_at))}</span>
+            <span class="crisis-alert-severity">${esc(c.severity)}</span>
+          </div>
+          <div class="crisis-alert-detail">
+            <strong>${esc(c.category)}:</strong> ${esc(c.details || 'No details provided')}<br>
+            <strong>Alo Response:</strong> ${esc(c.alo_response_action)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToCrisisAlerts() {
+      switchTab('tools', document.querySelectorAll('.tab')[1]);
+      document.getElementById('crisisAlertsCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderClientMessages(cacheKey) {
+      const messages = clientMessages[cacheKey] || [];
+      
+      if (!messages.length) return;
+
+      document.getElementById('activityMessages').innerHTML = messages.map(m => `
+        <div class="excerpt">
+          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '(unread)'}</div>
+          <div class="excerpt-text">${esc(m.message)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderSessionHistory(cacheKey) {
+      const sessions = clientSessions[cacheKey] || [];
+      
+      if (!sessions.length) return;
+
+      document.getElementById('activitySessions').innerHTML = sessions.slice(0, 10).map(s => `
+        <div class="session-preview">
+          <div class="session-preview-header">
+            <span class="session-preview-date">${new Date(s.created_at).toLocaleDateString()}</span>
+            <span class="session-preview-type">${esc(s.primary_mode || 'General')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =====================================================
+    // INVITE & CLIENT MANAGEMENT
+    // =====================================================
+       function showInviteModal() {
+      document.getElementById('inviteModal').classList.add('show');
+      document.getElementById('inviteResult').style.display = 'none';
+      document.getElementById('inviteClientName').value = '';
+      document.getElementById('generateInviteBtn').style.display = 'inline-flex';
+    }
+
+
+    async function generateInvite() {
+      const name = document.getElementById('inviteClientName').value.trim();
+      
+      try {
+        const code = 'ALO-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        
+        const result = await api('/rest/v1/therapist_clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            therapist_id: therapistId,
+            invite_code: code,
+            display_name: name || null,
+            status: 'pending'
+          })
+        });
+
+        document.getElementById('inviteCodeDisplay').textContent = code;
+        document.getElementById('inviteResult').style.display = 'block';
+        document.getElementById('generateInviteBtn').style.display = 'none';
+        
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error generating invite');
+      }
+    }
+
+    function copyInviteCode() {
+      const code = document.getElementById('inviteCodeDisplay').textContent;
+      navigator.clipboard.writeText(code).then(() => toast('Invite code copied'));
+    }
+
+    function showEditClientModal() {
+      if (!currentClient) return;
+      
+      document.getElementById('editClientName').value = currentClient.display_name || '';
+      document.getElementById('editNextSession').value = currentClient.next_session_date || '';
+      document.getElementById('editClientPhone').value = currentClient.phone || '';
+      document.getElementById('editEmergencyName').value = currentClient.emergency_contact_name || '';
+      document.getElementById('editEmergencyPhone').value = currentClient.emergency_contact_phone || '';
+      document.getElementById('editSafetyNotes').value = currentClient.safety_notes || '';
+      document.getElementById('settingHomework').checked = currentClient.allow_homework ?? true;
+      document.getElementById('settingMessages').checked = currentClient.allow_messages ?? true;
+      document.getElementById('settingSummary').checked = currentClient.allow_summary ?? true;
+      document.getElementById('settingHistory').checked = currentClient.allow_history ?? true;
+      
+      document.getElementById('editClientModal').classList.add('show');
+    }
+
+    async function saveClientEdit() {
+      if (!currentClient) return;
+      
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+          display_name: document.getElementById('editClientName').value,
+          next_session_date: document.getElementById('editNextSession').value || null,
+          phone: document.getElementById('editClientPhone').value,
+          emergency_contact_name: document.getElementById('editEmergencyName').value,
+          emergency_contact_phone: document.getElementById('editEmergencyPhone').value,
+          safety_notes: document.getElementById('editSafetyNotes').value,
+          allow_homework: document.getElementById('settingHomework').checked,
+          allow_messages: document.getElementById('settingMessages').checked,
+          allow_summary: document.getElementById('settingSummary').checked,
+          allow_history: document.getElementById('settingHistory').checked
+        });
+
+        closeModal('editClientModal');
+        toast('Client updated');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error updating client');
+      }
+    }
+
+    function confirmDeleteClient() {
+      if (confirm('Archive this client? Their data will be preserved but hidden from your dashboard.')) {
+        archiveClient();
+      }
+    }
+
+    async function archiveClient() {
+      if (!currentClient) return;
+      
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+          status: 'archived'
+        });
+
+        closeModal('editClientModal');
+        toast('Client archived');
+        showHomePage();
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error archiving client');
+      }
+    }
+
+    function showDefaultSettingsModal() {
+      document.getElementById('defaultSettingsModal').classList.add('show');
+    }
+
+    async function saveDefaultSettings() {
+      localStorage.setItem('alo_default_settings', JSON.stringify({
+        homework: document.getElementById('defaultHomework').checked,
+        messages: document.getElementById('defaultMessages').checked,
+        summary: document.getElementById('defaultSummary').checked,
+        history: document.getElementById('defaultHistory').checked
+      }));
+      closeModal('defaultSettingsModal');
+      toast('Default settings saved');
+    }
+  </script>
+</body>
+</html>
 
-/* Hide signal chips on desktop — sidebar too narrow */
-@media (min-width: 768px) {
-.client-signals { display: none; }
-}
