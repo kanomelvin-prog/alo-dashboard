@@ -8,6 +8,18 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
  <link rel="stylesheet" href="styles.css">
+<script>
+  window.onload = function() {
+    var sheets = document.styleSheets;
+    var msg = sheets.length + ' stylesheets loaded. ';
+    for (var i = 0; i < sheets.length; i++) {
+      try { msg += sheets[i].href + ' (' + sheets[i].cssRules.length + ' rules) | '; }
+      catch(e) { msg += sheets[i].href + ' (blocked) | '; }
+    }
+    alert(msg);
+  };
+</script>
+
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -1857,5 +1869,6 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
   </script>
 </body>
 </html>
+
 
 
