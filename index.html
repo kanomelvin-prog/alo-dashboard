@@ -322,7 +322,7 @@
                   <div class="form-group">
                     <label class="tooltip-trigger">Sensitivity
                       <span class="tooltip-icon">?</span>
-                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly — works on the underlying skill only.</span>
+                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
                     </label>
                     <select id="hwSensitivity">
                       <option value="low">Low</option>
@@ -346,7 +346,7 @@
                   <div class="form-group full">
                     <label>Clinical Rationale (private)</label>
                     <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                    <span class="form-hint">For your records only — client never sees this</span>
+                    <span class="form-hint">For your records only -- client never sees this</span>
                   </div>
                 </div>
                 <div class="form-actions">
@@ -1062,7 +1062,7 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
       document.getElementById('alertsCount').textContent = count;
 
       if (!count) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
         return;
       }
 
@@ -1562,7 +1562,7 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
       text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
       
       if (homework.length) {
-        text += 'Homework: ' + homework.map(h => h.title + ' — Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
+        text += 'Homework: ' + homework.map(h => h.title + ' -- Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
       } else {
         text += 'Homework: None assigned.\n\n';
       }
@@ -1593,12 +1593,12 @@ style="padding: 4px 10px; font-size: 0.75rem;">+ Invite</button>
       const notes = clientNotes[cacheKey] || [];
       const recentNote = notes[0];
       
-      let prepPack = 'SESSION PREP PACK — ' + clientName + ' — ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '\n\n';
+      let prepPack = 'SESSION PREP PACK -- ' + clientName + ' -- ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '\n\n';
       prepPack += addendum;
       
       if (recentNote) {
         const noteDate = new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        prepPack += '\n\n—————————————————————————————————————————\n\nLAST SESSION NOTE (' + noteDate + '):\n';
+        prepPack += '\n\n----------------------------------------------------------------------------------\n\nLAST SESSION NOTE (' + noteDate + '):\n';
         if (recentNote.themes) prepPack += 'Themes: ' + recentNote.themes + '\n';
         if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
       }
