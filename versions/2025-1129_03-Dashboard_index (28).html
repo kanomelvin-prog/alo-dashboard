@@ -1507,7 +1507,7 @@
       document.getElementById('alertsCount').textContent = alerts.length;
       
       if (!alerts.length) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts — all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
         return;
       }
       
@@ -1532,14 +1532,14 @@
       document.getElementById('triageCount').textContent = triage.length;
       
       if (!triage.length) {
-        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable — no action needed</div>';
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable -- no action needed</div>';
         return;
       }
       
       document.getElementById('triageList').innerHTML = triage.map(c => {
         let desc = '';
         if (c.trend === 'down') desc = 'Engagement declining';
-        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) — no Alo activity`;
+        else if (c.homework > 0 && c.messages === 0) desc = `Homework stalled (${c.homework} active) -- no Alo activity`;
         
         return `
           <div class="list-item" onclick="showClient('${c.client_code}')">
@@ -1810,7 +1810,7 @@
         container.innerHTML = notes.map((n) => `
           <div class="note-card">
             <div class="note-header">
-              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} — ${n.session_type || 'Session'}</span>
+              <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} -- ${n.session_type || 'Session'}</span>
               <div style="display: flex; gap: 8px;">
                 <button class="copy-btn" onclick="copyNoteFromDb('${n.id}', this)">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
