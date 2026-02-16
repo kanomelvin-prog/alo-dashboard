@@ -1,0 +1,69 @@
+name: QC Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for backtick fences in CSS
+        run: |
+          TICK='`'
+          FENCE="${TICK}${TICK}${TICK}"
+          if grep -Fn "$FENCE" *.css 2>/dev/null; then
+            echo "FAIL Backtick fences found in CSS"
+            exit 1
+          fi
+          echo "PASS No backticks"
+      - name: Check for smart quotes in CSS
+        run: |
+          if grep -Pn '[\x{201c}\x{201d}\x{2018}\x{2019}]' *.css 2>/dev/null; then
+            echo "FAIL Smart quotes found in CSS"
+            exit 1
+          fi
+          echo "PASS No smart quotes"
+      - name: Check for non-breaking spaces
+        run: |
+          if grep -Pn '\xc2\xa0' *.css 2>/dev/null; then
+            echo "FAIL Non-breaking spaces found"
+            exit 1
+          fi
+          echo "PASS No non-breaking spaces"
+      - name: Check CSS brace balance
+        run: |
+          for file in *.css; do
+            opens=$(grep -o '{' "$file" | wc -l)
+            closes=$(grep -o '}' "$file" | wc -l)
+            if [ "$opens" -ne "$closes" ]; then
+              echo "FAIL $file has $opens open and $closes close braces"
+              exit 1
+            fi
+            echo "PASS $file braces balanced"
+          done
+      - name: Check HTML for backticks
+        run: |
+          TICK='`'
+          FENCE="${TICK}${TICK}${TICK}"
+          for file in *.html; do
+            if grep -Fn "$FENCE" "$file" 2>/dev/null; then
+              echo "FAIL Backticks found in $file"
+              exit 1
+            fi
+            echo "PASS $file clean"
+          done
+      - name: W3C CSS validation
+        run: |
+          for file in *.css; do
+            result=$(curl -s -F "file=@$file" -F "output=text" https://jigsaw.w3.org/css-validator/validator)
+            if echo "$result" | grep -qi "parse error"; then
+              echo "FAIL $file has parse errors"
+              echo "$result" | grep -i "parse error" | head -10
+              exit 1
+            fi
+            echo "PASS $file valid CSS"
+          done
