@@ -1534,3 +1534,105 @@ to { transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
 *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* === PRODUCTION OVERRIDES v1 === */
+
+/* Fix 1: Header - prevent overlap on phone */
+@media (max-width: 767px) {
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .header-left {
+    flex: 0 0 auto;
+  }
+  .logo-text {
+    display: none;
+  }
+  .header-clients-btn {
+    flex: 0 0 auto;
+    order: 0;
+  }
+  .header-right {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+
+/* Fix 2: Section card shadows */
+.section {
+  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06), 0 1px 2px rgba(45, 42, 38, 0.04);
+}
+
+/* Fix 3: Reduce section spacing */
+.main {
+  gap: 16px;
+}
+
+/* Fix 4: Prep summary strip */
+.prep-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+}
+
+.prep-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.prep-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.prep-stat-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Fix 5: Morning greeting spacing */
+.morning-greeting {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.morning-summary {
+  font-size: 0.9375rem;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+/* Fix 6: Font fallback (Google Fonts blocked on iOS) */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+
+/* Fix 7: Page header spacing */
+.page-header {
+  margin-bottom: 8px;
+}
+
+/* Fix 8: Sidebar card shadow */
+.sidebar-section {
+  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+}
