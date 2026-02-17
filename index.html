@@ -20,7 +20,7 @@
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
-```
+ 
   <!-- Sign In Form -->
   <div class="login-form" id="signInForm">
     <div class="form-group">
@@ -57,7 +57,7 @@
     </p>
   </div>
 </div>
-```
+ 
 
   </div>
 
@@ -73,19 +73,19 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
 
-```
+ 
       </div>
       <span class="logo-text">Alo</span>
     </a>
   </div>
-```
+ 
 
 <button class="header-clients-btn" onclick="toggleSidebar()">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
   Clients
 </button>
 
-```
+ 
   <div class="header-right">
     <span class="user-name" id="therapistName"></span>
     <div class="user-avatar" id="therapistAvatar"></div>
@@ -401,7 +401,7 @@
       <div class="sidebar-header">
                    <div style="display: flex; align-items: center; gap: 8px;"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
         <button class="btn btn-sm btn-primary" onclick="showInviteModal()"
-```
+ 
 
 style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
 </div>
@@ -457,7 +457,7 @@ style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
           <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
         </div>
 
-```
+ 
     <div class="form-group" style="margin-top: 16px;">
       <label>Next Session Date</label>
       <input type="date" id="editNextSession">
@@ -566,7 +566,7 @@ style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
     <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
   </div>
 </div>
-```
+ 
 
   </div>
 
@@ -581,7 +581,7 @@ style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
       <div class="modal-body">
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">These defaults apply to all new clients. Override per-client in Edit.</p>
 
-```
+ 
     <div class="setting-row">
       <div>
         <div class="setting-label">Homework visibility</div>
@@ -635,7 +635,7 @@ style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
     <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
   </div>
 </div>
-```
+ 
 
   </div>
 
@@ -680,7 +680,7 @@ style=“padding: 4px 10px; font-size: 0.75rem;”>+ Invite</button>
   }
 })();
 
-```
+ 
 // =====================================================
 // CONFIG
 // =====================================================
@@ -1063,7 +1063,7 @@ async function loadDashboard() {
     console.error('Dashboard load error:', err);
   }
 }
-```
+ 
 
 // =====================================================
 // HOME PAGE RENDERERS
@@ -1072,7 +1072,7 @@ function renderAlerts(crisisEvents) {
 const count = crisisEvents.length;
 document.getElementById(‘alertsCount’).textContent = count;
 
-```
+ 
   if (!count) {
     document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
     return;
@@ -1456,7 +1456,7 @@ async function saveNote(e) {
 }
 
 // 
-```
+ 
 
 // =====================================================
 // RESPONSIVE SIDEBAR
@@ -1470,7 +1470,7 @@ backdrop?.classList.toggle(‘show’, !isOpen);
 document.body.style.overflow = isOpen ? ‘’ : ‘hidden’;
 }
 
-```
+ 
 // =====================================================
 // QUICK NOTE (PHONE)
 // =====================================================
@@ -1881,7 +1881,7 @@ async function saveDefaultSettings() {
   closeModal('defaultSettingsModal');
   toast('Default settings saved');
 }
-```
+ 
 
   </script>
 </body>
