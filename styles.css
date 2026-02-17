@@ -7,31 +7,32 @@ html, body { overflow-x: hidden; }
 }
 
 :root {
-–cream: #FDFBF7;
-–warm-white: #FAF8F5;
-–sage: #8B9A7D;
-–sage-light: #E8EDE4;
-–sage-hover: #7a8a6d;
-–charcoal: #2D2A26;
-–stone: #9C9589;
-–border: rgba(156, 149, 137, 0.2);
-–bg: var(–cream);
-–white: #ffffff;
-–text: var(–charcoal);
-–text-light: var(–stone);
-–text-muted: var(–stone);
-–primary: var(–sage);
-–primary-hover: var(–sage-hover);
-–danger: #d97706;
-–danger-bg: #fef3c7;
-–danger-border: #fde68a;
-–warning: #f59e0b;
-–warning-bg: #fffbeb;
-–warning-border: #fde68a;
-–success: #10b981;
-–success-bg: #ecfdf5;
-–info-bg: var(–sage-light);
+--cream: #FDFBF7;
+--warm-white: #FAF8F5;
+--sage: #8B9A7D;
+--sage-light: #E8EDE4;
+--sage-hover: #7a8a6d;
+--charcoal: #2D2A26;
+--stone: #9C9589;
+--border: rgba(156, 149, 137, 0.2);
+--bg: var(--cream);
+--white: #ffffff;
+--text: var(--charcoal);
+--text-light: var(--stone);
+--text-muted: var(--stone);
+--primary: var(--sage);
+--primary-hover: var(--sage-hover);
+--danger: #d97706;
+--danger-bg: #fef3c7;
+--danger-border: #fde68a;
+--warning: #f59e0b;
+--warning-bg: #fffbeb;
+--warning-border: #fde68a;
+--success: #10b981;
+--success-bg: #ecfdf5;
+--info-bg: var(--sage-light);
 }
+
 
 body {
 font-family: ‘Inter’, -apple-system, sans-serif;
