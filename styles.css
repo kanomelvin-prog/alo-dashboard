@@ -7,32 +7,31 @@ html, body { overflow-x: hidden; }
 }
 
 :root {
---cream: #FDFBF7;
---warm-white: #FAF8F5;
---sage: #8B9A7D;
---sage-light: #E8EDE4;
---sage-hover: #7a8a6d;
---charcoal: #2D2A26;
---stone: #9C9589;
---border: rgba(156, 149, 137, 0.2);
---bg: var(--cream);
---white: #ffffff;
---text: var(--charcoal);
---text-light: var(--stone);
---text-muted: var(--stone);
---primary: var(--sage);
---primary-hover: var(--sage-hover);
---danger: #d97706;
---danger-bg: #fef3c7;
---danger-border: #fde68a;
---warning: #f59e0b;
---warning-bg: #fffbeb;
---warning-border: #fde68a;
---success: #10b981;
---success-bg: #ecfdf5;
---info-bg: var(--sage-light);
+–cream: #FDFBF7;
+–warm-white: #FAF8F5;
+–sage: #8B9A7D;
+–sage-light: #E8EDE4;
+–sage-hover: #7a8a6d;
+–charcoal: #2D2A26;
+–stone: #9C9589;
+–border: rgba(156, 149, 137, 0.2);
+–bg: var(–cream);
+–white: #ffffff;
+–text: var(–charcoal);
+–text-light: var(–stone);
+–text-muted: var(–stone);
+–primary: var(–sage);
+–primary-hover: var(–sage-hover);
+–danger: #d97706;
+–danger-bg: #fef3c7;
+–danger-border: #fde68a;
+–warning: #f59e0b;
+–warning-bg: #fffbeb;
+–warning-border: #fde68a;
+–success: #10b981;
+–success-bg: #ecfdf5;
+–info-bg: var(–sage-light);
 }
-
 
 body {
 font-family: ‘Inter’, -apple-system, sans-serif;
@@ -1527,7 +1526,7 @@ to { transform: translateY(0); }
 .page-title { font-size: 1.125rem; }
 }
 
-/* Hide signal chips on desktop -- sidebar too narrow */
+/* Hide signal chips on desktop — sidebar too narrow */
 @media (min-width: 768px) {
 .client-signals { display: none; }
 }
@@ -1540,100 +1539,100 @@ to { transform: translateY(0); }
 
 /* Fix 1: Header - prevent overlap on phone */
 @media (max-width: 767px) {
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 12px;
-  }
-  .header-left {
-    flex: 0 0 auto;
-  }
-  .logo-text {
-    display: none;
-  }
-  .header-clients-btn {
-    flex: 0 0 auto;
-    order: 0;
-  }
-  .header-right {
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
+.header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 8px;
+padding: 0 12px;
+}
+.header-left {
+flex: 0 0 auto;
+}
+.logo-text {
+display: none;
+}
+.header-clients-btn {
+flex: 0 0 auto;
+order: 0;
+}
+.header-right {
+flex: 0 0 auto;
+margin-left: auto;
+}
 }
 
 /* Fix 2: Section card shadows */
 .section {
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06), 0 1px 2px rgba(45, 42, 38, 0.04);
+box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06), 0 1px 2px rgba(45, 42, 38, 0.04);
 }
 
 /* Fix 3: Reduce section spacing */
 .main {
-  gap: 16px;
+gap: 16px;
 }
 
 /* Fix 4: Prep summary strip */
 .prep-summary-strip {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 16px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 12px;
+padding: 16px;
+background: var(–white);
+border: 1px solid var(–border);
+border-radius: 12px;
+box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
 }
 
 .prep-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
-  background: var(--bg);
-  border-radius: 8px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+padding: 12px 8px;
+background: var(–bg);
+border-radius: 8px;
 }
 
 .prep-stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
+font-size: 1.5rem;
+font-weight: 700;
+color: var(–text);
+line-height: 1;
 }
 
 .prep-stat-label {
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
+font-size: 0.625rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.05em;
+color: var(–text-muted);
 }
 
 /* Fix 5: Morning greeting spacing */
 .morning-greeting {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 4px;
+font-size: 1.5rem;
+font-weight: 700;
+margin-bottom: 4px;
 }
 
 .morning-summary {
-  font-size: 0.9375rem;
-  color: var(--text-light);
-  margin-bottom: 8px;
+font-size: 0.9375rem;
+color: var(–text-light);
+margin-bottom: 8px;
 }
 
 /* Fix 6: Font fallback (Google Fonts blocked on iOS) */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, ‘SF Pro Text’, ‘Helvetica Neue’, sans-serif;
 }
 
 /* Fix 7: Page header spacing */
 .page-header {
-  margin-bottom: 8px;
+margin-bottom: 8px;
 }
 
 /* Fix 8: Sidebar card shadow */
 .sidebar-section {
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
 }
