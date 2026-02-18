@@ -2010,3 +2010,70 @@ body {
   outline-offset: -2px;
 }
 
+/* === TEXT HIERARCHY: CARD TITLES AS LABELS === */
+
+/* Card titles: lighter, smaller — section labels, not headlines */
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* Section titles on homepage: same treatment */
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* Note dates: these ARE the content — make them the loudest */
+.note-date {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+/* SOAP labels inside notes: medium weight, distinct from body */
+.note-content strong {
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+/* Note body text: slightly lighter so labels pop */
+.note-content p {
+  color: var(--text-light);
+}
+
+/* Session preview dates in prep tab: also loud */
+.session-preview-date {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+/* Keep crisis card title red and loud — exception to the label pattern */
+.card-title-danger {
+  font-size: 0.875rem;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--danger);
+}
+
+/* This Week card title: sage, not muted — it's the hero */
+#weekGlanceCard .card-title {
+  color: var(--sage-hover);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Homework type name: this is the content, keep it strong */
+.homework-type {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
