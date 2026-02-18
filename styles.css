@@ -1314,6 +1314,78 @@ button, input, select, textarea { font: inherit; }
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* === THIS WEEK GLANCE === */
+.glance-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.glance-row + .glance-row {
+  border-top: 1px solid var(--bg);
+}
+
+.glance-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.glance-icon.danger { color: var(--danger); }
+.glance-icon.warning { color: var(--warning); }
+.glance-icon.success { color: var(--success); }
+.glance-icon.info { color: var(--info); }
+.glance-icon.muted { color: var(--text-muted); }
+
+.glance-text {
+  font-size: 0.875rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.glance-danger { color: var(--danger); }
+
+.glance-plan .glance-text {
+  color: var(--text-light);
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+.glance-hw-row .glance-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.glance-hw-summary {
+  font-weight: 500;
+}
+
+.glance-hw-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.glance-hw {
+  font-size: 0.8125rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.glance-hw.done {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.glance-hw.open {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
 
 /* === PHONE === */
 @media (max-width: 767px) {
@@ -1321,7 +1393,8 @@ button, input, select, textarea { font: inherit; }
 .layout {
 grid-template-columns: 1fr;
 gap: 16px;
-padding: 72px 16px 16px;
+padding: 88px 16px 16px;
+
 }
 .main { gap: 16px; }
 
@@ -1452,7 +1525,7 @@ min-height: 44px;
 /* Tabs: sticky, full-width, larger targets */
 .tabs {
 position: sticky;
-top: 82px;
+top: 88px;
 z-index: 50;
 background: var(--bg);
 margin-bottom: 16px;
