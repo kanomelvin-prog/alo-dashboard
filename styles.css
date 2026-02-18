@@ -1812,3 +1812,201 @@ body {
 .sidebar-section {
   box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
 }
+
+/* ============================================================
+   UX HIERARCHY PASS v1.0
+   Purpose: Create clear visual priority tiers for therapist workflow
+   
+   Tier 1 (ACT NOW): Crisis alerts — red accents, elevated shadow
+   Tier 2 (REVIEW): This Week glance, What Changed — prominent cards
+   Tier 3 (REFERENCE): Session Notes, Messages, History — standard cards
+   Tier 4 (TOOLS): Homework form, Settings — recessed/quiet
+   ============================================================ */
+
+/* === HOMEPAGE: DIFFERENTIATED SECTIONS === */
+
+/* Crisis section gets elevated treatment */
+.section#alertsSection {
+  border: 1px solid var(--danger-border);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);
+}
+
+.section#alertsSection .section-header {
+  background: var(--danger-bg);
+}
+
+/* Messages section: subtle info tint */
+.section#messagesSection .section-header {
+  background: var(--info-bg);
+}
+
+/* Triage: subtle warning tint */
+.section#triageSection .section-header {
+  background: var(--warning-bg);
+}
+
+/* When alerts count is 0, dial back the urgency */
+.section#alertsSection:has(.section-empty) {
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.section#alertsSection:has(.section-empty) .section-header {
+  background: transparent;
+}
+
+/* === CLIENT DETAIL: TIERED CARD HIERARCHY === */
+
+/* Tier 1: "This Week" glance card — the hero card */
+#weekGlanceCard {
+  border: 1px solid var(--sage);
+  border-left: 4px solid var(--sage);
+  box-shadow: 0 2px 12px rgba(139, 154, 125, 0.12);
+}
+
+#weekGlanceCard .card-header {
+  background: var(--sage-light);
+}
+
+#weekGlanceCard .card-title {
+  color: var(--sage-hover);
+  font-weight: 700;
+}
+
+/* Tier 2: "What Changed" — already has left border, enhance it */
+#prepSummary {
+  border-left: 4px solid var(--sage);
+  padding-left: 16px;
+}
+
+/* Copy Prep Pack: make it a standout action */
+#copyPrepPackBtn {
+  background: var(--charcoal);
+  color: white;
+  font-weight: 600;
+}
+
+#copyPrepPackBtn:hover {
+  background: #1a1815;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 42, 38, 0.2);
+}
+
+/* Tier 4: Open Items and Messages in prep — quieter */
+#prepOpenItems,
+#clientMessagesPrep {
+  font-size: 0.8125rem;
+}
+
+/* === HOMEPAGE GREETING: COMPACT + ACTIONABLE === */
+
+/* Reduce greeting dominance, add summary emphasis */
+.morning-greeting {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.morning-summary {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+/* === SESSION TOOLS: GROUP VISUALLY === */
+
+/* Notes card: primary action area */
+.add-note-btn {
+  background: var(--charcoal);
+  color: white;
+}
+
+.add-note-btn:hover {
+  background: #1a1815;
+}
+
+/* Homework templates: warmer background to invite interaction */
+.templates {
+  background: var(--warm-white);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+/* === CRISIS: IMPOSSIBLE TO MISS === */
+
+/* Crisis alerts card in Session Tools — elevated */
+#crisisAlertsCard {
+  border: 2px solid var(--danger);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.12);
+}
+
+/* Crisis alert button: already pulsing, add glow */
+.crisis-alert-btn.visible {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+/* === SIDEBAR: ACTIVE CLIENT STRONGER === */
+.client-item.active {
+  background: var(--sage);
+  border-left: 3px solid var(--charcoal);
+}
+
+/* Crisis client in sidebar: red left accent */
+.client-item.status-crisis {
+  border-left: 3px solid var(--danger);
+}
+
+.client-item.status-needs-attention {
+  border-left: 3px solid var(--warning);
+}
+
+/* === SPACING: VISUAL GROUPS === */
+
+/* Add subtle group separator between prep cards */
+#tab-prep .card:nth-child(2) {
+  margin-top: 8px;
+}
+
+/* Session Tools: add breathing room between card groups */
+#tab-tools .card + .card {
+  margin-top: 4px;
+}
+
+/* Add stronger separation before crisis card */
+#crisisAlertsCard {
+  margin-top: 24px;
+}
+
+/* === EMPTY STATES: QUIETER === */
+.text-muted-center {
+  font-size: 0.8125rem;
+  padding: 24px 16px;
+  opacity: 0.7;
+}
+
+/* === DISCLAIMER BANNER: LESS DOMINANT === */
+.disclaimer-banner {
+  font-size: 0.6875rem;
+  padding: 4px 24px;
+  background: #fef9ee;
+  border-bottom-color: #fde68a;
+  color: var(--text-muted);
+}
+
+/* === FOCUS STATES FOR KEYBOARD NAV === */
+.tab:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: -2px;
+}
+
+.client-item:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: -2px;
+}
+
+.list-item:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: -2px;
+}
+
