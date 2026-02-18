@@ -193,24 +193,15 @@
 
         <!-- Session Prep Tab -->
         <div class="tab-content active" id="tab-prep">
-          <div class="prep-summary-strip" id="prepStrip" style="display: none;">
-            <div class="prep-signal">
-              <span class="prep-signal-value" id="prepAlerts">0</span>
-              <span class="prep-signal-label">Alerts</span>
+                    <div class="card" id="weekGlanceCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-title">This Week</span>
             </div>
-            <div class="prep-signal">
-              <span class="prep-signal-value" id="prepMessages">0</span>
-              <span class="prep-signal-label">Messages</span>
-            </div>
-            <div class="prep-signal">
-              <span class="prep-signal-value" id="prepHomework">0</span>
-              <span class="prep-signal-label">Homework</span>
-            </div>
-            <div class="prep-signal">
-              <span class="prep-signal-value" id="prepSessions">0</span>
-              <span class="prep-signal-label">Sessions</span>
+            <div class="card-body" id="weekGlanceBody">
+              <div class="loading"><div class="spinner"></div></div>
             </div>
           </div>
+
 
           <div class="card" id="lastSessionsCard">
             <div class="card-header">
@@ -1160,11 +1151,17 @@
     // =====================================================
     // CLIENT PAGE
     // =====================================================
-    async function showClient(clientIdOrLinkId) {
+        async function showClient(clientIdOrLinkId) {
       const client = allClients.find(c => c.client_id === clientIdOrLinkId || c.id === clientIdOrLinkId);
       if (!client) return;
 
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar && sidebar.classList.contains('open')) {
+        toggleSidebar();
+      }
+
       currentClient = client;
+
       const cacheKey = client.client_id || client.id;
 
       document.getElementById('homePage').style.display = 'none';
@@ -1224,34 +1221,84 @@
     // =====================================================
     // SESSION PREP
     // =====================================================
-    function renderSessionPrep(cacheKey) {
+        function renderSessionPrep(cacheKey) {
       const notes = clientNotes[cacheKey] || [];
       const homework = clientHomework[cacheKey] || [];
       const messages = clientMessages[cacheKey] || [];
       const sessions = clientSessions[cacheKey] || [];
       const crisis = clientCrisis[cacheKey] || [];
       const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const isPending = !currentClient.client_id;
 
       const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
-      const recentMessages = messages.filter(m => !m.read);
-      const activeHwAll = homework.filter(h => h.is_active && !h.completed_at);
+      const unreadMessages = messages.filter(m => !m.read);
+      const activeHw = homework.filter(h => h.is_active && !h.completed_at);
+      const completedHw = homework.filter(h => h.is_active && h.completed_at);
+      const totalAssigned = activeHw.length + completedHw.length;
       const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
 
-      const stripEl = document.getElementById('prepStrip');
-      if (stripEl) {
-        stripEl.style.display = 'flex';
-        const alertEl = document.getElementById('prepAlerts');
-        const msgEl = document.getElementById('prepMessages');
-        const hwEl = document.getElementById('prepHomework');
-        const sessEl = document.getElementById('prepSessions');
-        alertEl.textContent = unresolvedCrisis.length;
-        alertEl.className = 'prep-signal-value' + (unresolvedCrisis.length > 0 ? ' danger' : '');
-        msgEl.textContent = recentMessages.length;
-        msgEl.className = 'prep-signal-value' + (recentMessages.length > 0 ? ' warning' : '');
-        hwEl.textContent = activeHwAll.length;
-        sessEl.textContent = recentSessions.length;
+      // === THIS WEEK card ===
+      const glanceEl = document.getElementById('weekGlanceCard');
+      if (glanceEl) {
+        glanceEl.style.display = 'block';
+        const lines = [];
+
+        // 1. Crisis flag — top priority, impossible to miss
+        if (unresolvedCrisis.length > 0) {
+          lines.push(`<div class="glance-row"><span class="glance-icon danger">⚠</span><span class="glance-text"><strong class="glance-danger">${unresolvedCrisis.length} unresolved alert${unresolvedCrisis.length > 1 ? 's' : ''}</strong></span></div>`);
+        }
+
+        // 2. Homework — specific items by name with status
+        if (totalAssigned > 0) {
+          const hwItems = [];
+          completedHw.forEach(h => hwItems.push(`<span class="glance-hw done">✓ ${esc(h.title)}</span>`));
+          activeHw.forEach(h => hwItems.push(`<span class="glance-hw open">○ ${esc(h.title)}</span>`));
+          const summary = completedHw.length > 0
+            ? `${completedHw.length} of ${totalAssigned} completed`
+            : 'None completed yet';
+          lines.push(`<div class="glance-row glance-hw-row"><span class="glance-icon ${completedHw.length > 0 ? 'success' : 'warning'}">✎</span><div class="glance-text"><div class="glance-hw-summary">${summary}</div><div class="glance-hw-items">${hwItems.join('')}</div></div></div>`);
+        } else if (!isPending) {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">–</span><span class="glance-text">No homework assigned</span></div>`);
+        }
+
+        // 3. Alo engagement — how active between sessions
+        if (isPending) {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">○</span><span class="glance-text">Hasn't signed up yet</span></div>`);
+        } else if (sessions.length > 0) {
+          const lastDate = new Date(sessions[0].created_at);
+          const daysAgo = Math.floor((Date.now() - lastDate) / 86400000);
+          let activity;
+          if (recentSessions.length > 1) {
+            activity = `Used Alo ${recentSessions.length} times this week`;
+          } else if (recentSessions.length === 1) {
+            activity = 'Used Alo once this week';
+          } else if (daysAgo < 14) {
+            activity = `Last used Alo ${timeAgo(lastDate)}`;
+          } else {
+            activity = `No Alo activity in ${Math.floor(daysAgo / 7)} weeks`;
+          }
+          const icon = recentSessions.length > 0 ? 'success' : (daysAgo < 14 ? 'muted' : 'warning');
+          lines.push(`<div class="glance-row"><span class="glance-icon ${icon}">●</span><span class="glance-text">${activity}</span></div>`);
+        } else {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">○</span><span class="glance-text">No Alo activity yet</span></div>`);
+        }
+
+        // 4. Unread messages — only if present
+        if (unreadMessages.length > 0) {
+          lines.push(`<div class="glance-row"><span class="glance-icon info">✉</span><span class="glance-text">${unreadMessages.length} unread message${unreadMessages.length > 1 ? 's' : ''}</span></div>`);
+        }
+
+        // 5. Last session plan — the therapist's own agreed next step
+        if (notes.length > 0 && notes[0].plan) {
+          lines.push(`<div class="glance-row glance-plan"><span class="glance-icon muted">→</span><span class="glance-text">Last plan: ${esc(notes[0].plan)}</span></div>`);
+        }
+
+        document.getElementById('weekGlanceBody').innerHTML = lines.length
+          ? lines.join('')
+          : '<p class="text-muted-center">No data yet</p>';
       }
 
+      // === RECENT SESSION NOTES card ===
       if (notes.length > 0) {
         document.getElementById('viewAllNotesBtn').style.display = 'inline-flex';
         const lastNote = notes[0];
@@ -1267,24 +1314,25 @@
         `;
       }
 
-      const activeHw = homework.filter(h => h.is_active && !h.completed_at);
-      const isPending = !currentClient.client_id;
-
+      // === WHAT CHANGED card ===
       if (isPending) {
         document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. You can still write session notes and assign homework.</p>`;
       } else {
         const changes = [];
-        if (activeHw.length) changes.push(`<div><span class="change-badge changed">Open</span> Active homework: ${esc(activeHw[0].title)}</div>`);
+        if (completedHw.length) changes.push(`<div><span class="change-badge new">Done</span> ${completedHw.map(h => esc(h.title)).join(', ')}</div>`);
+        if (activeHw.length) changes.push(`<div><span class="change-badge changed">Open</span> ${activeHw.map(h => esc(h.title)).join(', ')}</div>`);
+        if (unreadMessages.length) changes.push(`<div><span class="change-badge alert">New</span> ${unreadMessages.length} unread message${unreadMessages.length > 1 ? 's' : ''}</div>`);
         document.getElementById('prepSummary').innerHTML = changes.length ? changes.join('') : '<p class="text-muted-center">No changes since last session</p>';
       }
 
+      // === OPEN ITEMS card ===
       if (activeHw.length) {
         document.getElementById('prepOpenItems').innerHTML = activeHw.map(h =>
           `<div>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</div>`
         ).join('');
       }
 
-      const unreadMessages = messages.filter(m => !m.read);
+      // === MESSAGES preview ===
       if (unreadMessages.length) {
         document.getElementById('clientMessagesPrep').innerHTML = unreadMessages.map(m =>
           `<div class="excerpt">
@@ -1294,6 +1342,7 @@
         ).join('');
       }
     }
+
 
     // =====================================================
     // NOTES
