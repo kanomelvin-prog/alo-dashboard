@@ -1299,6 +1299,22 @@ button, input, select, textarea { font: inherit; }
 }
 
 .client-signals { display: none; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+
 /* === PHONE === */
 @media (max-width: 767px) {
 /* Layout */
