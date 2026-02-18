@@ -154,6 +154,16 @@ button, input, select, textarea { font: inherit; }
   border-color: var(--primary);
 }
 
+.login-form input:-webkit-autofill,
+.login-form input:-webkit-autofill:hover,
+.login-form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px var(--white) inset;
+  -webkit-text-fill-color: var(--text);
+  border-color: var(--primary);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+
 .login-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -1393,7 +1403,7 @@ button, input, select, textarea { font: inherit; }
 .layout {
 grid-template-columns: 1fr;
 gap: 16px;
-padding: 88px 16px 16px;
+padding: 96px 16px 16px;
 
 }
 .main { gap: 16px; }
@@ -1525,7 +1535,7 @@ min-height: 44px;
 /* Tabs: sticky, full-width, larger targets */
 .tabs {
 position: sticky;
-top: 88px;
+top: 96px;
 z-index: 50;
 background: var(--bg);
 margin-bottom: 16px;
@@ -1535,8 +1545,29 @@ padding: 14px 8px;
 font-size: 0.8125rem;
 min-height: 44px;
 }
+/* Sticky client header + tabs as one unit */
+.client-sticky-header {
+  position: sticky;
+  top: 88px;
+  z-index: 51;
+  background: var(--bg);
+  margin-left: -16px;
+  margin-right: -16px;
+  padding: 0 16px;
+}
+
+.client-sticky-header .tabs {
+  position: static;
+  top: auto;
+}
+
+.client-sticky-header .page-header {
+  padding-top: 8px;
+  margin-bottom: 0;
+}
 
 /* Sections compact */
+
 .section-header { padding: 12px 16px; }
 .section-title { font-size: 0.875rem; }
 
