@@ -1,1041 +1,1926 @@
 <!DOCTYPE html>
-<!-- ALO CLIENT CHAT v2.4 — Feb 20, 2026 — 16-persona review P0+P1 fixes -->
-<!-- Changes: border-color fix, profiles on signup, homework writes to DB,
-     chat settings enforcement, privacy bar, header warmth, microcopy improvements,
-     homework viewed tracking, inline styles moved to CSS classes -->
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Alo">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#FDFBF7">
-  
-  <!-- Preconnect hints for faster iframe load -->
-  <link rel="preconnect" href="https://cdn.botpress.cloud">
-  <link rel="preconnect" href="https://files.bpcontent.cloud">
-  
-  <!-- Open Graph — link preview when therapist texts URL to client -->
-  <meta property="og:title" content="Alo — Someone to think out loud with">
-  <meta property="og:description" content="A private space to process your thoughts and emotions. Your therapist recommended Alo as a companion between sessions.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://kanomelvin-prog.github.io/alo-client-chat-full_v1/">
-  <meta property="og:image" content="https://kanomelvin-prog.github.io/alo-client-chat-full_v1/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="description" content="Alo is a private emotional support companion. Process thoughts between therapy sessions with Socratic questioning.">
-  
-  <title>Alo — Someone to think out loud with</title>
+  <title>Alo Clinical Dashboard</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-  <header>
-    <div class="brand">
-      <div class="brand-icon">A</div>
-      <div class="brand-text">
-        <h1 class="brand-name">Alo</h1>
-        <span>Someone to think out loud with</span>
-        <div id="trustBadge" class="trust-badge guest">
-          <span id="trustBadgeText"></span>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="login-logo">A</div>
+      <h1 class="login-title">Alo Dashboard</h1>
+      <p class="login-subtitle">Clinical companion management</p>
+      <p class="login-trust">Your client data is encrypted and HIPAA-aligned. No conversation transcripts are stored.</p>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-info" id="loginInfo"></div>
+
+      <!-- Sign In Form -->
+      <div class="login-form" id="signInForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="you@practice.com">
         </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleLogin()">Sign In</button>
+        <p class="login-switch">
+          New therapist? <a href="#" onclick="toggleAuthForm('signup'); return false;">Create account</a>
+        </p>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div class="login-form" id="signUpForm" style="display: none;">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="signupName" placeholder="Dr. Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="signupEmail" placeholder="you@practice.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="handleSignup()">Create Account</button>
+        <p class="login-switch">
+          Already have an account? <a href="#" onclick="toggleAuthForm('login'); return false;">Sign in</a>
+        </p>
       </div>
     </div>
-    <div class="header-actions">
-      <button id="connectBtn" class="btn-primary">Link to Therapist</button>
-      <button id="logoutBtn" class="btn-link hidden">Log Out</button>
-      <button id="privacyBtn" class="hidden">My Privacy</button>
-      <button id="messageBtn" class="hidden">Message</button>
-      <button id="shareChat">Share</button>
-    </div>
-  </header>
-
-  <!-- Privacy assurance bar — shown on first visit, dismissible -->
-  <div id="privacyBar" class="privacy-bar">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
-    <span class="privacy-bar-text">Your conversations with Alo are private. No one else can see what you discuss here.</span>
-    <button class="privacy-bar-dismiss" id="privacyBarDismiss" aria-label="Dismiss">&times;</button>
   </div>
 
-  <main id="chatMain">
-    <!-- Homework card (hidden unless client has active homework) -->
-    <div id="homeworkContainer" class="homework-container">
-      <div class="homework-card" id="homeworkCard">
-        <div class="homework-header">
-          <div class="homework-title" id="homeworkTitle">From your therapist</div>
-          <button class="homework-collapse" id="homeworkCollapseBtn" 
-            aria-label="Toggle homework" 
-            aria-controls="homeworkBody" 
-            aria-expanded="true">−</button>
+  <!-- MAIN APP (hidden until authenticated) -->
+  <div id="appContainer" style="display: none;">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <a href="#" class="home-link" onclick="showHomePage(); return false;">
+          <div class="home-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#FFFFFF" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <span class="logo-text">Alo</span>
+        </a>
+      </div>
+
+      <button class="header-clients-btn" onclick="toggleSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        Clients
+      </button>
+
+      <div class="header-right">
+        <span class="user-name" id="therapistName"></span>
+        <div class="user-avatar" id="therapistAvatar"></div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Disclaimer Banner -->
+    <div class="disclaimer-banner">
+      ⚠️ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
+    </div>
+
+    <!-- Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+    <!-- HOMEPAGE -->
+    <div class="layout" id="homePage">
+      <div class="main">
+        <div>
+          <div class="morning-greeting" id="morningGreeting">Good morning</div>
+          <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
         </div>
-        <div class="homework-body" id="homeworkBody">
-          <p id="homeworkGoal"></p>
-          <div class="homework-actions">
-            <button class="btn-primary" id="homeworkDoneBtn">✓ I did this</button>
-            <button class="btn-link" id="homeworkHideBtn">Hide for now</button>
+
+        <!-- Crisis Alerts -->
+        <div class="section" id="alertsSection">
+          <div class="section-header section-header-danger">
+            <div class="section-icon danger">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <span class="section-title">Crisis Alerts</span>
+            <span class="section-count section-count-danger" id="alertsCount">0</span>
+          </div>
+          <div class="section-body" id="alertsList">
+            <div class="loading"><div class="spinner"></div>Loading...</div>
+          </div>
+        </div>
+
+        <!-- Messages from Clients -->
+        <div class="section" id="messagesSection">
+          <div class="section-header section-header-info">
+            <div class="section-icon info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span class="section-title">Messages from Clients</span>
+            <span class="section-count section-count-info" id="messagesCount">0</span>
+          </div>
+          <div class="section-body" id="messagesList">
+            <div class="section-empty">No unread messages</div>
+          </div>
+        </div>
+
+        <!-- Triage -->
+        <div class="section" id="triageSection">
+          <div class="section-header section-header-warning">
+            <div class="section-icon warning">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <span class="section-title">Clinical Triage</span>
+            <span class="section-count section-count-warning" id="triageCount">0</span>
+          </div>
+          <div class="section-body" id="triageList">
+            <div class="section-empty">All clients stable</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Client List -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <div class="sidebar-header-left"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
+            <div class="sidebar-header-actions">
+              <button class="btn btn-sm sidebar-settings-btn" onclick="showDefaultSettingsModal()" title="Default client settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </button>
+              <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
+            </div>
+          </div>
+          <div class="sidebar-list" id="clientsList">
+            <div class="section-empty">No clients yet</div>
           </div>
         </div>
       </div>
     </div>
+    <!-- CLIENT DETAIL PAGE -->
+    <div class="layout client-page" id="clientPage">
+      <div class="main">
+                <div class="client-sticky-header">
+          <div class="page-header">
+            <div class="page-header-row">
+              <div>
+                <h1 class="page-title" id="clientName">Client</h1>
+                <p class="page-meta" id="clientMeta"></p>
+              </div>
+              <div class="page-header-actions">
+                <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span id="crisisAlertButtonText">Crisis Alert</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="showEditClientModal()">Edit</button>
+              </div>
+            </div>
+          </div>
 
-    <!-- Chat iframe -->
-    <div class="chat-container">
-      <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-message">
-          <div class="spinner"></div>
-          <p>Loading Alo...</p>
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+            <button class="tab" onclick="switchTab('tools', this)">Session Tools</button>
+          </div>
+        </div>
+
+
+        <!-- Session Prep Tab -->
+        <div class="tab-content active" id="tab-prep">
+                    <div class="card" id="weekGlanceCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-title">This Week</span>
+            </div>
+            <div class="card-body" id="weekGlanceBody">
+              <div class="loading"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+
+          <div class="card" id="lastSessionsCard">
+            <div class="card-header">
+              <span class="card-title">Recent Session Notes</span>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('tools', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
+            </div>
+            <div class="card-body" id="lastSessionsPreview">
+              <p class="text-muted-center">No session notes yet.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">What Changed</span>
+              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                Copy Prep Pack
+              </button>
+            </div>
+            <div class="card-body" id="prepSummary">
+              <div class="loading"><div class="spinner"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Open Items</span></div>
+            <div class="card-body" id="prepOpenItems">
+              <p class="text-muted-center">No open items</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Messages from Client</span></div>
+            <div class="card-body" id="clientMessagesPrep">
+              <p class="text-muted-center">No messages</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Tools Tab -->
+        <div class="tab-content" id="tab-tools">
+          <!-- Session Notes -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Session Notes</span>
+              <button class="btn btn-sm btn-primary add-note-btn" onclick="showNoteForm()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                Add Note
+              </button>
+            </div>
+            <div class="card-body" id="notesContainer">
+              <p class="text-muted-center">No session notes yet.</p>
+            </div>
+            <div class="note-quick-capture" id="quickNoteCapture">
+              <div class="quick-note-inner">
+                <label class="quick-note-label">Quick Note</label>
+                <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
+                <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assign Homework -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Assign Homework</span></div>
+            <div class="card-body">
+              <div class="templates">
+                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
+                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
+                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
+                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
+                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
+              </div>
+              <form id="homeworkForm" onsubmit="submitHomework(event)">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select id="hwType" required>
+                      <option value="grounding">Grounding Technique</option>
+                      <option value="noticing">Noticing Practice</option>
+                      <option value="journaling">Journaling Prompt</option>
+                      <option value="behavioral">Behavioral Experiment</option>
+                      <option value="cognitive">Cognitive Exercise</option>
+                      <option value="breathing">Breathing Exercise</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="tooltip-trigger">Sensitivity
+                      <span class="tooltip-icon">?</span>
+                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
+                    </label>
+                    <select id="hwSensitivity">
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label>Title</label>
+                    <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
+                  </div>
+                  <div class="form-group full">
+                    <label>Goal / Instructions</label>
+                    <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
+                  </div>
+                  <div class="form-group full">
+                    <label>Treatment Plan Goal (SimplePractice)</label>
+                    <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                    <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                  </div>
+                  <div class="form-group full">
+                    <label>Clinical Rationale (private)</label>
+                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                    <span class="form-hint">For your records only -- client never sees this</span>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Assign Homework</button>
+                </div>
+              </form>
+              <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
+            </div>
+          </div>
+
+          <!-- Homework History -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Homework History</span></div>
+            <div class="card-body" id="homeworkHistory">
+              <p class="text-muted-center">No homework yet</p>
+            </div>
+          </div>
+
+          <!-- Crisis Alerts Card -->
+          <div class="card" id="crisisAlertsCard" style="display: none;">
+            <div class="card-header card-header-danger">
+              <span class="card-title card-title-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Crisis Alerts
+              </span>
+              <span class="crisis-count-badge" id="crisisAlertCount"></span>
+            </div>
+            <div class="card-body" id="crisisAlertsList"></div>
+          </div>
+
+          <!-- Messages from Client -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Messages from Client</span></div>
+            <div class="card-body" id="activityMessages">
+              <p class="text-muted-center">No messages</p>
+            </div>
+          </div>
+
+          <!-- Session History -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Session History</span></div>
+            <div class="card-body" id="activitySessions">
+              <p class="text-muted-center">No sessions recorded yet</p>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <iframe
-        id="aloFrame"
-        src="https://cdn.botpress.cloud/webchat/v3.6/shareable.html?configUrl=https://files.bpcontent.cloud/2026/02/20/16/20260220161212-N5ZPU2UY.json"
-        allow="clipboard-read; clipboard-write"
-        title="Alo Chat Interface"
-        aria-label="Chatbot Conversation Window"
-      ></iframe>
+
+      <!-- Sidebar (client page) -->
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-header">
+            <div class="sidebar-header-left"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
+            <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
+          </div>
+          <div class="sidebar-list" id="clientsList2"></div>
+        </div>
+      </div>
     </div>
-  </main>
+  </div>
 
-  <footer>
-    <div class="crisis-notice">
-      Alo helps you think — not a therapist or doctor. <span class="crisis-link">Need help now?</span> <a href="tel:988">988 US</a>.
+  <!-- MODALS -->
+
+  <!-- Invite Client Modal -->
+  <div class="modal-overlay" id="inviteModal" onclick="closeModal('inviteModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Invite Client</h3>
+        <button class="modal-close" onclick="closeModal('inviteModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Display Name (optional)</label>
+          <input type="text" id="inviteClientName" placeholder="e.g., Sarah M.">
+          <span class="form-hint">Friendly name visible only to you</span>
+        </div>
+        <div id="inviteResult" style="display: none;">
+          <div class="invite-display">
+            <div class="invite-hint">Share this code with your client</div>
+            <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
+            <div class="invite-hint">Expires in 7 days • Click to copy</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('inviteModal')">Close</button>
+        <button class="btn btn-primary" id="generateInviteBtn" onclick="generateInvite()">Generate Invite Code</button>
+      </div>
     </div>
-    <div class="footer-links">
-      <a href="#" id="termsLink">Terms</a>
-      <a href="#" id="privacyLink">Privacy Policy</a>
+  </div>
+
+  <!-- Edit Client Modal -->
+  <div class="modal-overlay" id="editClientModal" onclick="closeModal('editClientModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Client</h3>
+        <button class="modal-close" onclick="closeModal('editClientModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="editClientName" placeholder="e.g., Sarah M.">
+        </div>
+        <div class="form-group">
+          <label>Next Session Date</label>
+          <input type="date" id="editNextSession">
+          <span class="form-hint">Used for session prep and Alo context</span>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="settings-section">
+          <div class="settings-section-title emergency-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Emergency Contact Information
+          </div>
+          <div class="form-hint form-hint-emergency">
+            Displayed only during crisis alerts for immediate action
+          </div>
+          <div class="form-group">
+            <label>Client Phone</label>
+            <input type="tel" id="editClientPhone" placeholder="(555) 123-4567">
+          </div>
+          <div class="form-group">
+            <label>Emergency Contact Name</label>
+            <input type="text" id="editEmergencyName" placeholder="e.g., Spouse, Parent">
+          </div>
+          <div class="form-group">
+            <label>Emergency Contact Phone</label>
+            <input type="tel" id="editEmergencyPhone" placeholder="(555) 987-6543">
+          </div>
+          <div class="form-group">
+            <label>Safety Notes (private)</label>
+            <textarea id="editSafetyNotes" placeholder="Safety plan details, risk factors, instructions for crisis..."></textarea>
+            <span class="form-hint">Never shared with client. For therapist reference only.</span>
+          </div>
+        </div>
+
+        <!-- Chat Settings -->
+        <div class="settings-section">
+          <div class="settings-section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Chat Settings
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Homework visibility</div>
+              <div class="setting-hint">Client can see assigned homework in chat</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingHomework" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Message to therapist</div>
+              <div class="setting-hint">Client can send you async messages</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingMessages" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Share conversation summary</div>
+              <div class="setting-hint">Client can share AI-generated session summaries with you</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingSummary" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Conversation history</div>
+              <div class="setting-hint">Client can view their own past sessions</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingHistory" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-default-note">
+            These settings control what features the client sees in their chat interface. Changes apply on client's next session.
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="form-group danger-zone">
+          <label class="danger-zone-label">Danger Zone</label>
+          <button class="btn btn-sm btn-danger-outline" onclick="confirmDeleteClient()">Archive Client</button>
+          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('editClientModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
+      </div>
     </div>
-  </footer>
+  </div>
 
-  <!-- Modals container -->
-  <div id="modalsContainer"></div>
+  <!-- Default Client Settings Modal -->
+  <div class="modal-overlay" id="defaultSettingsModal" onclick="closeModal('defaultSettingsModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Default Client Settings</h3>
+        <button class="modal-close" onclick="closeModal('defaultSettingsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">These defaults apply to all new clients. Override per-client in Edit.</p>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Homework visibility</div>
+            <div class="setting-hint">Client can see assigned homework in chat</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultHomework" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Message to therapist</div>
+            <div class="setting-hint">Client can send async messages</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultMessages" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Share conversation summary</div>
+            <div class="setting-hint">Client can share AI-generated session summaries</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultSummary" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Conversation history</div>
+            <div class="setting-hint">Client can view their own past sessions</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="defaultHistory" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-default-note">
+          Changes here apply to future clients only. Existing clients keep their current settings unless edited individually.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Toast container -->
-  <div id="toastContainer" class="toast-container"></div>
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+    <span id="toastMessage">Success</span>
+  </div>
+<script>
+// === PASSWORD RESET HANDLER ===
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    if (accessToken) {
+      document.addEventListener('DOMContentLoaded', function() {
+        const newPass = prompt('Enter your new password (min 6 characters):');
+        if (newPass && newPass.length >= 6) {
+          fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
+            method: 'PUT',
+            headers: {
+              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
+              'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password: newPass })
+          }).then(r => {
+            if (r.ok) {
+              alert('Password updated! You can now sign in.');
+              window.location.href = window.location.pathname;
+            } else {
+              r.text().then(t => alert('Error: ' + t));
+            }
+          });
+        }
+      });
+    }
+  }
+})();
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-  <script>
     // =====================================================
     // CONFIG
     // =====================================================
     const SUPABASE_URL = 'https://lelsdezstbnzyxvsvbyx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas';
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        storage: window.localStorage,
-        storageKey: 'alo_client_session',
-        autoRefreshToken: true,
-        detectSessionInUrl: true
+
+    let session = null;
+    let therapistId = null;
+    let currentClient = null;
+    let allClients = [];
+    let clientNotes = {};
+    let clientHomework = {};
+    let clientMessages = {};
+    let clientSessions = {};
+    let clientCrisis = {};
+
+    // =====================================================
+    // SUPABASE API HELPER
+    // =====================================================
+    async function api(endpoint, options = {}) {
+      const token = session?.access_token || SUPABASE_ANON_KEY;
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Prefer': options.prefer || 'return=representation',
+          ...options.headers
+        }
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`API ${res.status}: ${body}`);
       }
-    });
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    }
 
-    let clientId = null;
-    let therapistLink = null;
-    let chatSettings = {};
-    let currentHomeworkId = null;
-
-    // =====================================================
-    // TOAST NOTIFICATIONS
-    // =====================================================
-    function showToast(message, duration = 3000) {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      container.appendChild(toast);
-
-      setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, duration);
+    async function apiMutate(endpoint, method, body) {
+      return api(endpoint, {
+        method,
+        body: JSON.stringify(body),
+        prefer: 'return=minimal'
+      });
     }
 
     // =====================================================
-    // MODAL SYSTEM
+    // AUTH
     // =====================================================
-    function createModal(title, bodyHTML, options = {}) {
-      const {
-        confirmLabel = 'Confirm',
-        cancelLabel = 'Cancel',
-        onConfirm = null,
-        onCancel = null,
-        showCancel = true,
-        dangerous = false
-      } = options;
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const stored = localStorage.getItem('alo_session');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const refreshed = await refreshSession(parsed.refresh_token);
+          if (refreshed) {
+            session = refreshed;
+            therapistId = refreshed.user.id;
+            localStorage.setItem('alo_session', JSON.stringify(refreshed));
+            showApp();
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('No valid session, showing login');
+      }
+      showLogin();
+    });
 
-      const modalId = 'modal-' + Date.now();
-      const modalHTML = `
-        <div class="modal-overlay" id="${modalId}" role="dialog" aria-modal="true" aria-labelledby="${modalId}-title">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h2 id="${modalId}-title">${title}</h2>
-              <button class="modal-close" aria-label="Close dialog">&times;</button>
+    document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    async function refreshSession(refreshToken) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refresh_token: refreshToken })
+        });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch { return null; }
+    }
+
+    function toggleAuthForm(mode) {
+      const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
+      errorEl.style.display = 'none';
+      infoEl.style.display = 'none';
+      if (mode === 'signup') {
+        document.getElementById('signInForm').style.display = 'none';
+        document.getElementById('signUpForm').style.display = 'block';
+      } else {
+        document.getElementById('signInForm').style.display = 'block';
+        document.getElementById('signUpForm').style.display = 'none';
+      }
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
+      errorEl.style.display = 'none';
+      infoEl.style.display = 'none';
+
+      if (!name || !email || !password) {
+        errorEl.textContent = 'Please fill in all fields';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (password.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            data: { display_name: name, role: 'therapist' }
+          })
+        });
+
+        if (!signupRes.ok) {
+          const body = await signupRes.json();
+          throw new Error(body.error_description || body.msg || 'Signup failed');
+        }
+
+        const signupData = await signupRes.json();
+
+        if (!signupData.access_token) {
+          infoEl.textContent = 'Account created! Check your email for a confirmation link, then sign in.';
+          infoEl.style.display = 'block';
+          toggleAuthForm('login');
+          return;
+        }
+
+        session = signupData;
+        therapistId = session.user.id;
+        localStorage.setItem('alo_session', JSON.stringify(session));
+
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            id: therapistId,
+            role: 'therapist',
+            display_name: name,
+            email: email
+          })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            id: therapistId,
+            license_type: 'pending',
+            license_verified: false
+          })
+        });
+
+        showApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.style.display = 'none';
+
+      if (!email || !password) {
+        errorEl.textContent = 'Please enter email and password';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+          const body = await res.json();
+          throw new Error(body.error_description || body.msg || 'Login failed');
+        }
+
+        session = await res.json();
+        therapistId = session.user.id;
+        localStorage.setItem('alo_session', JSON.stringify(session));
+
+        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
+        if (!profile?.[0] || profile[0].role !== 'therapist') {
+          throw new Error('This account is not a therapist account');
+        }
+
+        showApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    function handleLogout() {
+      session = null;
+      therapistId = null;
+      localStorage.removeItem('alo_session');
+      showLogin();
+    }
+
+    function showLogin() {
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+    }
+
+    async function showApp() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+
+      const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=display_name,email`);
+      const name = profile?.[0]?.display_name || profile?.[0]?.email || 'Therapist';
+      document.getElementById('therapistName').textContent = name;
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('therapistAvatar').textContent = initials;
+
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      const firstName = name.split(' ')[0];
+      document.getElementById('morningGreeting').textContent = greeting + ', ' + firstName;
+
+      await loadDashboard();
+    }
+
+    // =====================================================
+    // UTILITY FUNCTIONS
+    // =====================================================
+    function esc(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+      return date.toLocaleDateString();
+    }
+
+    function truncate(str, len) {
+      if (!str || str.length <= len) return str;
+      return str.substring(0, len) + '...';
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function closeModal(id, event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById(id).classList.remove('show');
+    }
+
+    // =====================================================
+    // DASHBOARD LOADING
+    // =====================================================
+    async function loadDashboard() {
+      try {
+        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=in.(active,pending)&select=*`);
+
+        if (!links?.length) {
+          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts</div>';
+          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items needing attention</div>';
+          document.getElementById('messagesList').innerHTML = '<div class="section-empty">No messages</div>';
+          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet. Click "+ Invite" to add one.</div>';
+          document.getElementById('clientsList2').innerHTML = '';
+          document.getElementById('alertsCount').textContent = '0';
+          document.getElementById('messagesCount').textContent = '0';
+          document.getElementById('triageCount').textContent = '0';
+          return;
+        }
+
+        const clientIds = links.map(l => l.client_id).filter(Boolean);
+        const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
+
+        const [crisisEvents, messages, homework, sessions] = await Promise.all([
+          clientIds.length ? api(`/rest/v1/crisis_events?client_id=in.(${idFilter})&acknowledged=eq.false&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          clientIds.length ? api(`/rest/v1/client_messages?client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
+          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
+        ]);
+
+        const weekAgo = new Date(Date.now() - 7 * 86400000);
+
+        allClients = links.map(link => {
+          const clientCrisis = crisisEvents?.filter(e => e.client_id === link.client_id) || [];
+          const clientMessages = messages?.filter(m => m.client_id === link.client_id) || [];
+          const clientHw = homework?.filter(h => h.client_id === link.client_id) || [];
+          const clientSessions = sessions?.filter(s => s.client_id === link.client_id) || [];
+          const recentSessions = clientSessions.filter(s => new Date(s.created_at) > weekAgo);
+
+          let status = 'stable';
+          if (clientCrisis.length > 0) status = 'crisis';
+          else if (recentSessions.length === 0 && clientHw.length > 0) status = 'needs-attention';
+          else if (recentSessions.length === 0) status = 'dormant';
+
+          return {
+            ...link,
+            crisisCount: clientCrisis.length,
+            messageCount: clientMessages.length,
+            homeworkCount: clientHw.length,
+            sessionCount: recentSessions.length,
+            lastActivity: clientSessions[0]?.created_at || null,
+            status
+          };
+        });
+
+        renderAlerts(crisisEvents || []);
+        renderMessages(messages || []);
+        renderTriage();
+        renderClientsList();
+
+        const totalAlerts = (crisisEvents || []).length;
+        const totalMessages = (messages || []).length;
+        const stableCount = allClients.filter(c => c.status === 'stable').length;
+        const summaryEl = document.getElementById('morningSummary');
+        if (totalAlerts > 0) {
+          summaryEl.textContent = totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : '') + ' need your attention.';
+        } else if (totalMessages > 0) {
+          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients. ' + stableCount + ' stable.';
+        } else {
+          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', ' + stableCount + ' stable.';
+        }
+
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+      }
+    }
+
+    // =====================================================
+    // HOME PAGE RENDERERS
+    // =====================================================
+    function renderAlerts(crisisEvents) {
+      const count = crisisEvents.length;
+      document.getElementById('alertsCount').textContent = count;
+
+      if (!count) {
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
+        return;
+      }
+
+      document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
+        const client = allClients.find(c => c.client_id === e.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div class="list-item" onclick="showClient('${e.client_id}')">
+            <div class="list-item-indicator danger"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(name)}</div>
+              <div class="list-item-description">${esc(e.severity)} · ${esc(e.category)} · Alo: ${esc(e.alo_response_action)}</div>
             </div>
-            <div class="modal-body">
-              ${bodyHTML}
+            <span class="list-item-meta">${timeAgo(new Date(e.created_at))}</span>
+            <button class="list-item-action" onclick="acknowledgeCrisis('${e.id}', event)">Acknowledge</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMessages(messages) {
+      document.getElementById('messagesCount').textContent = messages.length;
+
+      if (!messages.length) {
+        document.getElementById('messagesList').innerHTML = '<div class="section-empty">No unread messages</div>';
+        return;
+      }
+
+      document.getElementById('messagesList').innerHTML = messages.map(m => {
+        const client = allClients.find(c => c.client_id === m.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div class="list-item" onclick="showClient('${m.client_id}')">
+            <div class="list-item-indicator info"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(name)}</div>
+              <div class="list-item-description">${esc(truncate(m.message, 60))}</div>
             </div>
-            <div class="modal-footer">
-              ${showCancel ? `<button class="btn-secondary modal-cancel">${cancelLabel}</button>` : ''}
-              <button class="btn-primary modal-confirm ${dangerous ? 'btn-danger' : ''}">${confirmLabel}</button>
+            <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTriage() {
+      const needsAttention = allClients.filter(c => c.status === 'needs-attention');
+      document.getElementById('triageCount').textContent = needsAttention.length;
+
+      if (!needsAttention.length) {
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable</div>';
+        return;
+      }
+
+      document.getElementById('triageList').innerHTML = needsAttention.map(c => {
+        return `
+          <div class="list-item" onclick="showClient('${c.client_id || c.id}')">
+            <div class="list-item-indicator warning"></div>
+            <div class="list-item-content">
+              <div class="list-item-title">${esc(c.display_name || 'Client')}</div>
+              <div class="list-item-description">No activity this week · ${c.homeworkCount} open homework</div>
             </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderClientsList() {
+      const statusOrder = { crisis: 0, 'needs-attention': 1, stable: 2, dormant: 3 };
+      allClients.sort((a, b) => {
+        const isPendingA = !a.client_id;
+        const isPendingB = !b.client_id;
+        const sa = statusOrder[isPendingA ? 'dormant' : a.status] ?? 4;
+        const sb = statusOrder[isPendingB ? 'dormant' : b.status] ?? 4;
+        if (sa !== sb) return sa - sb;
+        if ((b.messageCount || 0) !== (a.messageCount || 0)) return (b.messageCount || 0) - (a.messageCount || 0);
+        return (a.display_name || '').localeCompare(b.display_name || '');
+      });
+
+      const html = allClients.map(c => {
+        const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const isPending = !c.client_id;
+        const isActive = currentClient && ((currentClient.client_id && currentClient.client_id === c.client_id) || (!currentClient.client_id && currentClient.id === c.id));
+
+        let weatherClass = '';
+        let weatherLabel = '';
+        if (isPending) {
+          weatherClass = 'weather-dormant';
+          weatherLabel = 'PENDING';
+        } else if (c.status === 'crisis') {
+          weatherClass = 'weather-crisis';
+          weatherLabel = 'CRISIS';
+        } else if (c.status === 'needs-attention') {
+          weatherClass = 'weather-attention';
+          weatherLabel = 'ATTENTION';
+        } else if (c.status === 'dormant') {
+          weatherClass = 'weather-dormant';
+          weatherLabel = 'QUIET';
+        } else {
+          weatherClass = 'weather-stable';
+          weatherLabel = 'STABLE';
+        }
+
+        return `
+          <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')">
+            <div class="client-avatar">
+              ${initials}
+              ${!isPending ? `<div class="status-badge ${c.status}"></div>` : ''}
+            </div>
+            <div class="client-info">
+              <div class="client-name-row">
+                <span class="client-name">${esc(c.display_name || 'Client')}</span>
+                <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
+              </div>
+              <div class="client-meta">
+                ${isPending ? '<span class="pending-label">Pending signup</span>' : `${c.sessionCount} sessions · ${timeAgo(new Date(c.lastActivity || c.created_at))}`}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('clientsList').innerHTML = html || '<div class="section-empty">No clients yet</div>';
+      document.getElementById('clientsList2').innerHTML = html;
+    }
+
+    async function acknowledgeCrisis(eventId, e) {
+      e.stopPropagation();
+      try {
+        await apiMutate(`/rest/v1/crisis_events?id=eq.${eventId}`, 'PATCH', { acknowledged: true });
+        toast('Crisis alert acknowledged');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error acknowledging alert');
+      }
+    }
+
+    // =====================================================
+    // CLIENT PAGE
+    // =====================================================
+        async function showClient(clientIdOrLinkId) {
+      const client = allClients.find(c => c.client_id === clientIdOrLinkId || c.id === clientIdOrLinkId);
+      if (!client) return;
+
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar && sidebar.classList.contains('open')) {
+        toggleSidebar();
+      }
+
+            currentClient = client;
+
+      const cacheKey = client.client_id || client.id;
+
+      document.getElementById('homePage').style.display = 'none';
+      document.getElementById('clientPage').classList.add('active');
+
+      document.getElementById('clientName').textContent = client.display_name || 'Client';
+
+      const isPending = !client.client_id;
+      document.getElementById('clientMeta').innerHTML = isPending
+        ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(client.invite_code)}</span>`
+        : `${client.sessionCount} sessions this week · ${client.homeworkCount} active homework`;
+
+      // Clear all containers immediately to prevent stale data bleed
+      document.getElementById('notesContainer').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      document.getElementById('homeworkHistory').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      document.getElementById('activityMessages').innerHTML = '<p class="text-muted-center">No messages</p>';
+      document.getElementById('activitySessions').innerHTML = '<p class="text-muted-center">No sessions recorded yet</p>';
+      document.getElementById('prepSummary').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
+      document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
+      document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">No session notes yet.</p>';
+      document.getElementById('crisisAlertsCard').style.display = 'none';
+      document.getElementById('crisisAlertButton').classList.remove('visible');
+      const quickNote = document.getElementById('quickNoteText');
+      if (quickNote) quickNote.value = '';
+
+      // Reset to Session Prep tab on client switch
+      const prepTab = document.querySelector('.tab');
+      if (prepTab) switchTab('prep', prepTab);
+
+      renderClientsList();
+
+      // Always reload fresh data for this client
+      await loadClientData(cacheKey);
+
+      renderSessionPrep(cacheKey);
+      renderNotes(cacheKey);
+      renderHomework(cacheKey);
+      renderCrisisAlerts(cacheKey);
+      renderClientMessages(cacheKey);
+      renderSessionHistory(cacheKey);
+
+    }
+
+    function showHomePage() {
+      document.getElementById('homePage').style.display = 'grid';
+      document.getElementById('clientPage').classList.remove('active');
+      currentClient = null;
+      renderClientsList();
+    }
+
+    async function loadClientData(cacheKey) {
+      const clientId = currentClient.client_id || currentClient.id;
+
+      const [notes, homework, messages, sessions, crisis] = await Promise.all([
+        api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
+        api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
+        api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
+        api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc`),
+        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`)
+      ]);
+
+      clientNotes[cacheKey] = notes || [];
+      clientHomework[cacheKey] = homework || [];
+      clientMessages[cacheKey] = messages || [];
+      clientSessions[cacheKey] = sessions || [];
+      clientCrisis[cacheKey] = crisis || [];
+    }
+
+        function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+
+      // Scroll to top of tab content so each tab starts fresh
+      const stickyHeader = document.querySelector('.client-sticky-header');
+      if (stickyHeader) {
+        stickyHeader.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
+    }
+
+
+    // =====================================================
+    // SESSION PREP
+    // =====================================================
+        function renderSessionPrep(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+      const homework = clientHomework[cacheKey] || [];
+      const messages = clientMessages[cacheKey] || [];
+      const sessions = clientSessions[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const isPending = !currentClient.client_id;
+
+      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
+      const unreadMessages = messages.filter(m => !m.read);
+      const activeHw = homework.filter(h => h.is_active && !h.completed_at);
+      const completedHw = homework.filter(h => h.is_active && h.completed_at);
+      const totalAssigned = activeHw.length + completedHw.length;
+      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
+
+      // === THIS WEEK card ===
+      const glanceEl = document.getElementById('weekGlanceCard');
+      if (glanceEl) {
+        glanceEl.style.display = 'block';
+        const lines = [];
+
+        // 1. Crisis flag — top priority, impossible to miss
+        if (unresolvedCrisis.length > 0) {
+          lines.push(`<div class="glance-row"><span class="glance-icon danger">⚠</span><span class="glance-text"><strong class="glance-danger">${unresolvedCrisis.length} unresolved alert${unresolvedCrisis.length > 1 ? 's' : ''}</strong></span></div>`);
+        }
+
+        // 2. Homework — specific items by name with status
+        if (totalAssigned > 0) {
+          const hwItems = [];
+          completedHw.forEach(h => hwItems.push(`<span class="glance-hw done">✓ ${esc(h.title)}</span>`));
+          activeHw.forEach(h => hwItems.push(`<span class="glance-hw open">○ ${esc(h.title)}</span>`));
+          const summary = completedHw.length > 0
+            ? `${completedHw.length} of ${totalAssigned} completed`
+            : 'None completed yet';
+          lines.push(`<div class="glance-row glance-hw-row"><span class="glance-icon ${completedHw.length > 0 ? 'success' : 'warning'}">✎</span><div class="glance-text"><div class="glance-hw-summary">${summary}</div><div class="glance-hw-items">${hwItems.join('')}</div></div></div>`);
+        } else if (!isPending) {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">–</span><span class="glance-text">No homework assigned</span></div>`);
+        }
+
+        // 3. Alo engagement — how active between sessions
+        if (isPending) {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">○</span><span class="glance-text">Hasn't signed up yet</span></div>`);
+        } else if (sessions.length > 0) {
+          const lastDate = new Date(sessions[0].created_at);
+          const daysAgo = Math.floor((Date.now() - lastDate) / 86400000);
+          let activity;
+          if (recentSessions.length > 1) {
+            activity = `Used Alo ${recentSessions.length} times this week`;
+          } else if (recentSessions.length === 1) {
+            activity = 'Used Alo once this week';
+          } else if (daysAgo < 14) {
+            activity = `Last used Alo ${timeAgo(lastDate)}`;
+          } else {
+            activity = `No Alo activity in ${Math.floor(daysAgo / 7)} weeks`;
+          }
+          const icon = recentSessions.length > 0 ? 'success' : (daysAgo < 14 ? 'muted' : 'warning');
+          lines.push(`<div class="glance-row"><span class="glance-icon ${icon}">●</span><span class="glance-text">${activity}</span></div>`);
+        } else {
+          lines.push(`<div class="glance-row"><span class="glance-icon muted">○</span><span class="glance-text">No Alo activity yet</span></div>`);
+        }
+
+        // 4. Unread messages — only if present
+        if (unreadMessages.length > 0) {
+          lines.push(`<div class="glance-row"><span class="glance-icon info">✉</span><span class="glance-text">${unreadMessages.length} unread message${unreadMessages.length > 1 ? 's' : ''}</span></div>`);
+        }
+
+        // 5. Last session plan — the therapist's own agreed next step
+        if (notes.length > 0 && notes[0].plan) {
+          lines.push(`<div class="glance-row glance-plan"><span class="glance-icon muted">→</span><span class="glance-text">Last plan: ${esc(notes[0].plan)}</span></div>`);
+        }
+
+        document.getElementById('weekGlanceBody').innerHTML = lines.length
+          ? lines.join('')
+          : '<p class="text-muted-center">No data yet</p>';
+      }
+
+      // === RECENT SESSION NOTES card ===
+      if (notes.length > 0) {
+        document.getElementById('viewAllNotesBtn').style.display = 'inline-flex';
+        const lastNote = notes[0];
+        document.getElementById('lastSessionsPreview').innerHTML = `
+          <div class="session-preview">
+            <div class="session-preview-header">
+              <span class="session-preview-date">${new Date(lastNote.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+              <span class="session-preview-type">${esc(lastNote.session_type || 'Individual')}</span>
+            </div>
+            ${lastNote.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${esc(lastNote.themes)}</p>` : ''}
+            ${lastNote.plan ? `<p class="session-preview-text"><strong>Plan:</strong> ${esc(lastNote.plan)}</p>` : ''}
+          </div>
+        `;
+      }
+
+      // === WHAT CHANGED card ===
+      if (isPending) {
+        document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. You can still write session notes and assign homework.</p>`;
+      } else {
+        const changes = [];
+        if (completedHw.length) changes.push(`<div><span class="change-badge new">Done</span> ${completedHw.map(h => esc(h.title)).join(', ')}</div>`);
+        if (activeHw.length) changes.push(`<div><span class="change-badge changed">Open</span> ${activeHw.map(h => esc(h.title)).join(', ')}</div>`);
+        if (unreadMessages.length) changes.push(`<div><span class="change-badge alert">New</span> ${unreadMessages.length} unread message${unreadMessages.length > 1 ? 's' : ''}</div>`);
+        document.getElementById('prepSummary').innerHTML = changes.length ? changes.join('') : '<p class="text-muted-center">No changes since last session</p>';
+      }
+
+      // === OPEN ITEMS card ===
+      if (activeHw.length) {
+        document.getElementById('prepOpenItems').innerHTML = activeHw.map(h =>
+          `<div>• <strong>${esc(h.title)}:</strong> ${esc(h.goal)}</div>`
+        ).join('');
+      }
+
+      // === MESSAGES preview ===
+      if (unreadMessages.length) {
+        document.getElementById('clientMessagesPrep').innerHTML = unreadMessages.map(m =>
+          `<div class="excerpt">
+            <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
+            <div class="excerpt-text">${esc(m.message)}</div>
+          </div>`
+        ).join('');
+      }
+    }
+
+
+    // =====================================================
+    // NOTES
+    // =====================================================
+    function renderNotes(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+
+      if (!notes.length) {
+        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">No session notes yet.</p>';
+        return;
+      }
+
+      document.getElementById('notesContainer').innerHTML = notes.map(n => `
+        <div class="note-card">
+          <div class="note-header">
+            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span class="note-session-type">${esc(n.session_type || 'Individual')}</span>
+          </div>
+          <div class="note-content">
+            ${n.themes ? `<p><strong>Themes:</strong> ${esc(n.themes)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button></div>` : ''}
+            ${n.observations ? `<p><strong>Observations:</strong> ${esc(n.observations)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button></div>` : ''}
+            ${n.interventions ? `<p><strong>Interventions:</strong> ${esc(n.interventions)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button></div>` : ''}
+            ${n.plan ? `<p><strong>Plan:</strong> ${esc(n.plan)}</p><div class="sp-section-buttons"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button></div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showNoteForm() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Add Session Note</h3>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="noteForm" onsubmit="saveNote(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Session Date</label>
+                  <input type="date" id="noteDate" value="${new Date().toISOString().split('T')[0]}" required>
+                </div>
+                <div class="form-group">
+                  <label>Session Type</label>
+                  <select id="noteType">
+                    <option value="Individual">Individual</option>
+                    <option value="Couples">Couples</option>
+                    <option value="Family">Family</option>
+                    <option value="Group">Group</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label>Themes (Subjective)</label>
+                  <textarea id="noteThemes" placeholder="What did the client share?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Observations (Objective)</label>
+                  <textarea id="noteObs" placeholder="What did you observe?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Interventions (Assessment)</label>
+                  <textarea id="noteInt" placeholder="What did you do?"></textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Plan</label>
+                  <textarea id="notePlan" placeholder="Next steps..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Next Session Date</label>
+                  <input type="date" id="noteNextSession">
+                </div>
+                <div class="form-group form-group-inline">
+                  <input type="checkbox" id="noteBilling" class="checkbox-inline">
+                  <label for="noteBilling" class="label-inline">Include billing justification</label>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Note</button>
+              </div>
+            </form>
           </div>
         </div>
       `;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
 
-      const container = document.getElementById('modalsContainer');
-      container.insertAdjacentHTML('beforeend', modalHTML);
-
-      const modal = document.getElementById(modalId);
-      const closeBtn = modal.querySelector('.modal-close');
-      const cancelBtn = modal.querySelector('.modal-cancel');
-      const confirmBtn = modal.querySelector('.modal-confirm');
-
-      const firstInput = modal.querySelector('input, textarea, select');
-      if (firstInput) {
-        setTimeout(() => firstInput.focus(), 100);
-      } else {
-        setTimeout(() => confirmBtn.focus(), 100);
+        async function saveNote(e) {
+      e.preventDefault();
+      if (!currentClient.client_id) {
+        toast('Notes available after client signs up');
+        return;
       }
+      const cacheKey = currentClient.client_id || currentClient.id;
 
-      function closeModal() {
-        modal.classList.add('closing');
-        setTimeout(() => modal.remove(), 300);
-      }
 
-      closeBtn.addEventListener('click', () => {
-        if (onCancel) onCancel();
-        closeModal();
-      });
-
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          if (onCancel) onCancel();
-          closeModal();
+      try {
+        await apiMutate('/rest/v1/session_notes', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          session_date: document.getElementById('noteDate').value,
+          session_type: document.getElementById('noteType').value,
+          themes: document.getElementById('noteThemes').value,
+          observations: document.getElementById('noteObs').value,
+          interventions: document.getElementById('noteInt').value,
+          plan: document.getElementById('notePlan').value,
+          next_session_date: document.getElementById('noteNextSession').value || null,
+          billing_justification: document.getElementById('noteBilling').checked
         });
+
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+
+        e.target.closest('.modal-overlay').remove();
+        toast('Note saved');
+      } catch (err) {
+        console.error(err);
+        toast('Error saving note');
+      }
+    }
+
+    // =====================================================
+    // RESPONSIVE SIDEBAR
+    // =====================================================
+    function toggleSidebar() {
+      const sidebars = document.querySelectorAll('.sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const isOpen = sidebars[0]?.classList.contains('open');
+      sidebars.forEach(s => s.classList.toggle('open', !isOpen));
+      backdrop?.classList.toggle('show', !isOpen);
+      document.body.style.overflow = isOpen ? '' : 'hidden';
+    }
+
+    // =====================================================
+    // QUICK NOTE (PHONE)
+    // =====================================================
+        async function saveQuickNote() {
+      const text = document.getElementById('quickNoteText')?.value?.trim();
+      if (!text || !currentClient) return;
+      if (!currentClient.client_id) {
+        toast('Notes available after client signs up');
+        return;
       }
 
-      confirmBtn.addEventListener('click', async () => {
-        if (onConfirm) {
-          const result = await onConfirm();
-          if (result !== false) closeModal();
-        } else {
-          closeModal();
-        }
-      });
-
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          if (onCancel) onCancel();
-          closeModal();
-        }
-      });
-
-      document.addEventListener('keydown', function escHandler(e) {
-        if (e.key === 'Escape' && document.getElementById(modalId)) {
-          if (onCancel) onCancel();
-          closeModal();
-          document.removeEventListener('keydown', escHandler);
-        }
-      });
-
-      setTimeout(() => modal.classList.add('show'), 10);
-
-      return modal;
-    }
-
-    // =====================================================
-    // CONFIRM DIALOG
-    // =====================================================
-    function showConfirm(title, message, options = {}) {
-      return new Promise((resolve) => {
-        createModal(
-          title,
-          `<p>${message}</p>`,
-          {
-            ...options,
-            onConfirm: () => {
-              resolve(true);
-            },
-            onCancel: () => {
-              resolve(false);
-            }
-          }
-        );
-      });
-    }
-
-    // =====================================================
-    // UI STATE MANAGEMENT
-    // =====================================================
-    function showLoggedInNoConnection() {
-      const badge = document.getElementById('trustBadge');
-      const badgeText = document.getElementById('trustBadgeText');
-      badge.className = 'trust-badge';
-      badgeText.textContent = 'Logged in';
-      badge.style.display = 'flex';
-      
-      const svg = badge.querySelector('svg');
-      if (svg) svg.remove();
-      
-      document.getElementById('connectBtn').classList.remove('hidden');
-      document.getElementById('connectBtn').textContent = 'Link to Therapist';
-      document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('privacyBtn').classList.add('hidden');
-      document.getElementById('messageBtn').classList.add('hidden');
-    }
-
-    function showConnectedUI(therapistName, clientName) {
-      const badge = document.getElementById('trustBadge');
-      const badgeText = document.getElementById('trustBadgeText');
-      
-      badge.className = 'trust-badge connected';
-      
-      if (!badge.querySelector('svg')) {
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('fill', 'none');
-        svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('stroke', 'currentColor');
-        svg.setAttribute('stroke-width', '2');
-        svg.style.width = '12px';
-        svg.style.height = '12px';
-        
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('stroke-linecap', 'round');
-        path.setAttribute('stroke-linejoin', 'round');
-        path.setAttribute('d', 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z');
-        
-        svg.appendChild(path);
-        badge.insertBefore(svg, badgeText);
+      const cacheKey = currentClient.client_id || currentClient.id;
+      try {
+        await apiMutate('/rest/v1/session_notes', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          session_date: new Date().toISOString().split('T')[0],
+          session_type: 'Quick Note',
+          themes: text,
+          observations: '',
+          interventions: '',
+          plan: ''
+        });
+        document.getElementById('quickNoteText').value = '';
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+        toast('Quick note saved');
+      } catch (err) {
+        console.error(err);
+        toast('Error saving note');
       }
-      
-      badgeText.textContent = `Hi ${clientName} \u00B7 with ${therapistName}`;
-      
-      document.getElementById('connectBtn').classList.add('hidden');
-      document.getElementById('logoutBtn').classList.remove('hidden');
-      document.getElementById('privacyBtn').classList.remove('hidden');
-      
-      // Enforce chat settings from dashboard
-      if (chatSettings.allow_messages !== false) {
-        document.getElementById('messageBtn').classList.remove('hidden');
+    }
+
+    // =====================================================
+    // SIMPLEPRACTICE INTEGRATION
+    // =====================================================
+    function copySoapSection(noteId, section, event) {
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
+      const n = notes.find(note => note.id === noteId);
+      if (!n) return;
+
+      let text = '';
+      if (section === 'S') {
+        text = n.themes || '';
+      } else if (section === 'O') {
+        text = n.observations || '';
+      } else if (section === 'A') {
+        text = n.interventions || '';
+      } else if (section === 'P') {
+        text = n.plan || '';
+        if (n.next_session_date) {
+          const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+          text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
+        }
+        if (n.billing_justification) {
+          text += (text ? '\n\n' : '') + 'Continued therapeutic support medically necessary for symptom management and functional improvement.';
+        }
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.classList.add('copied');
+        btn.textContent = '✓ Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    function generateAddendum(format = 'full') {
+      if (!currentClient) return '';
+
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const sessions = clientSessions[cacheKey] || [];
+      const homework = (clientHomework[cacheKey] || []).filter(h => h.is_active);
+      const messages = clientMessages[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const recentSessions = sessions.filter(s => new Date(s.created_at) > weekAgo);
+      const recentMessages = messages.filter(m => new Date(m.created_at) > weekAgo);
+      const unresolvedCrisis = crisis.filter(c => !c.acknowledged);
+
+      const lastSession = recentSessions[0] ? new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A';
+      const dateRange = recentSessions.length
+        ? new Date(recentSessions[recentSessions.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' - ' + new Date(recentSessions[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : 'Past 7 days';
+
+      if (format === 'brief') {
+        const hwStatus = homework.length ? homework[0].title + ' (' + (homework[0].completed_at ? 'completed' : 'in progress') + ')' : 'none';
+        return 'Between-session (Alo): ' + recentSessions.length + ' check-in' + (recentSessions.length !== 1 ? 's' : '') + '; HW ' + hwStatus + '; messages ' + (recentMessages.length ? 'Y' : 'N') + '; alerts ' + (unresolvedCrisis.length ? 'Y' : 'N') + '.';
+      }
+
+      let text = 'BETWEEN-SESSION DATA (Source: Alo Clinical Dashboard, ' + dateRange + ')\n\n';
+      text += 'Source: Client self-directed use of an emotional support tool. No session transcript available.\n\n';
+      text += 'Engagement: Client engaged in ' + recentSessions.length + ' Alo session' + (recentSessions.length !== 1 ? 's' : '') + ' (last: ' + lastSession + ').\n\n';
+
+      const themes = recentSessions.map(s => s.primary_mode || 'emotional processing').filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'general emotional processing';
+      text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
+
+      if (homework.length) {
+        text += 'Homework: ' + homework.map(h => h.title + ' -- Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
       } else {
-        document.getElementById('messageBtn').classList.add('hidden');
+        text += 'Homework: None assigned.\n\n';
       }
+
+      text += 'Client Messages: ' + recentMessages.length + ' message' + (recentMessages.length !== 1 ? 's' : '') + ' received';
+      if (recentMessages.length) {
+        text += '; subject: ' + truncate(recentMessages[0].message, 50);
+      }
+      text += '.\n\n';
+
+      if (unresolvedCrisis.length) {
+        text += 'Safety: ' + unresolvedCrisis.map(c => {
+          const date = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          return 'Alert on ' + date + ': ' + c.category + '; resolved via ' + c.alo_response_action;
+        }).join('. ') + '.';
+      } else {
+        text += 'Safety: No alerts.';
+      }
+
+      return text;
     }
 
-    function resetToGuestUI() {
-      const badge = document.getElementById('trustBadge');
-      const badgeText = document.getElementById('trustBadgeText');
-      badge.className = 'trust-badge guest';
-      badgeText.textContent = '';
-      
-      const svg = badge.querySelector('svg');
-      if (svg) svg.remove();
-      
-      document.getElementById('connectBtn').classList.remove('hidden');
-      document.getElementById('connectBtn').textContent = 'Link to Therapist';
-      document.getElementById('logoutBtn').classList.add('hidden');
-      document.getElementById('messageBtn').classList.add('hidden');
-      document.getElementById('privacyBtn').classList.add('hidden');
-      document.getElementById('homeworkContainer').classList.remove('show');
+    function copyPrepPack() {
+      const clientName = currentClient?.display_name || 'Client';
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+
+      const addendum = generateAddendum('full');
+      const notes = clientNotes[cacheKey] || [];
+      const recentNote = notes[0];
+
+      let prepPack = 'SESSION PREP PACK -- ' + clientName + ' -- ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + '\n\n';
+      prepPack += addendum;
+
+      if (recentNote) {
+        const noteDate = new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        prepPack += '\n\n----------------------------------------------------------------------------------\n\nLAST SESSION NOTE (' + noteDate + '):\n';
+        if (recentNote.themes) prepPack += 'Themes: ' + recentNote.themes + '\n';
+        if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
+      }
+
+      navigator.clipboard.writeText(prepPack).then(() => {
+        const btn = document.getElementById('copyPrepPackBtn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
+        setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+        toast('Prep Pack copied to clipboard');
+      });
     }
 
     // =====================================================
     // HOMEWORK
     // =====================================================
-    async function loadHomework() {
-      // P1: Enforce chat settings — if therapist disabled homework visibility, skip
-      if (chatSettings.allow_homework === false) {
+    function renderHomework(cacheKey) {
+      const homework = clientHomework[cacheKey] || [];
+
+      if (!homework.length) {
+        document.getElementById('homeworkHistory').innerHTML = '<p class="text-muted-center">No homework yet</p>';
         return;
       }
 
-      try {
-        const homework = await api(`/rest/v1/homework_cards?client_id=eq.${clientId}&is_active=eq.true&order=created_at.desc&limit=1`);
-        
-        if (homework && homework.length > 0) {
-          const hw = homework[0];
-          currentHomeworkId = hw.id;
-          document.getElementById('homeworkTitle').textContent = hw.title || 'From your therapist';
-          document.getElementById('homeworkGoal').textContent = hw.goal || '';
-          document.getElementById('homeworkContainer').classList.add('show');
-
-          // P1: Track that client viewed this homework
-          if (!hw.viewed_at) {
-            try {
-              await api(`/rest/v1/homework_cards?id=eq.${hw.id}`, 'PATCH', {
-                viewed_at: new Date().toISOString()
-              });
-            } catch (viewErr) {
-              console.error('Error tracking homework view:', viewErr);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error loading homework:', err);
-      }
+      document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
+        <div class="homework-item">
+          <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
+            ${h.completed_at ? '✓' : '○'}
+          </div>
+          <div class="homework-content">
+            <div class="homework-type">${esc(h.title)}</div>
+            <div class="homework-desc">${esc(h.goal)}</div>
+            ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
+            <div class="homework-meta">Assigned ${new Date(h.created_at).toLocaleDateString()}</div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    async function handleHomeworkDone() {
-      showConfirm(
-        'Mark as complete?',
-        'Nice work. This lets your therapist know you engaged with this exercise.',
-        {
-          confirmLabel: 'Yes, I did this',
-          cancelLabel: 'Not yet'
-        }
-      ).then(async (confirmed) => {
-        if (confirmed && currentHomeworkId) {
-          try {
-            // P0: Actually write completion to Supabase
-            await api(`/rest/v1/homework_cards?id=eq.${currentHomeworkId}`, 'PATCH', {
-              is_active: false,
-              completed_at: new Date().toISOString()
-            });
-            showToast('Marked complete');
-            document.getElementById('homeworkContainer').classList.remove('show');
-          } catch (err) {
-            console.error('Error completing homework:', err);
-            showToast('Could not save. Please try again.');
-          }
-        } else if (confirmed && !currentHomeworkId) {
-          showToast('Marked complete');
-          document.getElementById('homeworkContainer').classList.remove('show');
-        }
-      });
+    function useTemplate(type, title, goal, rationale) {
+      document.getElementById('hwType').value = type;
+      document.getElementById('hwTitle').value = title;
+      document.getElementById('hwGoal').value = goal;
+      document.getElementById('hwRationale').value = rationale;
     }
 
-    // =====================================================
-    // LOGOUT HANDLER
-    // =====================================================
-    async function handleLogout() {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        showToast('Error signing out. Please try again.');
+        async function submitHomework(e) {
+      e.preventDefault();
+      if (!currentClient.client_id) {
+        toast('Homework available after client signs up');
         return;
       }
-      
-      clientId = null;
-      therapistLink = null;
-      chatSettings = {};
-      currentHomeworkId = null;
-      
-      location.reload();
+      const cacheKey = currentClient.client_id || currentClient.id;
+
+
+      try {
+        await apiMutate('/rest/v1/homework_cards', 'POST', {
+          therapist_id: therapistId,
+          client_id: currentClient.client_id || currentClient.id,
+          homework_type: document.getElementById('hwType').value,
+          title: document.getElementById('hwTitle').value,
+          goal: document.getElementById('hwGoal').value,
+          clinical_rationale: document.getElementById('hwRationale').value,
+          sensitivity_level: document.getElementById('hwSensitivity').value,
+          treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
+          is_active: true
+        });
+
+        delete clientHomework[cacheKey];
+        await loadClientData(cacheKey);
+        renderHomework(cacheKey);
+        renderSessionPrep(cacheKey);
+
+        e.target.reset();
+        toast('Homework assigned');
+      } catch (err) {
+        console.error(err);
+        toast('Error assigning homework');
+      }
     }
 
     // =====================================================
-    // CONNECT MODAL
+    // CRISIS & MESSAGES & SESSIONS
     // =====================================================
-    function showConnectModal() {
-      createModal('Link to Your Therapist', `
-        <p>Stay connected with your therapist between sessions. They can send you exercises, and you can message them anytime.</p>
-        <p class="modal-hint">Your conversations with Alo stay completely private — your therapist never sees them.</p>
-        <div style="margin-top: 16px;">
-          <label for="inviteCodeInput" style="font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px;">Invite code</label>
-          <input type="text" id="inviteCodeInput" class="modal-input" placeholder="Enter the code your therapist gave you" autocomplete="off" />
-        </div>
-        <p class="modal-sign-in-link">
-          Already have an account? <button onclick="document.querySelector('.modal-overlay').remove(); showLoginModal();">Sign in</button>
-        </p>
-      `, {
-        confirmLabel: 'Link',
-        cancelLabel: 'Maybe later',
-        onConfirm: async () => {
-          const code = document.getElementById('inviteCodeInput').value.trim();
-          if (!code) {
-            showToast('Please enter an invite code');
-            return false;
-          }
-          await handleConnectSubmit(code);
-        }
-      });
-    }
+    function renderCrisisAlerts(cacheKey) {
+      const crisis = clientCrisis[cacheKey] || [];
+      const unacknowledged = crisis.filter(c => !c.acknowledged);
 
-    async function handleConnectSubmit(inviteCode) {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        showLoginModal(inviteCode);
+      if (!unacknowledged.length) {
+        document.getElementById('crisisAlertsCard').style.display = 'none';
+        document.getElementById('crisisAlertButton').classList.remove('visible');
         return;
       }
 
-      try {
-        const link = await api(`/rest/v1/therapist_clients?invite_code=eq.${inviteCode}&status=eq.pending`);
-        
-        if (!link || link.length === 0) {
-          showToast('Invalid invite code. Check the code your therapist sent you.');
-          return;
-        }
+      document.getElementById('crisisAlertsCard').style.display = 'block';
+      document.getElementById('crisisAlertButton').classList.add('visible');
+      document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
+      document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
 
-        const linkId = link[0].id;
-        await api(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
-          client_id: user.id,
-          status: 'active'
-        });
-
-        showToast('Connected successfully!');
-        await loadConnectedState();
-      } catch (err) {
-        console.error('Connection error:', err);
-        showToast('Connection failed. Please try again.');
-      }
-    }
-
-    // =====================================================
-    // LOGIN MODAL
-    // =====================================================
-    function showLoginModal(inviteCode = null) {
-      createModal('Sign In or Create Account', `
-        <p>Create an account or sign in to connect with your therapist.</p>
-        <div style="margin-top: 16px;">
-          <label for="emailInput" style="font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px;">Email</label>
-          <input type="email" id="emailInput" class="modal-input" placeholder="Email" autocomplete="email" style="margin-bottom: 12px;" />
-          <label for="passwordInput" style="font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px;">Password</label>
-          <input type="password" id="passwordInput" class="modal-input" placeholder="Password" autocomplete="current-password" />
-        </div>
-      `, {
-        confirmLabel: 'Continue',
-        cancelLabel: 'Cancel',
-        onConfirm: async () => {
-          const email = document.getElementById('emailInput').value.trim();
-          const password = document.getElementById('passwordInput').value;
-          
-          if (!email || !password) {
-            showToast('Please enter email and password');
-            return false;
-          }
-
-          // Try sign in first
-          let { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          
-          // If sign in fails, try sign up
-          if (error && error.message.includes('Invalid login credentials')) {
-            const signUpResult = await supabase.auth.signUp({ email, password });
-            
-            if (signUpResult.error) {
-              showToast('Authentication failed. Please try again.');
-              return false;
-            }
-            
-            if (!signUpResult.data.session) {
-              showToast('Account created! Check your email to confirm.');
-              return;
-            }
-            
-            data = signUpResult.data;
-            error = null;
-
-            // P0: Create profiles row on sign-up
-            try {
-              const displayName = email.split('@')[0];
-              await api('/rest/v1/profiles', 'POST', {
-                id: data.user.id,
-                role: 'client',
-                display_name: displayName,
-                email: email
-              });
-            } catch (profileErr) {
-              // Non-blocking — profile creation failure shouldn't break signup
-              console.error('Error creating profile:', profileErr);
-            }
-          }
-
-          if (error) {
-            showToast('Authentication failed. Please try again.');
-            return false;
-          }
-
-          showToast('Signed in successfully');
-
-          if (inviteCode) {
-            await handleConnectSubmit(inviteCode);
-          } else {
-            await loadConnectedState();
-          }
-        }
-      });
-    }
-
-    // =====================================================
-    // MESSAGE MODAL
-    // =====================================================
-    function showMessageModal() {
-      const therapistName = therapistLink ? document.getElementById('trustBadgeText').textContent.split('with ')[1] : 'your therapist';
-      
-      createModal(`Message ${therapistName}`, `
-        <p class="modal-subtext">
-          ${therapistName} will see this message in their dashboard. They'll respond when they can.
-        </p>
-        <textarea id="messageTextarea" class="modal-textarea" placeholder="Type your message..."></textarea>
-      `, {
-        confirmLabel: 'Send',
-        cancelLabel: 'Cancel',
-        onConfirm: async () => {
-          const messageText = document.getElementById('messageTextarea').value.trim();
-          if (!messageText) {
-            showToast('Please enter a message');
-            return false;
-          }
-
-          try {
-            await api('/rest/v1/client_messages', 'POST', {
-              client_id: clientId,
-              therapist_id: therapistLink.therapist_id,
-              message: messageText,
-              read: false
-            });
-
-            showToast('Message sent');
-          } catch (err) {
-            console.error('Error sending message:', err);
-            showToast('Failed to send message. Please try again.');
-            return false;
-          }
-        }
-      });
-    }
-
-    // =====================================================
-    // PRIVACY MODAL
-    // =====================================================
-    function showPrivacyModal() {
-      const therapistName = document.getElementById('trustBadgeText').textContent.split('with ')[1] || 'your therapist';
-      
-      createModal('Your Privacy', `
-        <h3 class="modal-section-title">What ${therapistName} sees</h3>
-        <ul class="modal-list">
-          <li>Whether you're connected to Alo</li>
-          <li>If you completed homework exercises</li>
-          <li>Messages you send them directly</li>
-        </ul>
-        
-        <h3 class="modal-section-title">What they never see</h3>
-        <ul class="modal-list">
-          <li><strong>Your conversations with Alo</strong></li>
-          <li>What you talked about</li>
-          <li>How you're feeling</li>
-        </ul>
-        
-        <p class="modal-divider">
-          Alo is a private space. Your therapist trusts you to share what matters when you're ready.
-        </p>
-      `, {
-        confirmLabel: 'Got it',
-        showCancel: false
-      });
-    }
-
-    // =====================================================
-    // SHARE MODAL (3-option: Summary/Full/Range)
-    // =====================================================
-    function showShareModal() {
-      const summaryPrompt = `Alo, please create a 5-bullet summary of our conversation for me to share with my therapist or someone I trust. Include key insights and one suggested next step.`;
-      const fullPrompt = `Alo, please provide a complete transcript of our entire conversation in a clean, readable format that I can share.`;
-      
-      const modal = createModal('Share Your Conversation', `
-        <div class="share-options">
-          <button class="share-option active" id="optionSummary">
-            <span class="share-option-icon">\u{1F4DD}</span>
-            <span class="share-option-label">Summary</span>
-          </button>
-          <button class="share-option" id="optionFull">
-            <span class="share-option-icon">\u{1F4C4}</span>
-            <span class="share-option-label">Full</span>
-          </button>
-          <button class="share-option" id="optionRange">
-            <span class="share-option-icon">\u{1F3AF}</span>
-            <span class="share-option-label">Range</span>
-          </button>
-        </div>
-        
-        <div id="instructionsArea">
-          <div id="summaryInstructions">
-            <p class="share-instructions">
-              Get a 5-bullet summary perfect for sharing with your therapist
-            </p>
-            <ol class="share-steps">
-              <li>Copy the message below</li>
-              <li>Paste it into chat</li>
-              <li>Alo creates a summary</li>
-              <li>Long-press to copy &amp; share</li>
-            </ol>
-            <div class="share-prompt-box">
-              <textarea readonly id="summaryPromptText" class="share-prompt-textarea">${summaryPrompt}</textarea>
-              <button id="copySummaryBtn" class="btn-primary" style="width: 100%; margin-top: 8px;">\u{1F4CB} Copy Message</button>
-            </div>
+      document.getElementById('crisisAlertsList').innerHTML = unacknowledged.map(c => `
+        <div class="crisis-alert-item">
+          <div class="crisis-alert-header">
+            <span class="crisis-alert-time">${timeAgo(new Date(c.created_at))}</span>
+            <span class="crisis-alert-severity">${esc(c.severity)}</span>
           </div>
-          
-          <div id="fullInstructions" style="display: none;">
-            <p class="share-instructions">
-              Get a complete transcript of everything discussed
-            </p>
-            <ol class="share-steps">
-              <li>Copy the message below</li>
-              <li>Paste it into chat</li>
-              <li>Alo creates full transcript</li>
-              <li>Long-press to copy &amp; share</li>
-            </ol>
-            <div class="share-prompt-box">
-              <textarea readonly id="fullPromptText" class="share-prompt-textarea">${fullPrompt}</textarea>
-              <button id="copyFullBtn" class="btn-primary" style="width: 100%; margin-top: 8px;">\u{1F4CB} Copy Message</button>
-            </div>
-            <p class="share-hint">
-              \u{1F4A1} Full transcripts are long — summary is usually better for sharing
-            </p>
-          </div>
-          
-          <div id="rangeInstructions" style="display: none;">
-            <p class="share-instructions">
-              Share specific parts (example: turns 3-8)
-            </p>
-            <div class="range-inputs">
-              <div class="range-field">
-                <label for="rangeStart">Start:</label>
-                <input type="number" id="rangeStart" min="1" value="1">
-              </div>
-              <div class="range-field">
-                <label for="rangeEnd">End:</label>
-                <input type="number" id="rangeEnd" min="1" value="10">
-              </div>
-            </div>
-            <button id="copyRangeBtn" class="btn-primary" style="width: 100%;">
-              \u{1F4CB} Copy Range Message
-            </button>
-            <p class="share-hint">
-              \u{1F4A1} Count message bubbles to find turn numbers
-            </p>
+          <div class="crisis-alert-detail">
+            <strong>${esc(c.category)}:</strong> ${esc(c.details || 'No details provided')}<br>
+            <strong>Alo Response:</strong> ${esc(c.alo_response_action)}
           </div>
         </div>
-        
-        <p class="share-footer-note">
-          <strong>How to share:</strong> After Alo creates your summary/transcript, long-press on it and select "Copy". Then paste into Messages, Email, or Notes.
-        </p>
-      `, {
-        confirmLabel: 'Close',
-        showCancel: false
-      });
-      
-      setupShareTabs(modal, summaryPrompt, fullPrompt);
+      `).join('');
     }
 
-    function setupShareTabs(modal, summaryPrompt, fullPrompt) {
-      const optionSummary = modal.querySelector('#optionSummary');
-      const optionFull = modal.querySelector('#optionFull');
-      const optionRange = modal.querySelector('#optionRange');
-      
-      const summaryInstructions = modal.querySelector('#summaryInstructions');
-      const fullInstructions = modal.querySelector('#fullInstructions');
-      const rangeInstructions = modal.querySelector('#rangeInstructions');
-      
-      function switchTab(tab) {
-        [optionSummary, optionFull, optionRange].forEach(btn => {
-          btn.classList.remove('active');
-        });
-        
-        summaryInstructions.style.display = 'none';
-        fullInstructions.style.display = 'none';
-        rangeInstructions.style.display = 'none';
-        
-        if (tab === 'summary') {
-          optionSummary.classList.add('active');
-          summaryInstructions.style.display = 'block';
-        } else if (tab === 'full') {
-          optionFull.classList.add('active');
-          fullInstructions.style.display = 'block';
-        } else if (tab === 'range') {
-          optionRange.classList.add('active');
-          rangeInstructions.style.display = 'block';
-        }
-      }
-      
-      optionSummary.addEventListener('click', () => switchTab('summary'));
-      optionFull.addEventListener('click', () => switchTab('full'));
-      optionRange.addEventListener('click', () => switchTab('range'));
-      
-      const copySummaryBtn = modal.querySelector('#copySummaryBtn');
-      const copyFullBtn = modal.querySelector('#copyFullBtn');
-      const copyRangeBtn = modal.querySelector('#copyRangeBtn');
-      
-      copySummaryBtn.addEventListener('click', async function() {
-        const success = await copyToClipboard(summaryPrompt);
-        if (success) {
-          copySummaryBtn.textContent = '\u2713 Copied!';
-          copySummaryBtn.style.background = '#10b981';
-          setTimeout(function() {
-            copySummaryBtn.textContent = '\u{1F4CB} Copy Message';
-            copySummaryBtn.style.background = '';
-          }, 2000);
-        }
-      });
-      
-      copyFullBtn.addEventListener('click', async function() {
-        const success = await copyToClipboard(fullPrompt);
-        if (success) {
-          copyFullBtn.textContent = '\u2713 Copied!';
-          copyFullBtn.style.background = '#10b981';
-          setTimeout(function() {
-            copyFullBtn.textContent = '\u{1F4CB} Copy Message';
-            copyFullBtn.style.background = '';
-          }, 2000);
-        }
-      });
-      
-      copyRangeBtn.addEventListener('click', async function() {
-        const startTurn = modal.querySelector('#rangeStart').value;
-        const endTurn = modal.querySelector('#rangeEnd').value;
-        const rangePrompt = `Alo, please provide turns ${startTurn} through ${endTurn} of our conversation in a clean, readable format that I can share.`;
-        
-        const success = await copyToClipboard(rangePrompt);
-        if (success) {
-          copyRangeBtn.textContent = '\u2713 Copied!';
-          copyRangeBtn.style.background = '#10b981';
-          setTimeout(function() {
-            copyRangeBtn.textContent = '\u{1F4CB} Copy Range Message';
-            copyRangeBtn.style.background = '';
-          }, 2000);
-        }
-      });
+    function goToCrisisAlerts() {
+      switchTab('tools', document.querySelectorAll('.tab')[1]);
+      document.getElementById('crisisAlertsCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    async function copyToClipboard(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch (err) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
-        document.body.appendChild(textArea);
-        textArea.select();
-        const success = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        return success;
-      }
+    function renderClientMessages(cacheKey) {
+      const messages = clientMessages[cacheKey] || [];
+      if (!messages.length) return;
+
+      document.getElementById('activityMessages').innerHTML = messages.map(m => `
+        <div class="excerpt">
+          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '(unread)'}</div>
+          <div class="excerpt-text">${esc(m.message)}</div>
+        </div>
+      `).join('');
     }
 
-    // =====================================================
-    // API HELPER
-    // =====================================================
-    async function api(endpoint, method = 'GET', body = null) {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const options = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': session ? `Bearer ${session.access_token}` : `Bearer ${SUPABASE_ANON_KEY}`
-        }
-      };
+    function renderSessionHistory(cacheKey) {
+      const sessions = clientSessions[cacheKey] || [];
+      if (!sessions.length) return;
 
-      if (body && method !== 'GET') {
-        options.body = JSON.stringify(body);
-      }
-
-      // For POST, add Prefer header to get minimal response
-      if (method === 'POST') {
-        options.headers['Prefer'] = 'return=minimal';
-      }
-
-      const response = await fetch(`${SUPABASE_URL}${endpoint}`, options);
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const text = await response.text();
-      return text ? JSON.parse(text) : null;
-    }
-
-    // =====================================================
-    // LOAD CONNECTED STATE
-    // =====================================================
-    async function loadConnectedState() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          resetToGuestUI();
-          return;
-        }
-
-        const links = await api(`/rest/v1/therapist_clients?client_id=eq.${user.id}&status=eq.active`);
-
-        if (!links || links.length === 0) {
-          showLoggedInNoConnection();
-          return;
-        }
-
-        therapistLink = links[0];
-        clientId = user.id;
-
-        const therapist = await api(`/rest/v1/profiles?id=eq.${therapistLink.therapist_id}&select=display_name`);
-        const client = await api(`/rest/v1/profiles?id=eq.${user.id}&select=display_name`);
-
-        const therapistName = therapist?.[0]?.display_name || 'Your therapist';
-        const clientName = client?.[0]?.display_name || 'there';
-
-        // P1: Read ALL chat settings — column names match dashboard's saveClientEdit()
-        const settings = await api(`/rest/v1/therapist_clients?id=eq.${therapistLink.id}&select=allow_homework,allow_messages,allow_summary,allow_history`);
-        chatSettings = settings?.[0] || {};
-
-        showConnectedUI(therapistName, clientName);
-        await loadHomework();
-
-      } catch (err) {
-        console.error('Error loading connected state:', err);
-      }
-    }
-
-    // =====================================================
-    // PRIVACY BAR
-    // =====================================================
-    function initPrivacyBar() {
-      const bar = document.getElementById('privacyBar');
-      const dismissBtn = document.getElementById('privacyBarDismiss');
-      
-      // Check if user has dismissed it before
-      if (localStorage.getItem('alo_privacy_bar_dismissed')) {
-        bar.style.display = 'none';
-        return;
-      }
-
-      dismissBtn.addEventListener('click', () => {
-        bar.style.display = 'none';
-        localStorage.setItem('alo_privacy_bar_dismissed', 'true');
-      });
-    }
-
-    // =====================================================
-    // INITIALIZATION
-    // =====================================================
-    document.addEventListener('DOMContentLoaded', async function() {
-      const iframe = document.getElementById('aloFrame');
-      const loadingOverlay = document.getElementById('loadingOverlay');
-      let loadTimeout;
-
-      iframe.addEventListener('load', function() {
-        loadingOverlay.style.display = 'none';
-        clearTimeout(loadTimeout);
-      });
-
-      loadTimeout = setTimeout(function() {
-        loadingOverlay.innerHTML = `
-          <div class="error-message">
-            <p><strong>Still loading...</strong></p>
-            <p>This is taking longer than usual. Let's try again.</p>
-            <button onclick="location.reload()" class="btn-primary">Retry</button>
-            <p style="font-size: 13px; margin-top: 20px; color: var(--text-secondary);">
-              Need help now? Call <a href="tel:988" style="color: var(--text-primary);">988</a>
-            </p>
+      document.getElementById('activitySessions').innerHTML = sessions.slice(0, 10).map(s => `
+        <div class="session-preview">
+          <div class="session-preview-header">
+            <span class="session-preview-date">${new Date(s.created_at).toLocaleDateString()}</span>
+            <span class="session-preview-type">${esc(s.primary_mode || 'General')}</span>
           </div>
-        `;
-      }, 15000);
+        </div>
+      `).join('');
+    }
 
-      // Privacy bar
-      initPrivacyBar();
+    // =====================================================
+    // INVITE & CLIENT MANAGEMENT
+    // =====================================================
+    function showInviteModal() {
+      document.getElementById('inviteModal').classList.add('show');
+      document.getElementById('inviteResult').style.display = 'none';
+      document.getElementById('inviteClientName').value = '';
+      document.getElementById('generateInviteBtn').style.display = 'inline-flex';
+    }
 
-      // Event listeners
-      document.getElementById('connectBtn').addEventListener('click', showConnectModal);
-      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-      document.getElementById('privacyBtn').addEventListener('click', showPrivacyModal);
-      document.getElementById('messageBtn').addEventListener('click', showMessageModal);
-      document.getElementById('shareChat').addEventListener('click', showShareModal);
-      
-      document.getElementById('homeworkDoneBtn').addEventListener('click', handleHomeworkDone);
-      
-      document.getElementById('homeworkCollapseBtn').addEventListener('click', function() {
-        const body = document.getElementById('homeworkBody');
-        const btn = this;
-        const isCollapsed = body.classList.contains('collapsed');
-        body.classList.toggle('collapsed');
-        btn.textContent = isCollapsed ? '\u2212' : '+';
-        btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
-      });
+    async function generateInvite() {
+      const name = document.getElementById('inviteClientName').value.trim();
 
-      document.getElementById('homeworkHideBtn').addEventListener('click', function() {
-        document.getElementById('homeworkContainer').classList.remove('show');
-        showToast('Hidden for now. Tap here to see it again when you\u2019re ready.');
-      });
+      try {
+        const code = 'ALO-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-      document.getElementById('termsLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        createModal('Terms of Use', `
-          <p>Alo is a conversational companion, not a replacement for professional mental health care.</p>
-          <p style="margin-top: 12px;"><strong>By using Alo, you agree that:</strong></p>
-          <ul class="modal-list">
-            <li>Alo does not provide medical advice, diagnosis, or treatment</li>
-            <li>You will seek professional help for mental health crises</li>
-            <li>Your therapist does not see your conversations with Alo</li>
-            <li>You are responsible for deciding what to share with your therapist</li>
-          </ul>
-          <p class="modal-divider">
-            If you're in crisis, call <strong>988</strong> (US Suicide & Crisis Lifeline) or go to your nearest emergency room.
-          </p>
-        `, {
-          confirmLabel: 'I understand',
-          showCancel: false
+        const result = await api('/rest/v1/therapist_clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            therapist_id: therapistId,
+            invite_code: code,
+            display_name: name || null,
+            status: 'pending'
+          })
         });
-      });
 
-      document.getElementById('privacyLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        createModal('Privacy Policy', `
-          <h3 class="modal-section-title">What we collect</h3>
-          <ul class="modal-list">
-            <li>Account information (email, password hash)</li>
-            <li>Connection to your therapist</li>
-            <li>Homework completion status</li>
-            <li>Messages you send to your therapist</li>
-          </ul>
+        document.getElementById('inviteCodeDisplay').textContent = code;
+        document.getElementById('inviteResult').style.display = 'block';
+        document.getElementById('generateInviteBtn').style.display = 'none';
 
-          <h3 class="modal-section-title">What we don't collect</h3>
-          <ul class="modal-list">
-            <li><strong>Your conversations with Alo</strong></li>
-            <li>Chat transcripts or history</li>
-            <li>Personal details you share with Alo</li>
-          </ul>
-
-          <h3 class="modal-section-title">Who sees your data</h3>
-          <ul class="modal-list">
-            <li>Your therapist sees homework status and messages you send them</li>
-            <li>Your therapist <strong>never</strong> sees your Alo conversations</li>
-            <li>We don't sell or share your data with third parties</li>
-          </ul>
-
-          <p class="modal-divider">
-            Questions? Contact your therapist or email support@along.inc
-          </p>
-        `, {
-          confirmLabel: 'Got it',
-          showCancel: false
-        });
-      });
-
-      // Listen for auth state changes
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-          loadConnectedState();
-        } else if (event === 'SIGNED_OUT') {
-          resetToGuestUI();
-        }
-      });
-
-      // Check for existing session
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session) {
-        await loadConnectedState();
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error generating invite');
       }
-    });
+    }
+
+    function copyInviteCode() {
+      const code = document.getElementById('inviteCodeDisplay').textContent;
+      navigator.clipboard.writeText(code).then(() => toast('Invite code copied'));
+    }
+
+    function showEditClientModal() {
+      if (!currentClient) return;
+
+      document.getElementById('editClientName').value = currentClient.display_name || '';
+      document.getElementById('editNextSession').value = currentClient.next_session_date || '';
+      document.getElementById('editClientPhone').value = currentClient.phone || '';
+      document.getElementById('editEmergencyName').value = currentClient.emergency_contact_name || '';
+      document.getElementById('editEmergencyPhone').value = currentClient.emergency_contact_phone || '';
+      document.getElementById('editSafetyNotes').value = currentClient.safety_notes || '';
+      document.getElementById('settingHomework').checked = currentClient.allow_homework ?? true;
+      document.getElementById('settingMessages').checked = currentClient.allow_messages ?? true;
+      document.getElementById('settingSummary').checked = currentClient.allow_summary ?? true;
+      document.getElementById('settingHistory').checked = currentClient.allow_history ?? true;
+
+      document.getElementById('editClientModal').classList.add('show');
+    }
+
+    async function saveClientEdit() {
+      if (!currentClient) return;
+
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+          display_name: document.getElementById('editClientName').value,
+          next_session_date: document.getElementById('editNextSession').value || null,
+          phone: document.getElementById('editClientPhone').value,
+          emergency_contact_name: document.getElementById('editEmergencyName').value,
+          emergency_contact_phone: document.getElementById('editEmergencyPhone').value,
+          safety_notes: document.getElementById('editSafetyNotes').value,
+          allow_homework: document.getElementById('settingHomework').checked,
+          allow_messages: document.getElementById('settingMessages').checked,
+          allow_summary: document.getElementById('settingSummary').checked,
+          allow_history: document.getElementById('settingHistory').checked
+        });
+
+        closeModal('editClientModal');
+        toast('Client updated');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error updating client');
+      }
+    }
+
+    function confirmDeleteClient() {
+      if (confirm('Archive this client? Their data will be preserved but hidden from your dashboard.')) {
+        archiveClient();
+      }
+    }
+
+    async function archiveClient() {
+      if (!currentClient) return;
+
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+          status: 'archived'
+        });
+
+        closeModal('editClientModal');
+        toast('Client archived');
+        showHomePage();
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error archiving client');
+      }
+    }
+
+    function showDefaultSettingsModal() {
+      document.getElementById('defaultSettingsModal').classList.add('show');
+    }
+
+    async function saveDefaultSettings() {
+      localStorage.setItem('alo_default_settings', JSON.stringify({
+        homework: document.getElementById('defaultHomework').checked,
+        messages: document.getElementById('defaultMessages').checked,
+        summary: document.getElementById('defaultSummary').checked,
+        history: document.getElementById('defaultHistory').checked
+      }));
+      closeModal('defaultSettingsModal');
+      toast('Default settings saved');
+    }
   </script>
 </body>
 </html>
