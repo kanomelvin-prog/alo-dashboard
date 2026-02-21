@@ -1605,6 +1605,69 @@ button, input, select, textarea { font: inherit; }
   background: var(--white);
 }
 
+/* Calendar day popup */
+.cal-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  padding: 20px;
+  max-width: 400px;
+  width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 500;
+  animation: popIn 0.15s ease-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.cal-popup-header {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  padding-right: 24px;
+}
+
+.cal-popup-section {
+  margin-bottom: 10px;
+}
+
+.cal-popup-label {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin-bottom: 4px;
+}
+
+.cal-popup-item {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding: 3px 0 3px 16px;
+  border-left: 2px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.cal-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.125rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 4px;
+}
+.cal-popup-close:hover { color: var(--text); }
+
 /* === DRAWER === */
 
 .note-section {
