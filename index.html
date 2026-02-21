@@ -14,6 +14,7 @@
       <h1 class="login-title">Alo Dashboard</h1>
       <p class="login-subtitle">Clinical companion management</p>
       <p class="login-trust">Your client data is encrypted and HIPAA-aligned. No conversation transcripts are stored.</p>
+      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alo supports between-session reflection. It is not emergency care. In a crisis, follow your clinical protocol.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
@@ -81,11 +82,6 @@
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
     </header>
-
-    <!-- Disclaimer Banner -->
-    <div class="disclaimer-banner">
-      ⚠️ Alo supports between-session reflection. It is not emergency care. In a crisis, follow your clinical protocol.
-    </div>
 
     <!-- Sidebar Backdrop -->
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
@@ -205,14 +201,30 @@
             </div>
           </div>
 
-
-          <div class="card" id="lastSessionsCard">
-            <div class="card-header">
-              <span class="card-title">Recent Session Notes</span>
-              <button class="btn btn-sm btn-secondary" onclick="switchTab('tools', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
+          <!-- Activity Calendar -->
+          <div class="card" id="calendarCard">
+            <div class="card-header"><span class="card-title">Activity</span></div>
+            <div class="card-body" id="calendarBody">
+              <div class="calendar-strip" id="calendarStrip"></div>
+              <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Message</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>Homework</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+              </div>
+              <div class="calendar-detail" id="calendarDetail" style="display:none;"></div>
             </div>
-            <div class="card-body" id="lastSessionsPreview">
-              <p class="text-muted-center">No session notes yet.</p>
+          </div>
+
+          <!-- Messages from Client (moved up - most actionable) -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllMessagesBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
+            </div>
+            <div class="card-body" id="clientMessagesPrep">
+              <p class="text-muted-center">No messages</p>
             </div>
           </div>
 
@@ -236,10 +248,13 @@
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-header"><span class="card-title">Messages from Client</span></div>
-            <div class="card-body" id="clientMessagesPrep">
-              <p class="text-muted-center">No messages</p>
+          <div class="card" id="lastSessionsCard">
+            <div class="card-header">
+              <span class="card-title">Recent Session Notes</span>
+              <button class="btn btn-sm btn-secondary" onclick="switchTab('tools', document.querySelectorAll('.tab')[1])" id="viewAllNotesBtn" style="display: none;">View All</button>
+            </div>
+            <div class="card-body" id="lastSessionsPreview">
+              <p class="text-muted-center">No session notes yet.</p>
             </div>
           </div>
         </div>
@@ -268,13 +283,18 @@
             </div>
           </div>
 
-          <!-- Assign Homework -->
+          <!-- Assign Homework (templates visible, form expands on click) -->
           <div class="card">
-            <div class="card-header" style="cursor: pointer; user-select: none;" onclick="const body = this.nextElementSibling; const arrow = this.querySelector('.collapse-arrow'); if (body.style.display === 'none') { body.style.display = ''; arrow.style.transform = 'rotate(0deg)'; } else { body.style.display = 'none'; arrow.style.transform = 'rotate(-90deg)'; }">
-              <span class="card-title">Assign Homework</span>
-              <span class="collapse-arrow" style="margin-left: auto; transition: transform 0.2s; font-size: 0.75rem;">▼</span>
-            </div>
-            <div class="card-body" style="display: none;">
+            <div class="card-header"><span class="card-title">Assign Homework</span></div>
+            <div class="card-body">
+              <div class="templates">
+                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
+                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
+                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
+                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
+                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
+              </div>
+              <form id="homeworkForm" onsubmit="submitHomework(event)" style="display: none;">
               <div class="templates">
                 <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
                 <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
@@ -334,11 +354,30 @@
             </div>
           </div>
 
-          <!-- Homework History -->
+          <!-- Homework History (truncated) -->
           <div class="card">
-            <div class="card-header"><span class="card-title">Homework History</span></div>
+            <div class="card-header">
+              <span class="card-title">Homework History</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllHomeworkBtn" style="display:none;" onclick="openHomeworkDrawer()">View All</button>
+            </div>
             <div class="card-body" id="homeworkHistory">
               <p class="text-muted-center">No homework yet</p>
+            </div>
+          </div>
+
+          <!-- Activity Calendar (Session Tools version) -->
+          <div class="card" id="calendarCardTools">
+            <div class="card-header"><span class="card-title">Activity</span></div>
+            <div class="card-body" id="calendarBodyTools">
+              <div class="calendar-strip" id="calendarStripTools"></div>
+              <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Message</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>Homework</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+              </div>
+              <div class="calendar-detail" id="calendarDetailTools" style="display:none;"></div>
             </div>
           </div>
 
@@ -356,19 +395,14 @@
             <div class="card-body" id="crisisAlertsList"></div>
           </div>
 
-          <!-- Messages from Client -->
+          <!-- Messages from Client (truncated) -->
           <div class="card">
-            <div class="card-header"><span class="card-title">Messages from Client</span></div>
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllMessagesToolsBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
+            </div>
             <div class="card-body" id="activityMessages">
               <p class="text-muted-center">No messages</p>
-            </div>
-          </div>
-
-          <!-- Session History -->
-          <div class="card">
-            <div class="card-header"><span class="card-title">Session History</span></div>
-            <div class="card-body" id="activitySessions">
-              <p class="text-muted-center">No sessions recorded yet</p>
             </div>
           </div>
         </div>
@@ -1293,7 +1327,7 @@
       document.getElementById('notesContainer').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('homeworkHistory').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('activityMessages').innerHTML = '<p class="text-muted-center">No messages</p>';
-      document.getElementById('activitySessions').innerHTML = '<p class="text-muted-center">No sessions recorded yet</p>';
+      ['calendarDetail', 'calendarDetailTools'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
       document.getElementById('prepSummary').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
@@ -1317,7 +1351,7 @@
       renderHomework(cacheKey);
       renderCrisisAlerts(cacheKey);
       renderClientMessages(cacheKey);
-      renderSessionHistory(cacheKey);
+      renderCalendar(cacheKey);
 
       // Mark unread messages as read AFTER rendering (so UI shows unread state first)
       if (client.client_id) {
@@ -1479,15 +1513,18 @@
         ).join('');
       }
 
-      // === MESSAGES preview (show all recent, mark unread) ===
+      // === MESSAGES preview (show 3, View All for more) ===
       if (messages.length) {
-        const recentMessages = messages.slice(0, 5);
-        document.getElementById('clientMessagesPrep').innerHTML = recentMessages.map(m =>
+        const preview = messages.slice(0, 3);
+        const hasMore = messages.length > 3;
+        document.getElementById('clientMessagesPrep').innerHTML = preview.map(m =>
           `<div class="excerpt">
             <div class="excerpt-time">${timeAgo(new Date(m.created_at))}${!m.read ? ' <strong>(new)</strong>' : ''}</div>
             <div class="excerpt-text">${esc(m.content || '(empty message)')}</div>
           </div>`
         ).join('');
+        const btn = document.getElementById('viewAllMessagesBtn');
+        if (btn) { btn.style.display = hasMore ? 'inline-flex' : 'none'; if (hasMore) btn.textContent = 'View All (' + messages.length + ')'; }
       }
     }
 
@@ -1796,7 +1833,10 @@
         return;
       }
 
-      document.getElementById('homeworkHistory').innerHTML = homework.map(h => `
+      const preview = homework.slice(0, 2);
+      const hasMore = homework.length > 2;
+
+      document.getElementById('homeworkHistory').innerHTML = preview.map(h => `
         <div class="homework-item">
           <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
             ${h.completed_at ? '✓' : '○'}
@@ -1809,9 +1849,14 @@
           </div>
         </div>
       `).join('');
+
+      const btn = document.getElementById('viewAllHomeworkBtn');
+      if (btn) { btn.style.display = hasMore ? 'inline-flex' : 'none'; if (hasMore) btn.textContent = 'View All (' + homework.length + ')'; }
     }
 
     function useTemplate(type, title, goal, rationale) {
+      const form = document.getElementById('homeworkForm');
+      if (form) form.style.display = '';
       document.getElementById('hwType').value = type;
       document.getElementById('hwTitle').value = title;
       document.getElementById('hwGoal').value = goal;
@@ -1846,6 +1891,7 @@
         renderSessionPrep(cacheKey);
 
         e.target.reset();
+        document.getElementById('homeworkForm').style.display = 'none';
         toast('Homework assigned');
       } catch (err) {
         console.error(err);
@@ -1923,18 +1969,189 @@
       `).join('');
     }
 
-    function renderSessionHistory(cacheKey) {
+    // =====================================================
+    // CALENDAR WIDGET
+    // =====================================================
+    function renderCalendar(cacheKey) {
       const sessions = clientSessions[cacheKey] || [];
-      if (!sessions.length) return;
+      const messages = clientMessages[cacheKey] || [];
+      const homework = clientHomework[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      const notes = clientNotes[cacheKey] || [];
 
-      document.getElementById('activitySessions').innerHTML = sessions.slice(0, 10).map(s => `
-        <div class="session-preview">
-          <div class="session-preview-header">
-            <span class="session-preview-date">${new Date(s.created_at).toLocaleDateString()}</span>
-            <span class="session-preview-type">${esc(s.primary_mode || 'General')}</span>
-          </div>
+      // Build 7-day strip (today and 6 days back)
+      const days = [];
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        const end = new Date(d);
+        end.setHours(23, 59, 59, 999);
+
+        const dayData = {
+          date: d,
+          label: dayNames[d.getDay()],
+          num: d.getDate(),
+          isToday: i === 0,
+          dots: [],
+          details: []
+        };
+
+        // Check each data source for this day
+        const sCount = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }).length;
+        if (sCount > 0) { dayData.dots.push('#8B9A7D'); dayData.details.push(sCount + ' Alo check-in' + (sCount > 1 ? 's' : '')); }
+
+        const mCount = messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; }).length;
+        if (mCount > 0) { dayData.dots.push('#4A90D9'); dayData.details.push(mCount + ' message' + (mCount > 1 ? 's' : '')); }
+
+        const hwAssigned = homework.filter(h => { const t = new Date(h.created_at); return t >= d && t <= end; }).length;
+        const hwCompleted = homework.filter(h => h.completed_at && (() => { const t = new Date(h.completed_at); return t >= d && t <= end; })()).length;
+        if (hwAssigned > 0 || hwCompleted > 0) {
+          dayData.dots.push('#E8913A');
+          const parts = [];
+          if (hwAssigned > 0) parts.push(hwAssigned + ' assigned');
+          if (hwCompleted > 0) parts.push(hwCompleted + ' completed');
+          dayData.details.push('HW: ' + parts.join(', '));
+        }
+
+        const cCount = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; }).length;
+        if (cCount > 0) { dayData.dots.push('#dc2626'); dayData.details.push(cCount + ' crisis alert' + (cCount > 1 ? 's' : '')); }
+
+        const nCount = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }).length;
+        if (nCount > 0) { dayData.dots.push('#9CA3AF'); dayData.details.push(nCount + ' session note' + (nCount > 1 ? 's' : '')); }
+
+        days.push(dayData);
+      }
+
+      const stripHtml = days.map((d, idx) => `
+        <div class="cal-day ${d.isToday ? 'cal-today' : ''} ${d.dots.length ? 'cal-has-data' : ''}" onclick="showCalendarDetail(${idx}, '${d.date.toISOString()}', this)" role="button" tabindex="0">
+          <div class="cal-label">${d.label}</div>
+          <div class="cal-num">${d.num}</div>
+          <div class="cal-dots">${d.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('')}</div>
         </div>
       `).join('');
+
+      // Render to both tabs
+      ['calendarStrip', 'calendarStripTools'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = stripHtml;
+      });
+
+      // Store details for click handler
+      window._calDays = days;
+    }
+
+    function showCalendarDetail(idx, dateStr, el) {
+      const day = window._calDays?.[idx];
+      if (!day || !day.details.length) return;
+
+      const detailHtml = `
+        <div class="cal-detail-header">${day.label} ${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+        <div class="cal-detail-list">${day.details.map(d => `<div class="cal-detail-item">• ${d}</div>`).join('')}</div>
+      `;
+
+      ['calendarDetail', 'calendarDetailTools'].forEach(id => {
+        const det = document.getElementById(id);
+        if (det) { det.innerHTML = detailHtml; det.style.display = 'block'; }
+      });
+    }
+
+    // =====================================================
+    // MESSAGES DRAWER
+    // =====================================================
+    function openMessagesDrawer() {
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      const messages = clientMessages[cacheKey] || [];
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'messagesDrawerOverlay';
+      overlay.innerHTML = `
+        <div class="drawer" onclick="event.stopPropagation()">
+          <div class="drawer-header">
+            <h3>All Messages — ${esc(currentClient?.display_name || 'Client')}</h3>
+            <button class="modal-close" onclick="document.getElementById('messagesDrawerOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="drawer-body">
+            ${messages.length ? messages.map(m => `
+              <div class="excerpt" style="margin-bottom: 12px;">
+                <div class="excerpt-time">${new Date(m.created_at).toLocaleString()}${m.read ? '' : ' <strong>(unread)</strong>'}</div>
+                <div class="excerpt-text">${esc(m.content || '(empty)')}</div>
+              </div>
+            `).join('') : '<p class="text-muted-center">No messages</p>'}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    }
+
+    // =====================================================
+    // HOMEWORK DRAWER
+    // =====================================================
+    function openHomeworkDrawer() {
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      const homework = clientHomework[cacheKey] || [];
+
+      const active = homework.filter(h => h.is_active);
+      const completed = homework.filter(h => !h.is_active);
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'homeworkDrawerOverlay';
+      overlay.innerHTML = `
+        <div class="drawer" onclick="event.stopPropagation()">
+          <div class="drawer-header">
+            <h3>All Homework — ${esc(currentClient?.display_name || 'Client')}</h3>
+            <button class="modal-close" onclick="document.getElementById('homeworkDrawerOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="drawer-body">
+            ${active.length ? '<div class="drawer-section-title">Active</div>' + active.map(h => renderHwDrawerItem(h)).join('') : ''}
+            ${completed.length ? '<div class="drawer-section-title" style="margin-top:16px;">Completed</div>' + completed.map(h => renderHwDrawerItem(h)).join('') : ''}
+            ${!homework.length ? '<p class="text-muted-center">No homework yet</p>' : ''}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    }
+
+    function renderHwDrawerItem(h) {
+      const status = h.completed_at ? '✓' : (h.is_active ? '◦' : '–');
+      const statusClass = h.completed_at ? 'color: var(--success)' : '';
+      return `
+        <div class="hw-drawer-item">
+          <span style="${statusClass}; font-weight: 700; margin-right: 8px;">${status}</span>
+          <div>
+            <div><strong>${esc(h.title || 'Untitled')}</strong> <span class="hw-type-tag">${esc(h.homework_type || '')}</span></div>
+            <div style="font-size: 0.8125rem; color: var(--text-muted);">${esc(h.goal || '')}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =====================================================
+    // TRUNCATED MESSAGE RENDERING (Session Tools)
+    // =====================================================
+    function renderClientMessages(cacheKey) {
+      const messages = clientMessages[cacheKey] || [];
+      if (!messages.length) return;
+
+      const preview = messages.slice(0, 3);
+      const hasMore = messages.length > 3;
+
+      document.getElementById('activityMessages').innerHTML = preview.map(m => `
+        <div class="excerpt">
+          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '<strong>(unread)</strong>'}</div>
+          <div class="excerpt-text">${esc(m.content || '(empty message)')}</div>
+        </div>
+      `).join('');
+
+      const btn = document.getElementById('viewAllMessagesToolsBtn');
+      if (btn) btn.style.display = hasMore ? 'inline-flex' : 'none';
+      if (btn && hasMore) btn.textContent = 'View All (' + messages.length + ')';
     }
 
     // =====================================================
