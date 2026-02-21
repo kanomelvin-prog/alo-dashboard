@@ -1397,10 +1397,12 @@
       btn.classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
 
-      // Scroll to top of tab content so each tab starts fresh
+      // Scroll window so sticky header is at the top
       const stickyHeader = document.querySelector('.client-sticky-header');
       if (stickyHeader) {
-        stickyHeader.scrollIntoView({ behavior: 'auto', block: 'start' });
+        const headerHeight = document.querySelector('.header')?.offsetHeight || 60;
+        const top = stickyHeader.getBoundingClientRect().top + window.scrollY - headerHeight;
+        window.scrollTo({ top: top, behavior: 'auto' });
       }
     }
 
