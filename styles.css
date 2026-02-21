@@ -6,9 +6,11 @@
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-html, body { overflow-x: clip; }
+html { overflow-x: clip; }
+body { overflow-x: clip; overflow-y: visible; }
 @supports not (overflow-x: clip) {
-  html, body { overflow-x: hidden; }
+  html { overflow-x: hidden; }
+  body { overflow-x: hidden; overflow-y: visible; }
 }
 
 /* === DESIGN TOKENS === */
@@ -1494,6 +1496,31 @@ button, input, select, textarea { font: inherit; }
 }
 
 /* === DRAWER === */
+
+.note-section {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.note-section .sp-section-btn {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.note-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.note-meta + .note-meta {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 2px;
+}
+
 .drawer {
   position: fixed;
   top: 0;
