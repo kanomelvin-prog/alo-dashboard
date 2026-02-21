@@ -13,8 +13,8 @@
       <div class="login-logo">A</div>
       <h1 class="login-title">Alo Dashboard</h1>
       <p class="login-subtitle">Clinical companion management</p>
-      <p class="login-trust">Your client data is encrypted and HIPAA-aligned. No conversation transcripts are stored.</p>
-      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alo supports between-session reflection. It is not emergency care. In a crisis, follow your clinical protocol.</p>
+      <p class="login-trust">Client data is encrypted at rest and in transit. Alo conversations are not permanently saved — chat history is automatically cleared.</p>
+      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alo supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
@@ -2073,8 +2073,9 @@
 
       window._monthDays = monthDays;
 
-      // === 7-DAY STRIP (Session Prep) ===
+      // === 14-DAY STRIP (Session Prep) ===
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const stripDays = [];
       let stripHtml = '';
       for (let i = 13; i >= 0; i--) {
         const d = new Date();
@@ -2087,10 +2088,23 @@
         const activity = getActivityForDate(d, end, sessions, messages, homework, crisis, notes);
         const dotsHtml = activity.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('');
 
+        // Store rich data for popup
+        const dayMessages = messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; });
+        const dayHw = homework.filter(h => {
+          const ca = new Date(h.created_at);
+          const co = h.completed_at ? new Date(h.completed_at) : null;
+          return (ca >= d && ca <= end) || (co && co >= d && co <= end);
+        });
+        const dayNotes = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; });
+        const daySessions = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; });
+        const dayCrisis = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; });
+
+        stripDays.push({ date: d, ...activity, messages: dayMessages, homework: dayHw, notes: dayNotes, sessions: daySessions, crisis: dayCrisis });
+
         const monthLabel = d.getDate() === 1 || i === 13 ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' })}</div>` : '';
 
         stripHtml += `
-          <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" data-idx="${13 - i}">
+          <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0">
             ${monthLabel}
             <div class="cal-label">${dayNames[d.getDay()]}</div>
             <div class="cal-num">${d.getDate()}</div>
@@ -2099,31 +2113,111 @@
         `;
       }
 
+      window._stripDays = stripDays;
+
       const stripEl = document.getElementById('calendarStrip');
       if (stripEl) {
         stripEl.innerHTML = stripHtml;
-        // Auto-scroll to today (rightmost)
         stripEl.scrollLeft = stripEl.scrollWidth;
       }
     }
 
     function showMonthDayDetail(idx) {
+      // Month calendar stores basic data — build rich data on click
       const day = window._monthDays?.[idx];
       if (!day) return;
 
-      const detailEl = document.getElementById('calMonthDetail');
-      if (!detailEl) return;
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      const sessions = clientSessions[cacheKey] || [];
+      const messages = clientMessages[cacheKey] || [];
+      const homework = clientHomework[cacheKey] || [];
+      const crisis = clientCrisis[cacheKey] || [];
+      const notes = clientNotes[cacheKey] || [];
 
-      if (!day.details.length) {
-        detailEl.style.display = 'none';
-        return;
+      const d = day.date;
+      const end = new Date(d);
+      end.setHours(23, 59, 59, 999);
+
+      const richDay = {
+        date: d,
+        ...day,
+        messages: messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; }),
+        homework: homework.filter(h => {
+          const ca = new Date(h.created_at);
+          const co = h.completed_at ? new Date(h.completed_at) : null;
+          return (ca >= d && ca <= end) || (co && co >= d && co <= end);
+        }),
+        notes: notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }),
+        sessions: sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }),
+        crisis: crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; })
+      };
+
+      showDayPopup(null, 'month', richDay);
+    }
+
+    function showDayPopup(idx, source, richDayOverride) {
+      const day = richDayOverride || (source === 'strip' ? window._stripDays?.[idx] : null);
+      if (!day) return;
+
+      const hasContent = day.messages?.length || day.homework?.length || day.notes?.length || day.sessions?.length || day.crisis?.length;
+      if (!hasContent) return;
+
+      // Remove existing popup
+      document.getElementById('calDayPopup')?.remove();
+
+      let html = `<div class="cal-popup-header">${day.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>`;
+
+      if (day.sessions?.length) {
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#8B9A7D;">● ${day.sessions.length} Alo check-in${day.sessions.length > 1 ? 's' : ''}</div></div>`;
       }
 
-      detailEl.innerHTML = `
-        <div class="cal-detail-header">${day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
-        <div class="cal-detail-list">${day.details.map(d => `<div class="cal-detail-item">• ${d}</div>`).join('')}</div>
-      `;
-      detailEl.style.display = 'block';
+      if (day.messages?.length) {
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#4A90D9;">● Messages</div>`;
+        day.messages.forEach(m => {
+          html += `<div class="cal-popup-item">${esc(m.content || '(empty)')}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (day.homework?.length) {
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#E8913A;">● Homework</div>`;
+        day.homework.forEach(h => {
+          const status = h.completed_at ? '✓ Completed' : (h.is_active ? '○ Active' : '– Archived');
+          html += `<div class="cal-popup-item"><strong>${esc(h.title)}</strong> — ${status}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (day.notes?.length) {
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#9CA3AF;">● Session Notes</div>`;
+        day.notes.forEach(n => {
+          html += `<div class="cal-popup-item">${esc(n.session_type || 'Individual')}${n.themes ? ': ' + esc(n.themes) : ''}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      if (day.crisis?.length) {
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#dc2626;">● Crisis Alerts</div>`;
+        day.crisis.forEach(c => {
+          html += `<div class="cal-popup-item">${esc(c.category || 'Alert')} — ${c.acknowledged ? 'Resolved' : 'Unresolved'}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `<button class="cal-popup-close" onclick="document.getElementById('calDayPopup')?.remove()">✕</button>`;
+
+      const popup = document.createElement('div');
+      popup.id = 'calDayPopup';
+      popup.className = 'cal-popup';
+      popup.innerHTML = html;
+      document.body.appendChild(popup);
+
+      // Close on outside click
+      setTimeout(() => {
+        document.addEventListener('click', function closePop(e) {
+          if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('click', closePop); }
+        });
+      }, 100);
     }
 
     // =====================================================
