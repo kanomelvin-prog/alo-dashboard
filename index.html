@@ -283,102 +283,106 @@
             </div>
           </div>
 
-          <!-- Assign Homework (templates visible, form expands on click) -->
-          <div class="card">
-            <div class="card-header"><span class="card-title">Assign Homework</span></div>
-            <div class="card-body">
-              <div class="templates">
-                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
-                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
-                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
-                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
-                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
-              </div>
-              <form id="homeworkForm" onsubmit="submitHomework(event)">
-              <div class="templates">
-                <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
-                <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
-                <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
-                <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
-                <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
-              </div>
-              <form id="homeworkForm" onsubmit="submitHomework(event)">
-                <div class="form-grid">
-                  <div class="form-group">
-                    <label>Type</label>
-                    <select id="hwType" required>
-                      <option value="grounding">Grounding Technique</option>
-                      <option value="noticing">Noticing Practice</option>
-                      <option value="journaling">Journaling Prompt</option>
-                      <option value="behavioral">Behavioral Experiment</option>
-                      <option value="cognitive">Cognitive Exercise</option>
-                      <option value="breathing">Breathing Exercise</option>
-                      <option value="custom">Custom</option>
-                      <option value="other">Other</option>
-                    </select>
+          <!-- Homework Zone: 2/3 form + 1/3 calendar/history -->
+          <div class="homework-zone">
+            <!-- LEFT: Assign Homework (2/3) -->
+            <div class="homework-zone-form">
+              <div class="card">
+                <div class="card-header"><span class="card-title">Assign Homework</span></div>
+                <div class="card-body">
+                  <div class="templates">
+                    <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
+                    <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
+                    <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
+                    <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
+                    <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
                   </div>
-                  <div class="form-group">
-                    <label class="tooltip-trigger">Sensitivity
-                      <span class="tooltip-icon">?</span>
-                      <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
-                    </label>
-                    <select id="hwSensitivity">
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                  <div class="form-group full">
-                    <label>Title</label>
-                    <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
-                  </div>
-                  <div class="form-group full">
-                    <label>Goal / Instructions</label>
-                    <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
-                  </div>
-                  <div class="form-group full">
-                    <label>Treatment Plan Goal (SimplePractice)</label>
-                    <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
-                    <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
-                  </div>
-                  <div class="form-group full">
-                    <label>Clinical Rationale (private)</label>
-                    <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                    <span class="form-hint">For your records only -- client never sees this</span>
-                  </div>
+                  <form id="homeworkForm" onsubmit="submitHomework(event)">
+                    <div class="form-grid">
+                      <div class="form-group">
+                        <label>Type</label>
+                        <select id="hwType" required>
+                          <option value="grounding">Grounding Technique</option>
+                          <option value="noticing">Noticing Practice</option>
+                          <option value="journaling">Journaling Prompt</option>
+                          <option value="behavioral">Behavioral Experiment</option>
+                          <option value="cognitive">Cognitive Exercise</option>
+                          <option value="breathing">Breathing Exercise</option>
+                          <option value="custom">Custom</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="tooltip-trigger">Sensitivity
+                          <span class="tooltip-icon">?</span>
+                          <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
+                        </label>
+                        <select id="hwSensitivity">
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+                      <div class="form-group full">
+                        <label>Title</label>
+                        <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
+                      </div>
+                      <div class="form-group full">
+                        <label>Goal / Instructions</label>
+                        <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
+                      </div>
+                      <div class="form-group full">
+                        <label>Treatment Plan Goal (SimplePractice)</label>
+                        <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                        <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                      </div>
+                      <div class="form-group full">
+                        <label>Clinical Rationale (private)</label>
+                        <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                        <span class="form-hint">For your records only -- client never sees this</span>
+                      </div>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-primary">Assign Homework</button>
+                    </div>
+                  </form>
+                  <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
                 </div>
-                <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Assign Homework</button>
-                </div>
-              </form>
-              <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
-            </div>
-          </div>
-
-          <!-- Homework History (truncated) -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Homework History</span>
-              <button class="btn btn-sm btn-secondary" id="viewAllHomeworkBtn" style="display:none;" onclick="openHomeworkDrawer()">View All</button>
-            </div>
-            <div class="card-body" id="homeworkHistory">
-              <p class="text-muted-center">No homework yet</p>
-            </div>
-          </div>
-
-          <!-- Activity Calendar (Session Tools version) -->
-          <div class="card" id="calendarCardTools">
-            <div class="card-header"><span class="card-title">Activity</span></div>
-            <div class="card-body" id="calendarBodyTools">
-              <div class="calendar-strip" id="calendarStripTools"></div>
-              <div class="calendar-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Message</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>Homework</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
               </div>
-              <div class="calendar-detail" id="calendarDetailTools" style="display:none;"></div>
+            </div>
+
+            <!-- RIGHT: Month Calendar + Homework History (1/3) -->
+            <div class="homework-zone-sidebar">
+              <!-- Month Calendar -->
+              <div class="card">
+                <div class="card-header">
+                  <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
+                  <span class="card-title" id="calMonthLabel">February 2026</span>
+                  <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
+                </div>
+                <div class="card-body" style="padding: 8px 12px;">
+                  <div class="cal-month" id="calMonth"></div>
+                  <div class="calendar-legend" style="margin-top: 8px;">
+                    <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+                  </div>
+                  <div class="calendar-detail" id="calMonthDetail" style="display:none;"></div>
+                </div>
+              </div>
+
+              <!-- Homework History (compact) -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">Homework History</span>
+                  <button class="btn btn-sm btn-secondary" id="viewAllHomeworkBtn" style="display:none;" onclick="openHomeworkDrawer()">View All</button>
+                </div>
+                <div class="card-body" id="homeworkHistory">
+                  <p class="text-muted-center">No homework yet</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1311,6 +1315,7 @@
       }
 
             currentClient = client;
+      calendarOffset = 0;
 
       const cacheKey = client.client_id || client.id;
 
@@ -1328,7 +1333,7 @@
       document.getElementById('notesContainer').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('homeworkHistory').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('activityMessages').innerHTML = '<p class="text-muted-center">No messages</p>';
-      ['calendarDetail', 'calendarDetailTools'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      ['calendarDetail', 'calMonthDetail'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
       document.getElementById('prepSummary').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
@@ -1972,6 +1977,43 @@
     // =====================================================
     // CALENDAR WIDGET
     // =====================================================
+    let calendarOffset = 0; // 0 = current month, -1 = prev, etc.
+
+    function navigateCalendar(dir) {
+      calendarOffset += dir;
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      if (cacheKey) renderCalendar(cacheKey);
+    }
+
+    function getActivityForDate(d, end, sessions, messages, homework, crisis, notes) {
+      const dots = [];
+      const details = [];
+
+      const sCount = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }).length;
+      if (sCount > 0) { dots.push('#8B9A7D'); details.push(sCount + ' Alo check-in' + (sCount > 1 ? 's' : '')); }
+
+      const mItems = messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; });
+      if (mItems.length > 0) { dots.push('#4A90D9'); details.push(mItems.length + ' message' + (mItems.length > 1 ? 's' : '')); }
+
+      const hwAssigned = homework.filter(h => { const t = new Date(h.created_at); return t >= d && t <= end; }).length;
+      const hwCompleted = homework.filter(h => h.completed_at && new Date(h.completed_at) >= d && new Date(h.completed_at) <= end).length;
+      if (hwAssigned > 0 || hwCompleted > 0) {
+        dots.push('#E8913A');
+        const parts = [];
+        if (hwAssigned) parts.push(hwAssigned + ' assigned');
+        if (hwCompleted) parts.push(hwCompleted + ' completed');
+        details.push('HW: ' + parts.join(', '));
+      }
+
+      const cCount = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; }).length;
+      if (cCount > 0) { dots.push('#dc2626'); details.push(cCount + ' crisis alert' + (cCount > 1 ? 's' : '')); }
+
+      const nCount = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }).length;
+      if (nCount > 0) { dots.push('#9CA3AF'); details.push(nCount + ' session note' + (nCount > 1 ? 's' : '')); }
+
+      return { dots, details };
+    }
+
     function renderCalendar(cacheKey) {
       const sessions = clientSessions[cacheKey] || [];
       const messages = clientMessages[cacheKey] || [];
@@ -1979,82 +2021,109 @@
       const crisis = clientCrisis[cacheKey] || [];
       const notes = clientNotes[cacheKey] || [];
 
-      // Build 7-day strip (today and 6 days back)
-      const days = [];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // === MONTH CALENDAR (Session Tools sidebar) ===
+      const monthDate = new Date(today.getFullYear(), today.getMonth() + calendarOffset, 1);
+      const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const labelEl = document.getElementById('calMonthLabel');
+      if (labelEl) labelEl.textContent = monthName;
+
+      const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+      const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+      const startPad = firstDay.getDay(); // 0=Sun
+
+      let monthHtml = '<div class="cal-month-header">';
+      ['S','M','T','W','T','F','S'].forEach(d => { monthHtml += '<div class="cal-month-day-label">' + d + '</div>'; });
+      monthHtml += '</div><div class="cal-month-grid">';
+
+      const monthDays = [];
+
+      // Padding days
+      for (let i = 0; i < startPad; i++) {
+        monthHtml += '<div class="cal-month-cell cal-empty"></div>';
+      }
+
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const d = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+        d.setHours(0, 0, 0, 0);
+        const end = new Date(d);
+        end.setHours(23, 59, 59, 999);
+
+        const isToday = d.getTime() === today.getTime();
+        const isFuture = d > today;
+        const activity = getActivityForDate(d, end, sessions, messages, homework, crisis, notes);
+
+        monthDays.push({ date: d, ...activity });
+
+        const dotsHtml = activity.dots.slice(0, 3).map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('');
+
+        monthHtml += `<div class="cal-month-cell ${isToday ? 'cal-today' : ''} ${isFuture ? 'cal-future' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" 
+          onclick="showMonthDayDetail(${monthDays.length - 1})" role="button" tabindex="0">
+          <div class="cal-month-num">${day}</div>
+          <div class="cal-dots">${dotsHtml}</div>
+        </div>`;
+      }
+
+      monthHtml += '</div>';
+
+      const monthEl = document.getElementById('calMonth');
+      if (monthEl) monthEl.innerHTML = monthHtml;
+
+      window._monthDays = monthDays;
+
+      // === 7-DAY STRIP (Session Prep) ===
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      for (let i = 6; i >= 0; i--) {
+      let stripHtml = '';
+      for (let i = 13; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         d.setHours(0, 0, 0, 0);
         const end = new Date(d);
         end.setHours(23, 59, 59, 999);
+        const isToday = i === 0;
 
-        const dayData = {
-          date: d,
-          label: dayNames[d.getDay()],
-          num: d.getDate(),
-          isToday: i === 0,
-          dots: [],
-          details: []
-        };
+        const activity = getActivityForDate(d, end, sessions, messages, homework, crisis, notes);
+        const dotsHtml = activity.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('');
 
-        // Check each data source for this day
-        const sCount = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }).length;
-        if (sCount > 0) { dayData.dots.push('#8B9A7D'); dayData.details.push(sCount + ' Alo check-in' + (sCount > 1 ? 's' : '')); }
+        const monthLabel = d.getDate() === 1 || i === 13 ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' })}</div>` : '';
 
-        const mCount = messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; }).length;
-        if (mCount > 0) { dayData.dots.push('#4A90D9'); dayData.details.push(mCount + ' message' + (mCount > 1 ? 's' : '')); }
-
-        const hwAssigned = homework.filter(h => { const t = new Date(h.created_at); return t >= d && t <= end; }).length;
-        const hwCompleted = homework.filter(h => h.completed_at && (() => { const t = new Date(h.completed_at); return t >= d && t <= end; })()).length;
-        if (hwAssigned > 0 || hwCompleted > 0) {
-          dayData.dots.push('#E8913A');
-          const parts = [];
-          if (hwAssigned > 0) parts.push(hwAssigned + ' assigned');
-          if (hwCompleted > 0) parts.push(hwCompleted + ' completed');
-          dayData.details.push('HW: ' + parts.join(', '));
-        }
-
-        const cCount = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; }).length;
-        if (cCount > 0) { dayData.dots.push('#dc2626'); dayData.details.push(cCount + ' crisis alert' + (cCount > 1 ? 's' : '')); }
-
-        const nCount = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }).length;
-        if (nCount > 0) { dayData.dots.push('#9CA3AF'); dayData.details.push(nCount + ' session note' + (nCount > 1 ? 's' : '')); }
-
-        days.push(dayData);
+        stripHtml += `
+          <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" data-idx="${13 - i}">
+            ${monthLabel}
+            <div class="cal-label">${dayNames[d.getDay()]}</div>
+            <div class="cal-num">${d.getDate()}</div>
+            <div class="cal-dots">${dotsHtml}</div>
+          </div>
+        `;
       }
 
-      const stripHtml = days.map((d, idx) => `
-        <div class="cal-day ${d.isToday ? 'cal-today' : ''} ${d.dots.length ? 'cal-has-data' : ''}" onclick="showCalendarDetail(${idx}, '${d.date.toISOString()}', this)" role="button" tabindex="0">
-          <div class="cal-label">${d.label}</div>
-          <div class="cal-num">${d.num}</div>
-          <div class="cal-dots">${d.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('')}</div>
-        </div>
-      `).join('');
-
-      // Render to both tabs
-      ['calendarStrip', 'calendarStripTools'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = stripHtml;
-      });
-
-      // Store details for click handler
-      window._calDays = days;
+      const stripEl = document.getElementById('calendarStrip');
+      if (stripEl) {
+        stripEl.innerHTML = stripHtml;
+        // Auto-scroll to today (rightmost)
+        stripEl.scrollLeft = stripEl.scrollWidth;
+      }
     }
 
-    function showCalendarDetail(idx, dateStr, el) {
-      const day = window._calDays?.[idx];
-      if (!day || !day.details.length) return;
+    function showMonthDayDetail(idx) {
+      const day = window._monthDays?.[idx];
+      if (!day) return;
 
-      const detailHtml = `
-        <div class="cal-detail-header">${day.label} ${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+      const detailEl = document.getElementById('calMonthDetail');
+      if (!detailEl) return;
+
+      if (!day.details.length) {
+        detailEl.style.display = 'none';
+        return;
+      }
+
+      detailEl.innerHTML = `
+        <div class="cal-detail-header">${day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
         <div class="cal-detail-list">${day.details.map(d => `<div class="cal-detail-item">• ${d}</div>`).join('')}</div>
       `;
-
-      ['calendarDetail', 'calendarDetailTools'].forEach(id => {
-        const det = document.getElementById(id);
-        if (det) { det.innerHTML = detailHtml; det.style.display = 'block'; }
-      });
+      detailEl.style.display = 'block';
     }
 
     // =====================================================
@@ -2094,8 +2163,7 @@
       const cacheKey = currentClient?.client_id || currentClient?.id;
       const homework = clientHomework[cacheKey] || [];
 
-      const active = homework.filter(h => h.is_active);
-      const completed = homework.filter(h => !h.is_active);
+      const types = [...new Set(homework.map(h => h.homework_type).filter(Boolean))];
 
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay show';
@@ -2106,15 +2174,71 @@
             <h3>All Homework — ${esc(currentClient?.display_name || 'Client')}</h3>
             <button class="modal-close" onclick="document.getElementById('homeworkDrawerOverlay')?.remove()">&times;</button>
           </div>
-          <div class="drawer-body">
-            ${active.length ? '<div class="drawer-section-title">Active</div>' + active.map(h => renderHwDrawerItem(h)).join('') : ''}
-            ${completed.length ? '<div class="drawer-section-title" style="margin-top:16px;">Completed</div>' + completed.map(h => renderHwDrawerItem(h)).join('') : ''}
-            ${!homework.length ? '<p class="text-muted-center">No homework yet</p>' : ''}
+          <div class="drawer-filters">
+            <select id="hwDrawerType" onchange="filterHomeworkDrawer()">
+              <option value="">All types</option>
+              ${types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('')}
+            </select>
+            <select id="hwDrawerMonth" onchange="filterHomeworkDrawer()">
+              <option value="">All time</option>
+              ${getHomeworkMonths(homework).map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="drawer-body" id="hwDrawerBody">
+            ${renderHomeworkDrawerList(homework)}
           </div>
         </div>
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+    }
+
+    function getHomeworkMonths(homework) {
+      const months = new Set();
+      const result = [];
+      homework.forEach(h => {
+        const d = new Date(h.created_at);
+        const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        if (!months.has(key)) {
+          months.add(key);
+          result.push({ value: key, label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) });
+        }
+      });
+      return result.sort((a, b) => b.value.localeCompare(a.value));
+    }
+
+    function filterHomeworkDrawer() {
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      let homework = clientHomework[cacheKey] || [];
+
+      const typeFilter = document.getElementById('hwDrawerType')?.value;
+      const monthFilter = document.getElementById('hwDrawerMonth')?.value;
+
+      if (typeFilter) homework = homework.filter(h => h.homework_type === typeFilter);
+      if (monthFilter) {
+        const [y, m] = monthFilter.split('-').map(Number);
+        homework = homework.filter(h => {
+          const d = new Date(h.created_at);
+          return d.getFullYear() === y && d.getMonth() + 1 === m;
+        });
+      }
+
+      const body = document.getElementById('hwDrawerBody');
+      if (body) body.innerHTML = renderHomeworkDrawerList(homework);
+    }
+
+    function renderHomeworkDrawerList(homework) {
+      if (!homework.length) return '<p class="text-muted-center">No homework matches filters</p>';
+
+      const active = homework.filter(h => h.is_active);
+      const completed = homework.filter(h => !h.is_active && h.completed_at);
+      const hidden = homework.filter(h => !h.is_active && !h.completed_at);
+
+      let html = '';
+      if (active.length) html += '<div class="drawer-section-title">Active</div>' + active.map(h => renderHwDrawerItem(h)).join('');
+      if (completed.length) html += '<div class="drawer-section-title" style="margin-top:16px;">Completed</div>' + completed.map(h => renderHwDrawerItem(h)).join('');
+      if (hidden.length) html += '<div class="drawer-section-title" style="margin-top:16px;">Archived</div>' + hidden.map(h => renderHwDrawerItem(h)).join('');
+      return html;
     }
 
     function renderHwDrawerItem(h) {
