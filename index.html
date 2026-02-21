@@ -84,7 +84,7 @@
 
     <!-- Disclaimer Banner -->
     <div class="disclaimer-banner">
-      ⚠️ Alo is a self-help tool, not a remote monitoring device. Data may be delayed. In an emergency, call 911.
+      ⚠️ Alo supports between-session reflection. It is not emergency care. In a crisis, follow your clinical protocol.
     </div>
 
     <!-- Sidebar Backdrop -->
@@ -142,7 +142,7 @@
             <span class="section-count section-count-warning" id="triageCount">0</span>
           </div>
           <div class="section-body" id="triageList">
-            <div class="section-empty">All clients stable</div>
+            <div class="section-empty">No items needing attention</div>
           </div>
         </div>
       </div>
@@ -967,9 +967,12 @@
           const clientSessions = sessions?.filter(s => s.client_id === link.client_id) || [];
           const recentSessions = clientSessions.filter(s => new Date(s.created_at) > weekAgo);
 
+          const unreadMessages = clientMessages.filter(m => !m.read);
+          const unresolvedCrisis = clientCrisis.filter(c => !c.acknowledged);
+
           let status = 'stable';
-          if (clientCrisis.length > 0) status = 'crisis';
-          else if (recentSessions.length === 0 && clientHw.length > 0) status = 'needs-attention';
+          if (unresolvedCrisis.length > 0) status = 'crisis';
+          else if (unreadMessages.length > 0) status = 'needs-attention';
           else if (recentSessions.length === 0) status = 'dormant';
 
           return {
@@ -990,14 +993,13 @@
 
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
-        const stableCount = allClients.filter(c => c.status === 'stable').length;
         const summaryEl = document.getElementById('morningSummary');
         if (totalAlerts > 0) {
           summaryEl.textContent = totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : '') + ' need your attention.';
         } else if (totalMessages > 0) {
-          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients. ' + stableCount + ' stable.';
+          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients.';
         } else {
-          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', ' + stableCount + ' stable.';
+          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', no items needing attention.';
         }
 
       } catch (err) {
@@ -1028,7 +1030,7 @@
               <div class="list-item-description">${esc(e.severity)} · ${esc(e.category)} · Alo: ${esc(e.alo_response_action)}</div>
             </div>
             <span class="list-item-meta">${timeAgo(new Date(e.created_at))}</span>
-            <button class="list-item-action" onclick="acknowledgeCrisis('${e.id}', event)">Acknowledge</button>
+            <button class="list-item-action" onclick="openResolveCrisisModal('${e.id}', event)">Resolve</button>
           </div>
         `;
       }).join('');
@@ -1063,7 +1065,7 @@
       document.getElementById('triageCount').textContent = needsAttention.length;
 
       if (!needsAttention.length) {
-        document.getElementById('triageList').innerHTML = '<div class="section-empty">All clients stable</div>';
+        document.getElementById('triageList').innerHTML = '<div class="section-empty">No items needing attention</div>';
         return;
       }
 
@@ -1073,7 +1075,7 @@
             <div class="list-item-indicator warning"></div>
             <div class="list-item-content">
               <div class="list-item-title">${esc(c.display_name || 'Client')}</div>
-              <div class="list-item-description">No activity this week · ${c.homeworkCount} open homework</div>
+              <div class="list-item-description">${c.messageCount} unread message${c.messageCount !== 1 ? 's' : ''}</div>
             </div>
           </div>
         `;
@@ -1139,15 +1141,122 @@
       document.getElementById('clientsList2').innerHTML = html;
     }
 
-    async function acknowledgeCrisis(eventId, e) {
-      e.stopPropagation();
+    async function markClientMessagesRead(clientId) {
       try {
-        await apiMutate(`/rest/v1/crisis_events?id=eq.${eventId}`, 'PATCH', { acknowledged: true });
-        toast('Crisis alert acknowledged');
-        loadDashboard();
+        await api(`/rest/v1/client_messages?client_id=eq.${clientId}&read=eq.false`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            read: true,
+            read_at: new Date().toISOString(),
+            read_by: therapistId
+          }),
+          prefer: 'return=minimal'
+        });
+      } catch (err) {
+        console.error('Mark read failed:', err);
+      }
+    }
+
+    function openResolveCrisisModal(crisisEventId, e) {
+      e?.stopPropagation();
+
+      const eventObj = Object.values(clientCrisis).flat().find(x => x.id === crisisEventId);
+      const client = eventObj
+        ? allClients.find(c => c.client_id === eventObj.client_id)
+        : currentClient;
+
+      const phone = client?.phone || '';
+      const eName = client?.emergency_contact_name || '';
+      const ePhone = client?.emergency_contact_phone || '';
+      const safety = client?.safety_notes || '';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'resolveCrisisOverlay';
+      overlay.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Resolve Crisis Alert</h3>
+            <button class="modal-close" onclick="document.getElementById('resolveCrisisOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="highlight-box" style="margin-bottom: 12px;">
+              <strong>Emergency panel</strong>
+              <div style="margin-top:6px; font-size:0.875rem;">
+                <div><strong>Client phone:</strong> ${phone ? esc(phone) : '<span class="text-muted">No phone on file</span>'}</div>
+                <div><strong>Emergency contact:</strong> ${eName ? esc(eName) : '<span class="text-muted">None</span>'}${ePhone ? ' · ' + esc(ePhone) : ''}</div>
+                <div style="margin-top:8px;"><strong>Safety notes:</strong><br>
+                  <span style="color: var(--text-light)">${safety ? esc(safety) : 'None on file'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Action taken <span style="color:var(--danger)">*</span></label>
+              <select id="crisisActionTaken">
+                <option value="">Select action…</option>
+                <option value="called_client">Called client</option>
+                <option value="sent_message">Sent message to client</option>
+                <option value="contacted_emergency_contact">Contacted emergency contact</option>
+                <option value="reviewed_safety_plan">Reviewed safety plan</option>
+                <option value="escalated_911">Escalated to emergency services</option>
+                <option value="other">Other</option>
+              </select>
+              <span class="form-hint">For your internal audit trail.</span>
+            </div>
+
+            <div class="form-group">
+              <label>Notes (optional)</label>
+              <textarea id="crisisActionNotes" rows="3" placeholder="What happened, what you did, follow-up plan…"></textarea>
+            </div>
+
+            <div id="crisisResolveError" class="login-error" style="display:none;"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="document.getElementById('resolveCrisisOverlay')?.remove()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitResolveCrisis('${crisisEventId}')">Resolve Alert</button>
+          </div>
+        </div>
+      `;
+      overlay.onclick = (evt) => { if (evt.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    }
+
+    async function submitResolveCrisis(crisisEventId) {
+      const action = document.getElementById('crisisActionTaken')?.value;
+      const notes = document.getElementById('crisisActionNotes')?.value || '';
+      const errorEl = document.getElementById('crisisResolveError');
+      errorEl.style.display = 'none';
+
+      if (!action) {
+        errorEl.textContent = 'Please select an action taken.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        await apiMutate(`/rest/v1/crisis_events?id=eq.${crisisEventId}`, 'PATCH', {
+          acknowledged: true,
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: therapistId,
+          action_taken: action,
+          action_notes: notes
+        });
+
+        document.getElementById('resolveCrisisOverlay')?.remove();
+        toast('Crisis alert resolved');
+        await loadDashboard();
+
+        if (currentClient) {
+          const cacheKey = currentClient.client_id || currentClient.id;
+          await loadClientData(cacheKey);
+          renderSessionPrep(cacheKey);
+          renderCrisisAlerts(cacheKey);
+        }
       } catch (err) {
         console.error(err);
-        toast('Error acknowledging alert');
+        errorEl.textContent = 'Error resolving alert. Please try again.';
+        errorEl.style.display = 'block';
       }
     }
 
@@ -1166,6 +1275,11 @@
             currentClient = client;
 
       const cacheKey = client.client_id || client.id;
+
+      // Mark unread messages as read when viewing this client
+      if (client.client_id) {
+        markClientMessagesRead(client.client_id);
+      }
 
       document.getElementById('homePage').style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
@@ -1243,7 +1357,7 @@
       // Scroll to top of tab content so each tab starts fresh
       const stickyHeader = document.querySelector('.client-sticky-header');
       if (stickyHeader) {
-        stickyHeader.scrollIntoView({ behavior: 'instant', block: 'start' });
+        stickyHeader.scrollIntoView({ behavior: 'auto', block: 'start' });
       }
     }
 
@@ -1748,12 +1862,32 @@
         return;
       }
 
+      const phone = currentClient?.phone || '';
+      const eName = currentClient?.emergency_contact_name || '';
+      const ePhone = currentClient?.emergency_contact_phone || '';
+      const safety = currentClient?.safety_notes || '';
+
+      const emergencyPanel = `
+        <div class="highlight-box" style="margin-bottom:12px;">
+          <strong>Emergency panel</strong>
+          <div style="margin-top:6px; font-size:0.875rem;">
+            <div><strong>Client phone:</strong> ${phone ? esc(phone) : '<span class="text-muted">No phone on file</span>'}</div>
+            <div><strong>Emergency contact:</strong> ${eName ? esc(eName) : '<span class="text-muted">None</span>'}${ePhone ? ' · ' + esc(ePhone) : ''}</div>
+            <div style="margin-top:8px;"><strong>Safety notes:</strong><br>
+              <span style="color: var(--text-light)">${safety ? esc(safety) : 'None on file'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
       document.getElementById('crisisAlertsCard').style.display = 'block';
       document.getElementById('crisisAlertButton').classList.add('visible');
       document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
       document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
 
-      document.getElementById('crisisAlertsList').innerHTML = unacknowledged.map(c => `
+      document.getElementById('crisisAlertsList').innerHTML =
+        emergencyPanel +
+        unacknowledged.map(c => `
         <div class="crisis-alert-item">
           <div class="crisis-alert-header">
             <span class="crisis-alert-time">${timeAgo(new Date(c.created_at))}</span>
@@ -1763,6 +1897,7 @@
             <strong>${esc(c.category)}:</strong> ${esc(c.details || 'No details provided')}<br>
             <strong>Alo Response:</strong> ${esc(c.alo_response_action)}
           </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="openResolveCrisisModal('${c.id}', event)">Resolve</button>
         </div>
       `).join('');
     }
@@ -1812,7 +1947,7 @@
       const name = document.getElementById('inviteClientName').value.trim();
 
       try {
-        const code = 'ALO-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        const code = 'ALO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
         const result = await api('/rest/v1/therapist_clients', {
           method: 'POST',
