@@ -6,12 +6,6 @@
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-html { overflow-x: clip; }
-body { overflow-x: clip; overflow-y: visible; }
-@supports not (overflow-x: clip) {
-  html { overflow-x: hidden; }
-  body { overflow-x: hidden; overflow-y: visible; }
-}
 
 /* === DESIGN TOKENS === */
 :root {
@@ -1399,25 +1393,131 @@ button, input, select, textarea { font: inherit; }
 }
 
 /* === CALENDAR WIDGET === */
+
+/* Sticky client header (all screen sizes) */
+.client-sticky-header {
+  position: sticky;
+  top: 60px;
+  z-index: 51;
+  background: var(--cream, var(--bg));
+  margin-left: -24px;
+  margin-right: -24px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(45, 42, 38, 0.06);
+}
+
+.client-sticky-header .tabs {
+  position: static;
+  top: auto;
+  margin-bottom: 0;
+}
+
+.client-sticky-header .page-header {
+  padding-top: 8px;
+  margin-bottom: 0;
+}
+
+/* Homework zone: 2/3 form + 1/3 sidebar */
+.homework-zone {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.homework-zone-form { min-width: 0; }
+.homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+/* Month calendar */
+.cal-month-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.cal-month-day-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.cal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-month-cell {
+  text-align: center;
+  padding: 4px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 32px;
+}
+
+.cal-month-cell:hover { background: var(--bg); }
+.cal-month-cell.cal-today { background: var(--bg); border: 2px solid var(--primary); font-weight: 700; }
+.cal-month-cell.cal-future { opacity: 0.4; }
+.cal-month-cell.cal-empty { cursor: default; }
+
+.cal-month-num {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.cal-nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 8px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.cal-nav-btn:hover { color: var(--text); }
+
+/* Scrollable 7-day strip (Session Prep) */
 .calendar-strip {
   display: flex;
   gap: 4px;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
 }
 
-.cal-day {
-  flex: 1;
+.calendar-strip::-webkit-scrollbar { height: 4px; }
+.calendar-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.cal-strip-day {
+  flex: 0 0 56px;
   text-align: center;
-  padding: 8px 4px;
+  padding: 6px 4px;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s;
-  min-width: 0;
+  position: relative;
 }
 
-.cal-day:hover, .cal-day:focus {
-  background: var(--bg);
+.cal-strip-day:hover { background: var(--bg); }
+
+.cal-strip-month {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.cal-day, .cal-strip-day {
+  min-width: 0;
 }
 
 .cal-today {
@@ -1427,35 +1527,35 @@ button, input, select, textarea { font: inherit; }
 }
 
 .cal-label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .cal-num {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   margin: 2px 0;
 }
 
 .cal-dots {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   justify-content: center;
-  min-height: 8px;
+  min-height: 6px;
 }
 
 .cal-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   display: inline-block;
 }
 
 .calendar-legend {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   padding: 4px 0;
   border-top: 1px solid var(--border);
@@ -1465,14 +1565,14 @@ button, input, select, textarea { font: inherit; }
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.6875rem;
+  gap: 3px;
+  font-size: 0.625rem;
   color: var(--text-muted);
 }
 
 .legend-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   display: inline-block;
 }
@@ -1480,19 +1580,29 @@ button, input, select, textarea { font: inherit; }
 .calendar-detail {
   background: var(--bg);
   border-radius: 8px;
-  padding: 10px 12px;
-  margin-top: 8px;
+  padding: 8px 10px;
+  margin-top: 6px;
   font-size: 0.8125rem;
 }
 
-.cal-detail-header {
-  font-weight: 600;
-  margin-bottom: 4px;
+.cal-detail-header { font-weight: 600; margin-bottom: 4px; }
+.cal-detail-item { color: var(--text-muted); padding: 2px 0; }
+
+/* Drawer filters */
+.drawer-filters {
+  display: flex;
+  gap: 8px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-.cal-detail-item {
-  color: var(--text-muted);
-  padding: 2px 0;
+.drawer-filters select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  background: var(--white);
 }
 
 /* === DRAWER === */
@@ -1725,32 +1835,19 @@ padding: 14px 8px;
 font-size: 0.8125rem;
 min-height: 44px;
 }
-/* Sticky client header + tabs as one unit */
+/* Sticky client header mobile overrides */
 .client-sticky-header {
-  position: sticky;
-  top: 60px;
-  z-index: 51;
-  background: var(--cream, var(--bg));
   margin-left: -16px;
   margin-right: -16px;
   padding: 0 16px;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(45, 42, 38, 0.06);
-}
-
-.client-sticky-header .tabs {
-  position: static;
-  top: auto;
-}
-
-.client-sticky-header .page-header {
-  padding-top: 8px;
-  margin-bottom: 0;
 }
 
 @media (max-width: 767px) {
   .client-sticky-header {
     top: 52px;
+  }
+  .homework-zone {
+    grid-template-columns: 1fr;
   }
 }
 
