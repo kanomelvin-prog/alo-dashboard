@@ -270,8 +270,11 @@
 
           <!-- Assign Homework -->
           <div class="card">
-            <div class="card-header"><span class="card-title">Assign Homework</span></div>
-            <div class="card-body">
+            <div class="card-header" style="cursor: pointer; user-select: none;" onclick="const body = this.nextElementSibling; const arrow = this.querySelector('.collapse-arrow'); if (body.style.display === 'none') { body.style.display = ''; arrow.style.transform = 'rotate(0deg)'; } else { body.style.display = 'none'; arrow.style.transform = 'rotate(-90deg)'; }">
+              <span class="card-title">Assign Homework</span>
+              <span class="collapse-arrow" style="margin-left: auto; transition: transform 0.2s; font-size: 0.75rem;">▼</span>
+            </div>
+            <div class="card-body" style="display: none;">
               <div class="templates">
                 <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
                 <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
@@ -1052,7 +1055,7 @@
             <div class="list-item-indicator info"></div>
             <div class="list-item-content">
               <div class="list-item-title">${esc(name)}</div>
-              <div class="list-item-description">${esc(truncate(m.message, 60))}</div>
+              <div class="list-item-description">${esc(truncate(m.content, 60))}</div>
             </div>
             <span class="list-item-meta">${timeAgo(new Date(m.created_at))}</span>
           </div>
@@ -1276,11 +1279,6 @@
 
       const cacheKey = client.client_id || client.id;
 
-      // Mark unread messages as read when viewing this client
-      if (client.client_id) {
-        markClientMessagesRead(client.client_id);
-      }
-
       document.getElementById('homePage').style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
 
@@ -1320,6 +1318,11 @@
       renderCrisisAlerts(cacheKey);
       renderClientMessages(cacheKey);
       renderSessionHistory(cacheKey);
+
+      // Mark unread messages as read AFTER rendering (so UI shows unread state first)
+      if (client.client_id) {
+        markClientMessagesRead(client.client_id);
+      }
 
     }
 
@@ -1476,12 +1479,13 @@
         ).join('');
       }
 
-      // === MESSAGES preview ===
-      if (unreadMessages.length) {
-        document.getElementById('clientMessagesPrep').innerHTML = unreadMessages.map(m =>
+      // === MESSAGES preview (show all recent, mark unread) ===
+      if (messages.length) {
+        const recentMessages = messages.slice(0, 5);
+        document.getElementById('clientMessagesPrep').innerHTML = recentMessages.map(m =>
           `<div class="excerpt">
-            <div class="excerpt-time">${timeAgo(new Date(m.created_at))}</div>
-            <div class="excerpt-text">${esc(m.message)}</div>
+            <div class="excerpt-time">${timeAgo(new Date(m.created_at))}${!m.read ? ' <strong>(new)</strong>' : ''}</div>
+            <div class="excerpt-text">${esc(m.content || '(empty message)')}</div>
           </div>`
         ).join('');
       }
@@ -1913,8 +1917,8 @@
 
       document.getElementById('activityMessages').innerHTML = messages.map(m => `
         <div class="excerpt">
-          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '(unread)'}</div>
-          <div class="excerpt-text">${esc(m.message)}</div>
+          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '<strong>(unread)</strong>'}</div>
+          <div class="excerpt-text">${esc(m.content || '(empty message)')}</div>
         </div>
       `).join('');
     }
