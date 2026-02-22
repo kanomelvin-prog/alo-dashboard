@@ -1061,7 +1061,11 @@
         return;
       }
 
-      document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
+      const maxVisible = 3;
+      const visible = crisisEvents.slice(0, maxVisible);
+      const remaining = count - maxVisible;
+
+      let html = visible.map(e => {
         const client = e.client_id ? allClients.find(c => c.client_id === e.client_id) : null;
         const name = client?.display_name || 'Unknown Client';
         const clickAction = e.client_id ? `onclick="showClient('${e.client_id}')"` : '';
@@ -1077,6 +1081,40 @@
           </div>
         `;
       }).join('');
+
+      if (remaining > 0) {
+        html += `<button class="section-view-all" onclick="showAllAlerts()">View all ${count} alerts</button>`;
+      }
+
+      document.getElementById('alertsList').innerHTML = html;
+
+      // Store for "View all" modal
+      window._allCrisisEvents = crisisEvents;
+    }
+
+    function showAllAlerts() {
+      const events = window._allCrisisEvents || [];
+      const alertsHtml = events.map(e => {
+        const client = e.client_id ? allClients.find(c => c.client_id === e.client_id) : null;
+        const name = client?.display_name || 'Unknown Client';
+        return `
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+            <div style="width: 8px; height: 8px; background: #dc2626; border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 14px;">${esc(name)}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${esc(e.severity)} · ${esc(e.category)}</div>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">${timeAgo(new Date(e.created_at))}</span>
+            <button class="btn" style="font-size: 12px; padding: 4px 12px;" onclick="document.querySelector('.modal-overlay').remove(); openResolveCrisisModal('${e.id}', event)">Resolve</button>
+          </div>
+        `;
+      }).join('');
+
+      createModal('All Crisis Alerts', `
+        <div style="max-height: 60vh; overflow-y: auto;">
+          ${alertsHtml}
+        </div>
+      `, { confirmLabel: 'Close', showCancel: false });
     }
 
     function renderMessages(messages) {
