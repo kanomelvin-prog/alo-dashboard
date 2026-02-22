@@ -375,6 +375,25 @@ button, input, select, textarea { font: inherit; }
   font-size: 0.875rem;
 }
 
+.section-view-all {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--sage-dark);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.section-view-all:hover {
+  background: var(--sage-light);
+}
+
 /* === LIST ITEMS === */
 .list-item {
   display: flex;
