@@ -994,7 +994,7 @@
         const idFilter = clientIds.length ? clientIds.map(id => `"${id}"`).join(',') : '"00000000-0000-0000-0000-000000000000"';
 
         const [crisisEvents, messages, homework, sessions] = await Promise.all([
-          clientIds.length ? api(`/rest/v1/crisis_events?client_id=in.(${idFilter})&acknowledged=eq.false&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          api(`/rest/v1/crisis_events?or=(client_id.in.(${idFilter}),client_id.is.null)&acknowledged=eq.false&order=created_at.desc&limit=50`),
           clientIds.length ? api(`/rest/v1/client_messages?client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
           clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
@@ -1063,9 +1063,10 @@
 
       document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
         const client = allClients.find(c => c.client_id === e.client_id);
-        const name = client?.display_name || 'Client';
+        const name = client?.display_name || 'Unknown Client';
+        const clickAction = e.client_id ? `onclick="showClient('${e.client_id}')"` : '';
         return `
-          <div class="list-item" onclick="showClient('${e.client_id}')">
+          <div class="list-item" ${clickAction}>
             <div class="list-item-indicator danger"></div>
             <div class="list-item-content">
               <div class="list-item-title">${esc(name)}</div>
