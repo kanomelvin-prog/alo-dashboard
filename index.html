@@ -1003,7 +1003,7 @@
         const weekAgo = new Date(Date.now() - 7 * 86400000);
 
         allClients = links.map(link => {
-          const clientCrisis = crisisEvents?.filter(e => e.client_id === link.client_id) || [];
+          const clientCrisis = crisisEvents?.filter(e => e.client_id && e.client_id === link.client_id) || [];
           const clientMessages = messages?.filter(m => m.client_id === link.client_id) || [];
           const clientHw = homework?.filter(h => h.client_id === link.client_id) || [];
           const clientSessions = sessions?.filter(s => s.client_id === link.client_id) || [];
@@ -1062,7 +1062,7 @@
       }
 
       document.getElementById('alertsList').innerHTML = crisisEvents.map(e => {
-        const client = allClients.find(c => c.client_id === e.client_id);
+        const client = e.client_id ? allClients.find(c => c.client_id === e.client_id) : null;
         const name = client?.display_name || 'Unknown Client';
         const clickAction = e.client_id ? `onclick="showClient('${e.client_id}')"` : '';
         return `
