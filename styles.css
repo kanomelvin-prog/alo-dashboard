@@ -1,6 +1,7 @@
 /* ============================================================
-   ALO CLINICAL DASHBOARD v3.0
-   Design: Warm Clinical (cream/sage/charcoal + severity spectrum)
+   ALO CLINICAL DASHBOARD v3.1
+   Design: Teal-blue thinking partner (aligned with client chat palette)
+   Updated: Feb 23, 2026 — Color palette overhaul to teal-blue
    ============================================================ */
 
 /* === RESET === */
@@ -9,37 +10,41 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* === DESIGN TOKENS === */
 :root {
-  --cream: #FDFBF7;
-  --warm-white: #FAF8F5;
-  --sage: #8B9A7D;
-  --sage-light: #E8EDE4;
-  --sage-hover: #7a8a6d;
-  --charcoal: #2D2A26;
-  --stone: #9C9589;
+  --cream: #F3EDE4;
+  --warm-white: #F8F4EF;
+  --sage: #3A7C86;
+  --sage-light: #E0EDEB;
+  --sage-hover: #2D6B74;
+  --charcoal: #1D3539;
+  --stone: #6B8085;
 
   --bg: var(--cream);
   --white: #ffffff;
-  --border: rgba(156, 149, 137, 0.2);
-  --border-strong: rgba(156, 149, 137, 0.35);
+  --border: rgba(58, 124, 134, 0.15);
+  --border-strong: rgba(58, 124, 134, 0.28);
 
   --text: var(--charcoal);
-  --text-light: #6b6560;
+  --text-light: #4A5C5E;
   --text-muted: var(--stone);
 
   --primary: var(--sage);
   --primary-hover: var(--sage-hover);
 
-  --danger: #dc2626;
-  --danger-bg: #fef2f2;
-  --danger-border: #fecaca;
-  --danger-text: #991b1b;
+  /* Warm accent — clay terracotta (for CTAs that need differentiation) */
+  --accent: #C7865F;
+  --accent-hover: #B57550;
+
+  --danger: #C45A4D;
+  --danger-bg: #FEF2F0;
+  --danger-border: #F5C4BF;
+  --danger-text: #8B2E24;
 
   --warning: #d97706;
   --warning-bg: #fffbeb;
   --warning-border: #fde68a;
   --warning-text: #92400e;
 
-  --success: #16a34a;
+  --success: #5C9E7A;
   --success-bg: #f0fdf4;
   --success-border: #bbf7d0;
 
@@ -48,9 +53,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   --info-border: #bfdbfe;
   --info-text: #1e40af;
 
-  --shadow-sm: 0 1px 3px rgba(45, 42, 38, 0.06), 0 1px 2px rgba(45, 42, 38, 0.04);
-  --shadow-md: 0 4px 12px rgba(45, 42, 38, 0.08);
-  --shadow-lg: 0 8px 24px rgba(45, 42, 38, 0.12);
+  --shadow-sm: 0 1px 3px rgba(29, 53, 57, 0.06), 0 1px 2px rgba(29, 53, 57, 0.04);
+  --shadow-md: 0 4px 12px rgba(29, 53, 57, 0.08);
+  --shadow-lg: 0 8px 24px rgba(29, 53, 57, 0.12);
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -87,7 +92,7 @@ button, input, select, textarea { font: inherit; }
   max-width: 400px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 4px 24px rgba(45, 42, 38, 0.06);
+  box-shadow: 0 4px 24px rgba(29, 53, 57, 0.06);
 }
 
 .login-logo {
@@ -161,9 +166,9 @@ button, input, select, textarea { font: inherit; }
 
 
 .login-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger);
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 0.8125rem;
@@ -845,7 +850,7 @@ button, input, select, textarea { font: inherit; }
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(139, 154, 125, 0.12);
+  box-shadow: 0 0 0 3px rgba(58, 124, 134, 0.12);
 }
 
 .form-group textarea { min-height: 80px; resize: vertical; }
@@ -880,7 +885,7 @@ button, input, select, textarea { font: inherit; }
 .btn-primary:hover {
   background: var(--sage-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 154, 125, 0.3);
+  box-shadow: 0 4px 12px rgba(58, 124, 134, 0.3);
 }
 
 .btn-secondary { background: var(--warm-white); border: 1px solid var(--border); color: var(--text); }
@@ -893,7 +898,7 @@ button, input, select, textarea { font: inherit; }
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(45, 42, 38, 0.5);
+  background: rgba(29, 53, 57, 0.5);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1183,7 +1188,7 @@ button, input, select, textarea { font: inherit; }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(45, 42, 38, 0.3);
+  background: rgba(29, 53, 57, 0.3);
   z-index: 199;
   opacity: 0;
   transition: opacity 0.3s;
@@ -1423,7 +1428,7 @@ button, input, select, textarea { font: inherit; }
   margin-right: -24px;
   padding: 0 24px;
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(45, 42, 38, 0.06);
+  box-shadow: 0 2px 4px rgba(29, 53, 57, 0.06);
 }
 
 .client-sticky-header .tabs {
@@ -2107,7 +2112,7 @@ to { transform: translateY(0); }
 
 /* Fix 2: Section card shadows */
 .section {
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06), 0 1px 2px rgba(45, 42, 38, 0.04);
+  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06), 0 1px 2px rgba(29, 53, 57, 0.04);
 }
 
 /* Fix 3: Reduce section spacing */
@@ -2124,7 +2129,7 @@ to { transform: translateY(0); }
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06);
 }
 
 .prep-stat {
@@ -2177,7 +2182,7 @@ body {
 
 /* Fix 8: Sidebar card shadow */
 .sidebar-section {
-  box-shadow: 0 1px 3px rgba(45, 42, 38, 0.06);
+  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06);
 }
 
 /* ============================================================
@@ -2228,7 +2233,7 @@ body {
 #weekGlanceCard {
   border: 1px solid var(--sage);
   border-left: 4px solid var(--sage);
-  box-shadow: 0 2px 12px rgba(139, 154, 125, 0.12);
+  box-shadow: 0 2px 12px rgba(58, 124, 134, 0.12);
 }
 
 #weekGlanceCard .card-header {
@@ -2256,7 +2261,7 @@ body {
 #copyPrepPackBtn:hover {
   background: #1a1815;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(45, 42, 38, 0.2);
+  box-shadow: 0 4px 12px rgba(29, 53, 57, 0.2);
 }
 
 /* Tier 4: Open Items and Messages in prep — quieter */
