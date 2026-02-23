@@ -207,7 +207,7 @@
             <div class="card-body" id="calendarBody">
               <div class="calendar-strip" id="calendarStrip"></div>
               <div class="calendar-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
                 <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Message</span>
                 <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>Homework</span>
                 <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
@@ -363,7 +363,7 @@
                 <div class="card-body" style="padding: 8px 12px;">
                   <div class="cal-month" id="calMonth"></div>
                   <div class="calendar-legend" style="margin-top: 8px;">
-                    <span class="legend-item"><span class="legend-dot" style="background:#8B9A7D;"></span>Alo</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
                     <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
                     <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
                     <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
@@ -2031,7 +2031,7 @@
       const details = [];
 
       const sCount = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }).length;
-      if (sCount > 0) { dots.push('#8B9A7D'); details.push(sCount + ' Alo check-in' + (sCount > 1 ? 's' : '')); }
+      if (sCount > 0) { dots.push('#3A7C86'); details.push(sCount + ' Alo check-in' + (sCount > 1 ? 's' : '')); }
 
       const mItems = messages.filter(m => { const t = new Date(m.created_at); return t >= d && t <= end; });
       if (mItems.length > 0) { dots.push('#4A90D9'); details.push(mItems.length + ' message' + (mItems.length > 1 ? 's' : '')); }
@@ -2209,7 +2209,7 @@
       let html = `<div class="cal-popup-header">${day.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>`;
 
       if (day.sessions?.length) {
-        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#8B9A7D;">● ${day.sessions.length} Alo check-in${day.sessions.length > 1 ? 's' : ''}</div></div>`;
+        html += `<div class="cal-popup-section"><div class="cal-popup-label" style="color:#3A7C86;">● ${day.sessions.length} Alo check-in${day.sessions.length > 1 ? 's' : ''}</div></div>`;
       }
 
       if (day.messages?.length) {
