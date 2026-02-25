@@ -126,8 +126,8 @@
           </div>
         </div>
 
-        <!-- Triage -->
-        <div class="section" id="triageSection">
+        <!-- Triage (hidden for pilot — redundant with Messages) -->
+        <div class="section" id="triageSection" style="display:none;">
           <div class="section-header section-header-warning">
             <div class="section-icon warning">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -149,9 +149,6 @@
           <div class="sidebar-header">
             <div class="sidebar-header-left"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
             <div class="sidebar-header-actions">
-              <button class="btn btn-sm sidebar-settings-btn" onclick="showDefaultSettingsModal()" title="Default client settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </button>
               <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
             </div>
           </div>
@@ -690,16 +687,46 @@
     // =====================================================
     async function api(endpoint, options = {}) {
       const token = session?.access_token || SUPABASE_ANON_KEY;
-      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Prefer': options.prefer || 'return=representation',
-          ...options.headers
+      const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Prefer': options.prefer || 'return=representation',
+        ...options.headers
+      };
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers });
+
+      // Retry once on 401 (token expired after ~60 min)
+      if (res.status === 401 && session?.refresh_token) {
+        const refreshed = await refreshSession(session.refresh_token);
+        if (refreshed) {
+          session = refreshed;
+          therapistId = refreshed.user.id;
+          localStorage.setItem('alo_session', JSON.stringify(refreshed));
+          const retryHeaders = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${refreshed.access_token}`,
+            'Content-Type': 'application/json',
+            'Prefer': options.prefer || 'return=representation',
+            ...options.headers
+          };
+          const retryRes = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers: retryHeaders });
+          if (!retryRes.ok) {
+            const body = await retryRes.text();
+            throw new Error(`API ${retryRes.status}: ${body}`);
+          }
+          const text = await retryRes.text();
+          return text ? JSON.parse(text) : null;
         }
-      });
+        // Refresh failed — force re-login
+        localStorage.removeItem('alo_session');
+        session = null;
+        therapistId = null;
+        showLogin();
+        toast('Session expired. Please log in again.');
+        throw new Error('Session expired');
+      }
+
       if (!res.ok) {
         const body = await res.text();
         throw new Error(`API ${res.status}: ${body}`);
@@ -824,36 +851,45 @@
         therapistId = session.user.id;
         localStorage.setItem('alo_session', JSON.stringify(session));
 
-        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            id: therapistId,
-            role: 'therapist',
-            display_name: name,
-            email: email
-          })
-        });
+        // Profile and therapist inserts — may fail if auth trigger already created them
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              id: therapistId,
+              role: 'therapist',
+              display_name: name,
+              email: email
+            })
+          });
+        } catch (profileErr) {
+          console.log('Profile insert skipped (may already exist):', profileErr.message);
+        }
 
-        await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            id: therapistId,
-            license_type: 'pending',
-            license_verified: false
-          })
-        });
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              id: therapistId,
+              license_type: 'pending',
+              license_verified: false
+            })
+          });
+        } catch (therapistErr) {
+          console.log('Therapist insert skipped (may already exist):', therapistErr.message);
+        }
 
         showApp();
       } catch (err) {
@@ -921,8 +957,14 @@
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('appContainer').style.display = 'block';
 
-      const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=display_name,email`);
-      const name = profile?.[0]?.display_name || profile?.[0]?.email || 'Therapist';
+      let name = 'Therapist';
+      try {
+        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=display_name,email`);
+        name = profile?.[0]?.display_name || profile?.[0]?.email || 'Therapist';
+      } catch (err) {
+        console.error('Profile load failed, using fallback:', err);
+      }
+
       document.getElementById('therapistName').textContent = name;
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       document.getElementById('therapistAvatar').textContent = initials;
@@ -966,9 +1008,22 @@
       setTimeout(() => el.classList.remove('show'), 3000);
     }
 
+    // Track unsaved form state
+    let _formDirty = false;
+    function setFormDirty(dirty) {
+      _formDirty = dirty;
+    }
+    window.addEventListener('beforeunload', function(e) {
+      if (_formDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
     function closeModal(id, event) {
       if (event && event.target !== event.currentTarget) return;
       document.getElementById(id).classList.remove('show');
+      setFormDirty(false);
     }
 
     // =====================================================
@@ -979,14 +1034,43 @@
         const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=in.(active,pending)&select=*`);
 
         if (!links?.length) {
-          document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts</div>';
-          document.getElementById('triageList').innerHTML = '<div class="section-empty">No items needing attention</div>';
-          document.getElementById('messagesList').innerHTML = '<div class="section-empty">No messages</div>';
-          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet. Click "+ Invite" to add one.</div>';
-          document.getElementById('clientsList2').innerHTML = '';
+          document.getElementById('alertsList').innerHTML = '';
+          document.getElementById('triageList').innerHTML = '';
+          document.getElementById('messagesList').innerHTML = '';
           document.getElementById('alertsCount').textContent = '0';
           document.getElementById('messagesCount').textContent = '0';
           document.getElementById('triageCount').textContent = '0';
+
+          // Welcome card — hide all sections, show onboarding
+          document.getElementById('alertsSection')?.closest('.section')?.style.setProperty('display', 'none');
+          document.getElementById('triageSection').style.display = 'none';
+          document.querySelectorAll('.home-content .section').forEach(s => s.style.display = 'none');
+
+          const homeContent = document.querySelector('.home-content');
+          if (homeContent) {
+            const welcome = document.createElement('div');
+            welcome.className = 'section';
+            welcome.style.gridColumn = '1 / -1';
+            welcome.innerHTML = `
+              <div style="text-align: center; padding: 48px 24px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">👋</div>
+                <h2 style="margin-bottom: 8px; font-size: 1.25rem;">Welcome to Alo</h2>
+                <p style="color: var(--text-muted); max-width: 360px; margin: 0 auto 24px;">
+                  Here's how to get started:
+                </p>
+                <div style="text-align: left; max-width: 320px; margin: 0 auto 24px; font-size: 0.9375rem; line-height: 1.8;">
+                  <div><strong>1.</strong> Click <strong>+ Invite</strong> to create an invite code</div>
+                  <div><strong>2.</strong> Share the code with your client</div>
+                  <div><strong>3.</strong> They connect via Alo, and you see their activity here</div>
+                </div>
+                <button class="btn btn-primary" onclick="showInviteModal()" style="padding: 10px 24px;">+ Invite Your First Client</button>
+              </div>
+            `;
+            homeContent.prepend(welcome);
+          }
+
+          document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet</div>';
+          document.getElementById('clientsList2').innerHTML = '';
           return;
         }
 
@@ -1098,23 +1182,37 @@
         const client = e.client_id ? allClients.find(c => c.client_id === e.client_id) : null;
         const name = client?.display_name || 'Unknown Client';
         return `
-          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);">
             <div style="width: 8px; height: 8px; background: #dc2626; border-radius: 50%; flex-shrink: 0;"></div>
             <div style="flex: 1; min-width: 0;">
               <div style="font-weight: 600; font-size: 14px;">${esc(name)}</div>
               <div style="font-size: 12px; color: var(--text-muted);">${esc(e.severity)} · ${esc(e.category)}</div>
             </div>
             <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">${timeAgo(new Date(e.created_at))}</span>
-            <button class="btn" style="font-size: 12px; padding: 4px 12px;" onclick="document.querySelector('.modal-overlay').remove(); openResolveCrisisModal('${e.id}', event)">Resolve</button>
+            <button class="btn" style="font-size: 12px; padding: 4px 12px;" onclick="document.getElementById('allAlertsOverlay')?.remove(); openResolveCrisisModal('${e.id}', event)">Resolve</button>
           </div>
         `;
       }).join('');
 
-      createModal('All Crisis Alerts', `
-        <div style="max-height: 60vh; overflow-y: auto;">
-          ${alertsHtml}
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'allAlertsOverlay';
+      overlay.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>All Crisis Alerts (${events.length})</h3>
+            <button class="modal-close" onclick="document.getElementById('allAlertsOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+            ${alertsHtml || '<p class="text-muted-center">No alerts</p>'}
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="document.getElementById('allAlertsOverlay')?.remove()">Close</button>
+          </div>
         </div>
-      `, { confirmLabel: 'Close', showCancel: false });
+      `;
+      overlay.onclick = (evt) => { if (evt.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function renderMessages(messages) {
@@ -1241,8 +1339,12 @@
     function openResolveCrisisModal(crisisEventId, e) {
       e?.stopPropagation();
 
-      const eventObj = Object.values(clientCrisis).flat().find(x => x.id === crisisEventId);
-      const client = eventObj
+      // Try per-client cache first, then homepage crisis list, then currentClient
+      let eventObj = Object.values(clientCrisis).flat().find(x => x.id === crisisEventId);
+      if (!eventObj && window._allCrisisEvents) {
+        eventObj = window._allCrisisEvents.find(x => x.id === crisisEventId);
+      }
+      const client = eventObj?.client_id
         ? allClients.find(c => c.client_id === eventObj.client_id)
         : currentClient;
 
@@ -1389,7 +1491,13 @@
       renderClientsList();
 
       // Always reload fresh data for this client
-      await loadClientData(cacheKey);
+      try {
+        await loadClientData(cacheKey);
+      } catch (err) {
+        console.error('Error loading client data:', err);
+        toast('Error loading client data. Try again.');
+        return;
+      }
 
       renderSessionPrep(cacheKey);
       renderNotes(cacheKey);
@@ -1476,11 +1584,18 @@
           lines.push(`<div class="glance-row"><span class="glance-icon danger">⚠</span><span class="glance-text"><strong class="glance-danger">${unresolvedCrisis.length} unresolved alert${unresolvedCrisis.length > 1 ? 's' : ''}</strong></span></div>`);
         }
 
-        // 2. Homework — specific items by name with status
+        // 2. Homework — specific items by name with status + timestamps
         if (totalAssigned > 0) {
           const hwItems = [];
-          completedHw.forEach(h => hwItems.push(`<span class="glance-hw done">✓ ${esc(h.title)}</span>`));
-          activeHw.forEach(h => hwItems.push(`<span class="glance-hw open">○ ${esc(h.title)}</span>`));
+          completedHw.forEach(h => {
+            const when = h.completed_at ? ' — completed ' + timeAgo(new Date(h.completed_at)) : '';
+            hwItems.push(`<span class="glance-hw done">✓ ${esc(h.title)}${when}</span>`);
+          });
+          activeHw.forEach(h => {
+            const assigned = ' — assigned ' + timeAgo(new Date(h.created_at));
+            const seen = h.viewed_at ? ', seen ' + timeAgo(new Date(h.viewed_at)) : '';
+            hwItems.push(`<span class="glance-hw open">○ ${esc(h.title)}${assigned}${seen}</span>`);
+          });
           const summary = completedHw.length > 0
             ? `${completedHw.length} of ${totalAssigned} completed`
             : 'None completed yet';
@@ -1632,19 +1747,19 @@
                 </div>
                 <div class="form-group full">
                   <label>Themes (Subjective)</label>
-                  <textarea id="noteThemes" placeholder="What did the client share?"></textarea>
+                  <textarea id="noteThemes" placeholder="What did the client share?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Observations (Objective)</label>
-                  <textarea id="noteObs" placeholder="What did you observe?"></textarea>
+                  <textarea id="noteObs" placeholder="What did you observe?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Interventions (Assessment)</label>
-                  <textarea id="noteInt" placeholder="What did you do?"></textarea>
+                  <textarea id="noteInt" placeholder="What did you do?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Plan</label>
-                  <textarea id="notePlan" placeholder="Next steps..."></textarea>
+                  <textarea id="notePlan" placeholder="Next steps..." oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group">
                   <label>Next Session Date</label>
@@ -1697,6 +1812,7 @@
 
         e.target.closest('.modal-overlay').remove();
         toast('Note saved');
+        setFormDirty(false);
       } catch (err) {
         console.error(err);
         toast('Error saving note');
@@ -1821,14 +1937,19 @@
       text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
 
       if (homework.length) {
-        text += 'Homework: ' + homework.map(h => h.title + ' -- Status: ' + (h.completed_at ? 'completed' : 'in progress')).join('; ') + '.\n\n';
+        text += 'Homework: ' + homework.map(h => {
+          let status = h.completed_at ? 'completed' : 'in progress';
+          if (!h.completed_at && h.viewed_at) status += ', seen by client ' + new Date(h.viewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          else if (!h.completed_at && !h.viewed_at) status += ', not yet seen by client';
+          return h.title + ' -- Status: ' + status;
+        }).join('; ') + '.\n\n';
       } else {
         text += 'Homework: None assigned.\n\n';
       }
 
       text += 'Client Messages: ' + recentMessages.length + ' message' + (recentMessages.length !== 1 ? 's' : '') + ' received';
       if (recentMessages.length) {
-        text += '; subject: ' + truncate(recentMessages[0].message, 50);
+        text += '; subject: ' + truncate(recentMessages[0].content, 50);
       }
       text += '.\n\n';
 
@@ -1885,7 +2006,9 @@
       const preview = homework.slice(0, 2);
       const hasMore = homework.length > 2;
 
-      document.getElementById('homeworkHistory').innerHTML = preview.map(h => `
+      document.getElementById('homeworkHistory').innerHTML = preview.map(h => {
+        const viewedInfo = h.viewed_at ? ' · Seen ' + new Date(h.viewed_at).toLocaleDateString() : '';
+        return `
         <div class="homework-item">
           <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
             ${h.completed_at ? '✓' : '○'}
@@ -1894,10 +2017,10 @@
             <div class="homework-type">${esc(h.title)}</div>
             <div class="homework-desc">${esc(h.goal)}</div>
             ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
-            <div class="homework-meta">Assigned ${new Date(h.created_at).toLocaleDateString()}</div>
+            <div class="homework-meta">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}${viewedInfo}</div>
           </div>
         </div>
-      `).join('');
+      `}).join('');
 
       const btn = document.getElementById('viewAllHomeworkBtn');
       if (btn) { btn.style.display = hasMore ? 'inline-flex' : 'none'; if (hasMore) btn.textContent = 'View All (' + homework.length + ')'; }
@@ -1951,13 +2074,23 @@
     function renderCrisisAlerts(cacheKey) {
       const crisis = clientCrisis[cacheKey] || [];
       const unacknowledged = crisis.filter(c => !c.acknowledged);
+      const weekAgo = new Date(Date.now() - 7 * 86400000);
+      const recentResolved = crisis.filter(c => c.acknowledged && c.acknowledged_at && new Date(c.acknowledged_at) > weekAgo);
 
-      if (!unacknowledged.length) {
+      if (!unacknowledged.length && !recentResolved.length) {
         document.getElementById('crisisAlertsCard').style.display = 'none';
         document.getElementById('crisisAlertButton').classList.remove('visible');
         return;
       }
-
+// Show card for either unresolved or recently resolved
+      document.getElementById('crisisAlertsCard').style.display = 'block';
+      if (unacknowledged.length > 0) {
+        document.getElementById('crisisAlertButton').classList.add('visible');
+        document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
+        document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
+      } else {
+        document.getElementById('crisisAlertButton').classList.remove('visible');
+      }
       const phone = currentClient?.phone || '';
       const eName = currentClient?.emergency_contact_name || '';
       const ePhone = currentClient?.emergency_contact_phone || '';
@@ -1976,10 +2109,6 @@
         </div>
       `;
 
-      document.getElementById('crisisAlertsCard').style.display = 'block';
-      document.getElementById('crisisAlertButton').classList.add('visible');
-      document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
-      document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
 
       document.getElementById('crisisAlertsList').innerHTML =
         emergencyPanel +
@@ -1996,6 +2125,30 @@
           <button class="btn btn-secondary" style="margin-top:8px;" onclick="openResolveCrisisModal('${c.id}', event)">Resolve</button>
         </div>
       `).join('');
+
+      // Recently resolved (last 7 days) — collapsed audit trail
+      if (recentResolved.length > 0) {
+        const resolvedHtml = recentResolved.map(c => `
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>${esc(c.category)}</span>
+              <span style="color: var(--text-muted);">${timeAgo(new Date(c.acknowledged_at))}</span>
+            </div>
+            <div style="color: var(--text-muted); margin-top: 2px;">
+              Action: ${esc(c.action_taken || 'resolved')}${c.action_notes ? ' — ' + esc(truncate(c.action_notes, 80)) : ''}
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('crisisAlertsList').innerHTML += `
+          <details style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
+            <summary style="cursor: pointer; font-size: 0.8125rem; color: var(--text-muted); font-weight: 500;">
+              Recently resolved (${recentResolved.length})
+            </summary>
+            <div style="margin-top: 8px;">${resolvedHtml}</div>
+          </details>
+        `;
+      }
     }
 
     function goToCrisisAlerts() {
@@ -2003,17 +2156,7 @@
       document.getElementById('crisisAlertsCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function renderClientMessages(cacheKey) {
-      const messages = clientMessages[cacheKey] || [];
-      if (!messages.length) return;
-
-      document.getElementById('activityMessages').innerHTML = messages.map(m => `
-        <div class="excerpt">
-          <div class="excerpt-time">${timeAgo(new Date(m.created_at))} ${m.read ? '' : '<strong>(unread)</strong>'}</div>
-          <div class="excerpt-text">${esc(m.content || '(empty message)')}</div>
-        </div>
-      `).join('');
-    }
+    
 
     // =====================================================
     // CALENDAR WIDGET
@@ -2379,13 +2522,14 @@
     function renderHwDrawerItem(h) {
       const status = h.completed_at ? '✓' : (h.is_active ? '◦' : '–');
       const statusClass = h.completed_at ? 'color: var(--success)' : '';
+      const viewedInfo = h.viewed_at ? ' · Seen ' + new Date(h.viewed_at).toLocaleDateString() : '';
       return `
         <div class="hw-drawer-item">
           <span style="${statusClass}; font-weight: 700; margin-right: 8px;">${status}</span>
           <div>
             <div><strong>${esc(h.title || 'Untitled')}</strong> <span class="hw-type-tag">${esc(h.homework_type || '')}</span></div>
             <div style="font-size: 0.8125rem; color: var(--text-muted);">${esc(h.goal || '')}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}${viewedInfo}</div>
           </div>
         </div>
       `;
@@ -2491,7 +2635,20 @@
 
         closeModal('editClientModal');
         toast('Client updated');
-        loadDashboard();
+        await loadDashboard();
+
+        // Refresh client detail view with updated data
+        if (currentClient) {
+          const updated = allClients.find(c => c.id === currentClient.id);
+          if (updated) {
+            currentClient = updated;
+            document.getElementById('clientName').textContent = updated.display_name || 'Client';
+            const isPending = !updated.client_id;
+            document.getElementById('clientMeta').innerHTML = isPending
+              ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(updated.invite_code)}</span>`
+              : `${updated.sessionCount} sessions this week · ${updated.homeworkCount} active homework`;
+          }
+        }
       } catch (err) {
         console.error(err);
         toast('Error updating client');
