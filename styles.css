@@ -16,11 +16,12 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   --sage-light: #E0EDEB;
   --sage-hover: #2D6B74;
   --charcoal: #1D3539;
-  --stone: #6B8085;
+  --stone: #566A6F;
 
   --bg: var(--cream);
   --white: #ffffff;
   --border: rgba(58, 124, 134, 0.15);
+  --border-subtle: rgba(58, 124, 134, 0.10);
   --border-strong: rgba(58, 124, 134, 0.28);
 
   --text: var(--charcoal);
