@@ -756,6 +756,30 @@
             session = refreshed;
             therapistId = refreshed.user.id;
             localStorage.setItem('alo_session', JSON.stringify(refreshed));
+
+            // Verify this is actually a therapist account before showing dashboard
+            try {
+              const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
+              if (!profile?.[0] || profile[0].role !== 'therapist') {
+                throw new Error('Not a therapist account');
+              }
+            } catch (roleErr) {
+              console.log('Session is not a therapist account');
+              localStorage.removeItem('alo_session');
+              session = null;
+              therapistId = null;
+
+              // Show clear error message instead of generic login
+              const errorEl = document.getElementById('loginError');
+              if (errorEl) {
+                errorEl.textContent = 'This account is not authorized for the therapist dashboard. If you are a client, visit alowen.ai to chat with Alo.';
+                errorEl.style.display = 'block';
+              }
+
+              showLogin();
+              return;
+            }
+
             showApp();
             return;
           }
