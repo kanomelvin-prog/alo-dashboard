@@ -1,7 +1,7 @@
 /* ============================================================
-   ALO CLINICAL DASHBOARD v3.1
+   ALOWEN CLINICAL DASHBOARD v3.2
    Design: Teal-blue thinking partner (aligned with client chat palette)
-   Updated: Feb 23, 2026 — Color palette overhaul to teal-blue
+   Updated: Mar 4, 2026 — v3.2 Phase 1+2 implementation
    ============================================================ */
 
 /* === RESET === */
@@ -2449,4 +2449,288 @@ body {
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--charcoal);
+}
+
+/* ============================================================
+   DASHBOARD v3.2 ADDITIONS
+   Phase 1 + Phase 2 implementation (March 2026)
+   ============================================================ */
+
+/* === BETWEEN-SESSION THEMES === */
+.themes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.themes-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.theme-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sage-light);
+  color: var(--sage-hover);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.theme-count {
+  font-weight: 600;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.themes-provenance {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.themes-disclaimer {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.themes-empty {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 16px;
+  line-height: 1.5;
+}
+
+/* === NOTE HEADER ACTIONS (Edit/Delete) === */
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.note-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note-action-btn {
+  background: none;
+  border: 1px solid transparent;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.note-action-btn:hover {
+  background: var(--sage-light);
+  border-color: var(--border);
+  color: var(--sage);
+}
+
+.note-action-delete:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+/* === DRAFT RESTORED BANNER === */
+.draft-restored-banner {
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  color: var(--info-text);
+  margin-bottom: 16px;
+}
+
+.draft-restored-banner a {
+  color: var(--info);
+  font-weight: 500;
+}
+
+/* === FORGOT PASSWORD LINK === */
+.login-forgot {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+.login-forgot a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.login-forgot a:hover {
+  color: var(--sage);
+  text-decoration: underline;
+}
+
+/* === PASSWORD RESET MODAL === */
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle-btn:hover {
+  color: var(--text);
+}
+
+.password-strength {
+  min-height: 18px;
+  margin-top: 4px;
+}
+
+/* === ONBOARDING CARD === */
+.onboarding-card {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.onboarding-logo {
+  width: 48px;
+  height: 48px;
+  background: var(--sage);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 auto 16px;
+}
+
+.onboarding-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 6px;
+}
+
+.onboarding-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-light);
+  margin-bottom: 24px;
+}
+
+.onboarding-steps {
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto 24px;
+}
+
+.onboarding-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.onboarding-step + .onboarding-step {
+  border-top: 1px solid var(--border);
+}
+
+.onboarding-step-num {
+  width: 24px;
+  height: 24px;
+  background: var(--sage-light);
+  color: var(--sage);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.onboarding-step strong {
+  font-size: 0.9375rem;
+  color: var(--charcoal);
+}
+
+.onboarding-step-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.onboarding-disclaimer {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 16px;
+}
+
+/* === FEEDBACK LINK === */
+.feedback-link {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.feedback-link:hover {
+  background: var(--sage-light);
+  border-color: var(--sage);
+  color: var(--sage);
+}
+
+/* === NOTE SESSION TYPE TAG === */
+.note-session-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* === MOBILE: Note action buttons touch targets === */
+@media (max-width: 767px) {
+  .note-action-btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 8px;
+  }
+
+  .feedback-link {
+    display: none;
+  }
+
+  .onboarding-card {
+    padding: 24px 16px;
+  }
+
+  .theme-pill {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+  }
 }
