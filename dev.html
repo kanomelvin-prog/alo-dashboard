@@ -838,7 +838,7 @@ async function submitPasswordReset(accessToken) {
             'apikey': SUPABASE_ANON_KEY,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email: email })
+          body: JSON.stringify({ email: email, redirect_to: window.location.origin + window.location.pathname })
         });
 
         // Always show success (don't reveal if email exists)
@@ -1011,8 +1011,14 @@ async function submitPasswordReset(accessToken) {
       showLogin();
     });
 
+    document.getElementById('loginEmail')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
     document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('signupPassword')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSignup();
     });
 
     async function refreshSession(refreshToken) {
@@ -1063,6 +1069,9 @@ async function submitPasswordReset(accessToken) {
         errorEl.style.display = 'block';
         return;
       }
+
+      const btn = document.querySelector('#signUpForm .btn-primary');
+      setButtonLoading(btn, true, 'Creating account...');
 
       try {
         const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
@@ -1140,6 +1149,8 @@ async function submitPasswordReset(accessToken) {
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
+      } finally {
+        setButtonLoading(btn, false, 'Create Account');
       }
     }
 
@@ -1147,13 +1158,18 @@ async function submitPasswordReset(accessToken) {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
+      const infoEl = document.getElementById('loginInfo');
       errorEl.style.display = 'none';
+      if (infoEl) infoEl.style.display = 'none';
 
       if (!email || !password) {
         errorEl.textContent = 'Please enter email and password';
         errorEl.style.display = 'block';
         return;
       }
+
+      const btn = document.querySelector('#signInForm .btn-primary');
+      setButtonLoading(btn, true, 'Signing in...');
 
       try {
         const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
@@ -1183,6 +1199,8 @@ async function submitPasswordReset(accessToken) {
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
+      } finally {
+        setButtonLoading(btn, false, 'Sign In');
       }
     }
 
