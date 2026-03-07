@@ -802,14 +802,14 @@ async function submitForgotPassword() {
 
   setButtonLoading(btn, true, 'Sending...');
   try {
-    const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-    const res = await fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/recover?redirect_to=' + redirectUrl, {
+    const redirectUrl = window.location.origin + window.location.pathname;
+    const res = await fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/recover?redirect_to=' + encodeURIComponent(redirectUrl), {
       method: 'POST',
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email: email })
+      body: JSON.stringify({ email: email, redirect_to: redirectUrl })
     });
     if (res.ok) {
         // Replace modal content with clean success message
@@ -1735,6 +1735,9 @@ function setButtonLoading(btn, loading, loadingText) {
         markClientMessagesRead(client.client_id);
       }
 
+      // Check for missing emergency contact info
+      checkEmergencyContactWarning();
+
     }
 
     function showHomePage() {
@@ -2231,6 +2234,43 @@ function setButtonLoading(btn, loading, loadingText) {
       });
       // Close dropdown
       document.querySelectorAll('.ehr-dropdown').forEach(d => d.style.display = 'none');
+    }
+
+    // =====================================================
+    // EMERGENCY CONTACT WARNING
+    // =====================================================
+    function checkEmergencyContactWarning() {
+      // Remove any existing warning
+      document.getElementById('emergencyContactWarning')?.remove();
+
+      if (!currentClient || !currentClient.client_id) return; // skip for pending clients
+
+      const missing = [];
+      if (!currentClient.phone) missing.push('client phone');
+      if (!currentClient.emergency_contact_name) missing.push('emergency contact name');
+      if (!currentClient.emergency_contact_phone) missing.push('emergency contact phone');
+
+      if (missing.length === 0) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'emergencyContactWarning';
+      banner.className = 'emergency-warning-banner';
+      banner.innerHTML = `
+        <div class="emergency-warning-content">
+          <span class="emergency-warning-icon">⚠</span>
+          <div class="emergency-warning-text">
+            <strong>Missing emergency info:</strong> ${missing.join(', ')}. 
+            <a href="#" onclick="showEditClientModal(); return false;">Add in Edit →</a>
+          </div>
+          <button class="emergency-warning-close" onclick="this.closest('.emergency-warning-banner').remove()" aria-label="Dismiss">&times;</button>
+        </div>
+      `;
+
+      // Insert at the top of the client page, after the sticky header
+      const stickyHeader = document.querySelector('.client-sticky-header');
+      if (stickyHeader) {
+        stickyHeader.after(banner);
+      }
     }
 
     // =====================================================
@@ -3063,6 +3103,10 @@ function setButtonLoading(btn, loading, loadingText) {
               : `${updated.sessionCount} sessions this week · ${updated.homeworkCount} active homework`;
           }
         }
+
+        // Re-check emergency contact warning after edit
+        checkEmergencyContactWarning();
+
       } catch (err) {
         console.error(err);
         toast('Error updating client');
