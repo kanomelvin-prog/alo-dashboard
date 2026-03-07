@@ -2450,3 +2450,189 @@ body {
   font-weight: 600;
   color: var(--charcoal);
 }
+
+/* ============================================================
+   PRE-PILOT POLISH — March 2026
+   Batches 3-6: Loading states, note actions, EHR dropdown
+   ============================================================ */
+
+/* === BUTTON LOADING STATE === */
+.btn-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+
+.btn-secondary .btn-spinner {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: var(--charcoal);
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === NOTE ACTIONS (edit, delete, EHR copy) === */
+.note-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.note-action-btn {
+  min-height: 36px;
+  min-width: 36px;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+}
+
+.note-type-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--cream);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* === EHR FORMAT DROPDOWN === */
+.ehr-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(29, 53, 57, 0.12);
+  min-width: 120px;
+  overflow: hidden;
+}
+
+.ehr-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  min-height: 44px;
+}
+
+.ehr-dropdown button:hover {
+  background: var(--sage-light);
+}
+
+.ehr-dropdown button:not(:last-child) {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Mobile: bottom-sheet style for EHR dropdown */
+@media (max-width: 767px) {
+  .note-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .note-action-btn {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+  }
+
+  .ehr-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 24px rgba(29, 53, 57, 0.18);
+    min-width: unset;
+  }
+
+  .ehr-dropdown button {
+    padding: 16px 20px;
+    font-size: 1rem;
+    text-align: center;
+    min-height: 52px;
+  }
+}
+
+/* === FORGOT PASSWORD / RESET MODAL reuses existing modal styles === */
+/* login-error and login-info styles already exist, used inside modals too */
+
+/* === EMERGENCY CONTACT WARNING BANNER === */
+.emergency-warning-banner {
+  background: #FEF3CD;
+  border: 1px solid #F0D060;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.emergency-warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.emergency-warning-icon {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.emergency-warning-text {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: #665520;
+  line-height: 1.5;
+}
+
+.emergency-warning-text a {
+  color: #665520;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.emergency-warning-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #997A20;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
