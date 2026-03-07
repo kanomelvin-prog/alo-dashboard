@@ -12,9 +12,9 @@
     <div class="login-card">
       <div class="login-logo">A</div>
       <h1 class="login-title">Alowen Dashboard</h1>
-      <p class="login-subtitle">Clinical companion intelligence</p>
-      <p class="login-trust">Client data is encrypted at rest and in transit. Alo conversations are not permanently saved — chat history is automatically cleared.</p>
-      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alo supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol. <a href="mailto:contact@alowen.ai" style="color: var(--sage);">Questions or feedback?</a></p>
+      <p class="login-subtitle">Clinical companion management</p>
+      <p class="login-trust">Client data is encrypted at rest and in transit. Alowen conversations are not permanently saved — chat history is automatically cleared.</p>
+      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
@@ -28,9 +28,9 @@
           <label>Password</label>
           <input type="password" id="loginPassword" placeholder="••••••••">
         </div>
-        <button class="btn btn-primary btn-full" onclick="handleLogin()">Sign In</button>
-        <p class="login-forgot">
-          <a href="#" onclick="handleForgotPassword(); return false;">Forgot password?</a>
+        <button class="btn btn-primary btn-full" id="loginBtn" onclick="handleLogin()">Sign In</button>
+        <p style="text-align: center; margin-top: 8px;">
+          <a href="#" onclick="showForgotPassword(); return false;" style="color: var(--text-muted); font-size: 0.8125rem; text-decoration: none;">Forgot password?</a>
         </p>
         <p class="login-switch">
           New therapist? <a href="#" onclick="toggleAuthForm('signup'); return false;">Create account</a>
@@ -51,7 +51,7 @@
           <label>Password</label>
           <input type="password" id="signupPassword" placeholder="Min. 6 characters">
         </div>
-        <button class="btn btn-primary btn-full" onclick="handleSignup()">Create Account</button>
+        <button class="btn btn-primary btn-full" id="signupBtn" onclick="handleSignup()">Create Account</button>
         <p class="login-switch">
           Already have an account? <a href="#" onclick="toggleAuthForm('login'); return false;">Sign in</a>
         </p>
@@ -82,7 +82,6 @@
       <div class="header-right">
         <span class="user-name" id="therapistName"></span>
         <div class="user-avatar" id="therapistAvatar"></div>
-        <a href="mailto:contact@alowen.ai" class="feedback-link" title="Send feedback">Feedback</a>
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
     </header>
@@ -198,16 +197,6 @@
               <span class="card-title">This Week</span>
             </div>
             <div class="card-body" id="weekGlanceBody">
-              <div class="loading"><div class="spinner"></div></div>
-            </div>
-          </div>
-
-          <!-- Activity Calendar -->
-          <div class="card" id="themesCard" style="display: none;">
-            <div class="card-header">
-              <span class="card-title">Between-Session Themes</span>
-            </div>
-            <div class="card-body" id="themesBody">
               <div class="loading"><div class="spinner"></div></div>
             </div>
           </div>
@@ -648,7 +637,7 @@
     <span id="toastMessage">Success</span>
   </div>
 <script>
-// === PASSWORD RESET HANDLER ===
+// === PASSWORD RESET HANDLER (modal-based) ===
 (function() {
   const hash = window.location.hash;
   if (hash && hash.includes('type=recovery')) {
@@ -656,95 +645,78 @@
     const accessToken = params.get('access_token');
     if (accessToken) {
       document.addEventListener('DOMContentLoaded', function() {
-        showPasswordResetModal(accessToken);
+        try {
+          showPasswordResetModal(accessToken);
+        } catch (e) {
+          // Fallback if modal code fails
+          const newPass = prompt('Enter your new password (min 6 characters):');
+          if (newPass && newPass.length >= 6) {
+            fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
+              method: 'PUT',
+              headers: {
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ password: newPass })
+            }).then(r => {
+              if (r.ok) { alert('Password updated!'); window.location.href = window.location.pathname; }
+              else { r.text().then(t => alert('Error: ' + t)); }
+            });
+          }
+        }
       });
     }
   }
 })();
 
 function showPasswordResetModal(accessToken) {
-  const existing = document.getElementById('passwordResetOverlay');
-  if (existing) existing.remove();
-
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay show';
-  overlay.id = 'passwordResetOverlay';
   overlay.innerHTML = `
-    <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 400px;">
       <div class="modal-header">
         <h3>Set New Password</h3>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 16px;">Enter your new password below. It must be at least 6 characters.</p>
+        <div class="login-error" id="resetError" style="display:none;"></div>
         <div class="form-group">
           <label>New Password</label>
-          <div style="position: relative;">
-            <input type="password" id="resetNewPassword" placeholder="Min. 6 characters" style="padding-right: 44px;">
-            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('resetNewPassword', this)" aria-label="Show password">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-            </button>
-          </div>
-          <div class="password-strength" id="resetPasswordStrength"></div>
+          <input type="password" id="resetNewPass" placeholder="Min. 6 characters" autofocus>
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
-          <input type="password" id="resetConfirmPassword" placeholder="Re-enter password">
+          <input type="password" id="resetConfirmPass" placeholder="Confirm password">
         </div>
-        <div id="resetError" class="login-error" style="display:none;"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" id="resetSubmitBtn" onclick="submitPasswordReset('${accessToken}')">Update Password</button>
+        <button class="btn btn-primary" id="resetPassBtn" onclick="submitPasswordReset('${accessToken}')">Update Password</button>
       </div>
     </div>
   `;
   document.body.appendChild(overlay);
-
-  document.getElementById('resetNewPassword').addEventListener('input', function() {
-    updatePasswordStrength(this.value, 'resetPasswordStrength');
+  document.getElementById('resetNewPass')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('resetConfirmPass')?.focus();
+  });
+  document.getElementById('resetConfirmPass')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitPasswordReset(accessToken);
   });
 }
 
-function togglePasswordVisibility(inputId, btn) {
-  const input = document.getElementById(inputId);
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" /></svg>';
-  } else {
-    input.type = 'password';
-    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>';
-  }
-}
-
-function updatePasswordStrength(password, elementId) {
-  const el = document.getElementById(elementId);
-  if (!password) { el.innerHTML = ''; return; }
-  let strength = 0;
-  if (password.length >= 6) strength++;
-  if (password.length >= 8) strength++;
-  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
-  if (/\d/.test(password)) strength++;
-  if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-  const labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
-  const colors = ['var(--danger)', 'var(--warning)', 'var(--warning)', 'var(--success)', 'var(--success)'];
-  const idx = Math.min(strength, 4);
-  el.innerHTML = '<span style="color:' + colors[idx] + '; font-size: 0.75rem;">' + labels[idx] + '</span>';
-}
-
 async function submitPasswordReset(accessToken) {
-  const password = document.getElementById('resetNewPassword').value;
-  const confirm = document.getElementById('resetConfirmPassword').value;
+  const btn = document.getElementById('resetPassBtn');
   const errorEl = document.getElementById('resetError');
-  const btn = document.getElementById('resetSubmitBtn');
+  const newPass = document.getElementById('resetNewPass').value;
+  const confirmPass = document.getElementById('resetConfirmPass').value;
   errorEl.style.display = 'none';
 
-  if (!password || password.length < 6) {
-    errorEl.textContent = 'Password must be at least 6 characters.';
+  if (!newPass || newPass.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters';
     errorEl.style.display = 'block';
     return;
   }
-  if (password !== confirm) {
-    errorEl.textContent = 'Passwords do not match.';
+  if (newPass !== confirmPass) {
+    errorEl.textContent = 'Passwords do not match';
     errorEl.style.display = 'block';
     return;
   }
@@ -758,11 +730,11 @@ async function submitPasswordReset(accessToken) {
         'Authorization': 'Bearer ' + accessToken,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ password: password })
+      body: JSON.stringify({ password: newPass })
     });
     if (res.ok) {
-      document.getElementById('passwordResetOverlay')?.remove();
-      window.location.href = window.location.pathname;
+      btn.closest('.modal-overlay').remove();
+      window.location.hash = '';
       const infoEl = document.getElementById('loginInfo');
       if (infoEl) {
         infoEl.textContent = 'Password updated! You can now sign in.';
@@ -777,7 +749,96 @@ async function submitPasswordReset(accessToken) {
     errorEl.textContent = 'Network error. Please try again.';
     errorEl.style.display = 'block';
   } finally {
-    setButtonLoading(btn, false, 'Update Password');
+    setButtonLoading(btn, false);
+  }
+}
+
+function showForgotPassword() {
+  const prefillEmail = document.getElementById('loginEmail')?.value?.trim() || '';
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div class="modal" onclick="event.stopPropagation()" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3>Reset Password</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">Enter your email and we'll send you a link to reset your password.</p>
+        <div class="login-error" id="forgotError" style="display:none;"></div>
+        <div class="login-info" id="forgotInfo" style="display:none;"></div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="forgotEmail" placeholder="you@practice.com" value="${prefillEmail}">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" id="forgotBtn" onclick="submitForgotPassword()">Send Reset Link</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('forgotEmail')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitForgotPassword();
+  });
+  if (!prefillEmail) document.getElementById('forgotEmail')?.focus();
+}
+
+async function submitForgotPassword() {
+  const btn = document.getElementById('forgotBtn');
+  const email = document.getElementById('forgotEmail')?.value?.trim();
+  const errorEl = document.getElementById('forgotError');
+  const infoEl = document.getElementById('forgotInfo');
+  errorEl.style.display = 'none';
+  infoEl.style.display = 'none';
+
+  if (!email) {
+    errorEl.textContent = 'Please enter your email';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  setButtonLoading(btn, true, 'Sending...');
+  try {
+    const res = await fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/recover', {
+      method: 'POST',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email: email, redirect_to: window.location.origin + window.location.pathname })
+    });
+    if (res.ok) {
+      infoEl.textContent = 'Check your email for a reset link.';
+      infoEl.style.display = 'block';
+      document.getElementById('forgotEmail').disabled = true;
+      btn.style.display = 'none';
+    } else {
+      errorEl.textContent = 'Could not send reset email. Check the address and try again.';
+      errorEl.style.display = 'block';
+    }
+  } catch (err) {
+    errorEl.textContent = 'Network error. Please try again.';
+    errorEl.style.display = 'block';
+  } finally {
+    setButtonLoading(btn, false);
+  }
+}
+
+// === BUTTON LOADING UTILITY ===
+function setButtonLoading(btn, loading, loadingText) {
+  if (!btn) return;
+  if (loading) {
+    btn._originalHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="btn-spinner"></span> ' + (loadingText || 'Loading...');
+    btn.disabled = true;
+    btn.classList.add('btn-loading');
+  } else {
+    if (btn._originalHTML !== undefined) btn.innerHTML = btn._originalHTML;
+    btn.disabled = false;
+    btn.classList.remove('btn-loading');
   }
 }
 
@@ -796,112 +857,6 @@ async function submitPasswordReset(accessToken) {
     let clientMessages = {};
     let clientSessions = {};
     let clientCrisis = {};
-    let clientSummaries = {};
-
-    // =====================================================
-    // BUTTON LOADING STATE UTILITY
-    // =====================================================
-    function setButtonLoading(btn, loading, loadingText) {
-      if (!btn) return;
-      if (loading) {
-        btn._originalHTML = btn.innerHTML;
-        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;display:inline-block;vertical-align:middle;"></div> ' + (loadingText || 'Saving...');
-        btn.disabled = true;
-        btn.style.opacity = '0.7';
-      } else {
-        btn.innerHTML = btn._originalHTML || loadingText || 'Save';
-        btn.disabled = false;
-        btn.style.opacity = '';
-      }
-    }
-
-    // =====================================================
-    // FORGOT PASSWORD
-    // =====================================================
-    async function handleForgotPassword() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const errorEl = document.getElementById('loginError');
-      const infoEl = document.getElementById('loginInfo');
-      errorEl.style.display = 'none';
-      infoEl.style.display = 'none';
-
-      if (!email) {
-        errorEl.textContent = 'Enter your email address above, then click "Forgot password?"';
-        errorEl.style.display = 'block';
-        return;
-      }
-
-      try {
-        const res = await fetch(SUPABASE_URL + '/auth/v1/recover', {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email: email, redirect_to: window.location.origin + window.location.pathname })
-        });
-
-        // Always show success (don't reveal if email exists)
-        infoEl.textContent = 'If an account exists for ' + email + ', a password reset link has been sent. Check your inbox.';
-        infoEl.style.display = 'block';
-      } catch (err) {
-        errorEl.textContent = 'Network error. Please try again.';
-        errorEl.style.display = 'block';
-      }
-    }
-
-    // =====================================================
-    // NOTE DRAFT AUTO-SAVE
-    // =====================================================
-    let _noteDraftTimer = null;
-
-    function startNoteDraftAutoSave() {
-      stopNoteDraftAutoSave();
-      _noteDraftTimer = setInterval(saveNoteDraft, 5000);
-    }
-
-    function stopNoteDraftAutoSave() {
-      if (_noteDraftTimer) { clearInterval(_noteDraftTimer); _noteDraftTimer = null; }
-    }
-
-    function saveNoteDraft() {
-      const form = document.getElementById('noteForm') || document.getElementById('noteEditForm');
-      if (!form) return;
-      const draft = {
-        date: (document.getElementById('noteDate') || document.getElementById('editNoteDate'))?.value || '',
-        type: (document.getElementById('noteType') || document.getElementById('editNoteType'))?.value || '',
-        themes: (document.getElementById('noteThemes') || document.getElementById('editNoteThemes'))?.value || '',
-        observations: (document.getElementById('noteObs') || document.getElementById('editNoteObs'))?.value || '',
-        interventions: (document.getElementById('noteInt') || document.getElementById('editNoteInt'))?.value || '',
-        plan: (document.getElementById('notePlan') || document.getElementById('editNotePlan'))?.value || '',
-        nextSession: (document.getElementById('noteNextSession') || document.getElementById('editNoteNextSession'))?.value || '',
-        billing: (document.getElementById('noteBilling') || document.getElementById('editNoteBilling'))?.checked || false,
-        clientId: currentClient?.client_id || currentClient?.id || '',
-        savedAt: Date.now()
-      };
-      // Only save if there's actual content
-      if (draft.themes || draft.observations || draft.interventions || draft.plan) {
-        try { localStorage.setItem('alowen_note_draft', JSON.stringify(draft)); } catch(e) {}
-      }
-    }
-
-    function loadNoteDraft() {
-      try {
-        const raw = localStorage.getItem('alowen_note_draft');
-        if (!raw) return null;
-        const draft = JSON.parse(raw);
-        // Only restore if less than 24 hours old and for same client
-        const clientId = currentClient?.client_id || currentClient?.id || '';
-        if (Date.now() - draft.savedAt > 86400000) { clearNoteDraft(); return null; }
-        if (draft.clientId && draft.clientId !== clientId) return null;
-        return draft;
-      } catch(e) { return null; }
-    }
-
-    function clearNoteDraft() {
-      try { localStorage.removeItem('alowen_note_draft'); } catch(e) {}
-      stopNoteDraftAutoSave();
-    }
 
     // =====================================================
     // SUPABASE API HELPER
@@ -1011,11 +966,17 @@ async function submitPasswordReset(accessToken) {
       showLogin();
     });
 
+    document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
     document.getElementById('loginEmail')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleLogin();
     });
-    document.getElementById('loginPassword')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleLogin();
+    document.getElementById('signupName')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('signupEmail')?.focus();
+    });
+    document.getElementById('signupEmail')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('signupPassword')?.focus();
     });
     document.getElementById('signupPassword')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSignup();
@@ -1070,9 +1031,8 @@ async function submitPasswordReset(accessToken) {
         return;
       }
 
-      const btn = document.querySelector('#signUpForm .btn-primary');
+      const btn = document.getElementById('signupBtn');
       setButtonLoading(btn, true, 'Creating account...');
-
       try {
         const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
           method: 'POST',
@@ -1150,7 +1110,7 @@ async function submitPasswordReset(accessToken) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
       } finally {
-        setButtonLoading(btn, false, 'Create Account');
+        setButtonLoading(btn, false);
       }
     }
 
@@ -1159,8 +1119,9 @@ async function submitPasswordReset(accessToken) {
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
       const infoEl = document.getElementById('loginInfo');
+      const btn = document.getElementById('loginBtn');
       errorEl.style.display = 'none';
-      if (infoEl) infoEl.style.display = 'none';
+      infoEl.style.display = 'none';
 
       if (!email || !password) {
         errorEl.textContent = 'Please enter email and password';
@@ -1168,9 +1129,7 @@ async function submitPasswordReset(accessToken) {
         return;
       }
 
-      const btn = document.querySelector('#signInForm .btn-primary');
       setButtonLoading(btn, true, 'Signing in...');
-
       try {
         const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
           method: 'POST',
@@ -1200,11 +1159,11 @@ async function submitPasswordReset(accessToken) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
       } finally {
-        setButtonLoading(btn, false, 'Sign In');
+        setButtonLoading(btn, false);
       }
     }
 
-    function handleLogout() {
+    function handleLogout() { {
       session = null;
       therapistId = null;
       localStorage.removeItem('alo_session');
@@ -1305,48 +1264,31 @@ async function submitPasswordReset(accessToken) {
           document.getElementById('triageCount').textContent = '0';
 
           // Welcome card — hide all sections, show onboarding
-          document.querySelectorAll('#homePage .main .section').forEach(s => s.style.display = 'none');
+          document.getElementById('alertsSection')?.closest('.section')?.style.setProperty('display', 'none');
+          document.getElementById('triageSection').style.display = 'none';
+          document.querySelectorAll('.home-content .section').forEach(s => s.style.display = 'none');
 
-          const homeMain = document.querySelector('#homePage .main');
-          if (homeMain) {
+          const homeContent = document.querySelector('.home-content');
+          if (homeContent) {
             const welcome = document.createElement('div');
             welcome.className = 'section';
             welcome.style.gridColumn = '1 / -1';
             welcome.innerHTML = `
-              <div class="onboarding-card">
-                <div class="onboarding-logo">A</div>
-                <h2 class="onboarding-title">Welcome to Alowen</h2>
-                <p class="onboarding-subtitle">
-                  Your clinical companion dashboard. Here's how to get started:
+              <div style="text-align: center; padding: 48px 24px;">
+                <div style="font-size: 2rem; margin-bottom: 12px;">👋</div>
+                <h2 style="margin-bottom: 8px; font-size: 1.25rem;">Welcome to Alowen</h2>
+                <p style="color: var(--text-muted); max-width: 360px; margin: 0 auto 24px;">
+                  Here's how to get started:
                 </p>
-                <div class="onboarding-steps">
-                  <div class="onboarding-step">
-                    <span class="onboarding-step-num">1</span>
-                    <div>
-                      <strong>Invite a client</strong>
-                      <div class="onboarding-step-hint">Click "+ Invite" to create a code, then share it with your client.</div>
-                    </div>
-                  </div>
-                  <div class="onboarding-step">
-                    <span class="onboarding-step-num">2</span>
-                    <div>
-                      <strong>Client connects via Alo</strong>
-                      <div class="onboarding-step-hint">They enter the code at alowen.ai. You'll see them appear here.</div>
-                    </div>
-                  </div>
-                  <div class="onboarding-step">
-                    <span class="onboarding-step-num">3</span>
-                    <div>
-                      <strong>Review between-session activity</strong>
-                      <div class="onboarding-step-hint">Themes, homework progress, and messages — all in one view before your next session.</div>
-                    </div>
-                  </div>
+                <div style="text-align: left; max-width: 320px; margin: 0 auto 24px; font-size: 0.9375rem; line-height: 1.8;">
+                  <div><strong>1.</strong> Click <strong>+ Invite</strong> to create an invite code</div>
+                  <div><strong>2.</strong> Share the code with your client</div>
+                  <div><strong>3.</strong> They connect via Alowen, and you see their activity here</div>
                 </div>
                 <button class="btn btn-primary" onclick="showInviteModal()" style="padding: 10px 24px;">+ Invite Your First Client</button>
-                <p class="onboarding-disclaimer">Alo supports between-session reflection. It is not emergency care or a crisis service.</p>
               </div>
             `;
-            homeMain.prepend(welcome);
+            homeContent.prepend(welcome);
           }
 
           document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet</div>';
@@ -1755,15 +1697,12 @@ async function submitPasswordReset(accessToken) {
       document.getElementById('homeworkHistory').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('activityMessages').innerHTML = '<p class="text-muted-center">No messages</p>';
       ['calendarDetail', 'calMonthDetail'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-      calendarOffset = 0; // Reset calendar to current month on client switch
       document.getElementById('prepSummary').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
-      document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">No session notes yet.</p>';
+      document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">Session notes will appear here after your first documented session.</p>';
       document.getElementById('crisisAlertsCard').style.display = 'none';
       document.getElementById('crisisAlertButton').classList.remove('visible');
-      document.getElementById('themesCard').style.display = 'none';
-      document.getElementById('themesBody').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       const quickNote = document.getElementById('quickNoteText');
       if (quickNote) quickNote.value = '';
 
@@ -1783,7 +1722,6 @@ async function submitPasswordReset(accessToken) {
       }
 
       renderSessionPrep(cacheKey);
-      renderSessionThemes(cacheKey);
       renderNotes(cacheKey);
       renderHomework(cacheKey);
       renderCrisisAlerts(cacheKey);
@@ -1807,13 +1745,12 @@ async function submitPasswordReset(accessToken) {
     async function loadClientData(cacheKey) {
       const clientId = currentClient.client_id || currentClient.id;
 
-      const [notes, homework, messages, sessions, crisis, summaries] = await Promise.all([
+      const [notes, homework, messages, sessions, crisis] = await Promise.all([
         api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
         api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
         api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
         api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc`),
-        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`),
-        api(`/rest/v1/conversation_summaries?client_id=eq.${clientId}&order=conversation_date.desc.nullslast,created_at.desc&limit=20`).catch(err => { console.log('Summaries fetch skipped:', err.message); return []; })
+        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`)
       ]);
 
       clientNotes[cacheKey] = notes || [];
@@ -1821,7 +1758,6 @@ async function submitPasswordReset(accessToken) {
       clientMessages[cacheKey] = messages || [];
       clientSessions[cacheKey] = sessions || [];
       clientCrisis[cacheKey] = crisis || [];
-      clientSummaries[cacheKey] = summaries || [];
     }
 
         function switchTab(tabName, btn) {
@@ -1978,77 +1914,13 @@ async function submitPasswordReset(accessToken) {
 
 
     // =====================================================
-    // BETWEEN-SESSION THEMES (from conversation summaries)
-    // =====================================================
-    function renderSessionThemes(cacheKey) {
-      const summaries = clientSummaries[cacheKey] || [];
-      const sessions = clientSessions[cacheKey] || [];
-      const isPending = !currentClient.client_id;
-      const themesCard = document.getElementById('themesCard');
-      const themesBody = document.getElementById('themesBody');
-
-      if (isPending) {
-        themesCard.style.display = 'none';
-        return;
-      }
-
-      // Always show the card for connected clients
-      themesCard.style.display = 'block';
-
-      if (!summaries.length && !sessions.length) {
-        themesBody.innerHTML = '<p class="themes-empty">No Alo activity yet. This is common early on — themes will appear here after your client uses Alo.</p>';
-        return;
-      }
-
-      if (!summaries.length && sessions.length > 0) {
-        themesBody.innerHTML = '<p class="themes-empty">Your client has used Alo, but no conversation summaries are available yet. Summaries are generated after each conversation.</p>';
-        return;
-      }
-
-      // Build theme frequency from topic_label field
-      const themeMap = {};
-      let oldestDate = null;
-      let newestDate = null;
-
-      summaries.forEach(s => {
-        const label = s.topic_label || 'General reflection';
-        themeMap[label] = (themeMap[label] || 0) + 1;
-
-        const d = new Date(s.conversation_date || s.created_at);
-        if (!oldestDate || d < oldestDate) oldestDate = d;
-        if (!newestDate || d > newestDate) newestDate = d;
-      });
-
-      // Sort themes by frequency desc
-      const sortedThemes = Object.entries(themeMap).sort((a, b) => b[1] - a[1]);
-
-      // Build provenance string
-      const dateOpts = { month: 'short', day: 'numeric' };
-      const dateRange = oldestDate && newestDate
-        ? oldestDate.toLocaleDateString('en-US', dateOpts) + ' \u2013 ' + newestDate.toLocaleDateString('en-US', dateOpts)
-        : '';
-
-      const themePills = sortedThemes.map(([label, count]) =>
-        '<span class="theme-pill">' + esc(label) + ' <span class="theme-count">(' + count + ')</span></span>'
-      ).join('');
-
-      themesBody.innerHTML =
-        '<div class="themes-container">' +
-          '<div class="themes-pills">' + themePills + '</div>' +
-          '<div class="themes-provenance">Based on ' + summaries.length + ' conversation' + (summaries.length !== 1 ? 's' : '') + (dateRange ? ', ' + dateRange : '') + '</div>' +
-          '<div class="themes-disclaimer">Topics from Alo session summaries. Not clinical interpretation.</div>' +
-        '</div>';
-    }
-
-
-    // =====================================================
     // NOTES
     // =====================================================
     function renderNotes(cacheKey) {
       const notes = clientNotes[cacheKey] || [];
 
       if (!notes.length) {
-        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">No session notes yet.</p>';
+        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">Session notes will appear here after you document your first session.</p>';
         return;
       }
 
@@ -2056,168 +1928,85 @@ async function submitPasswordReset(accessToken) {
         <div class="note-card">
           <div class="note-header">
             <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
-            <div class="note-header-actions">
-              <span class="note-session-type">${esc(n.session_type || 'Individual')}</span>
-              <button class="note-action-btn" onclick="showEditNoteForm('${n.id}')" title="Edit note">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-              </button>
-              <button class="note-action-btn note-action-delete" onclick="confirmDeleteNote('${n.id}')" title="Delete note">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
+            <div class="note-actions">
+              <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
+                <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${n.id}')">Copy for EHR</button>
+                <div class="ehr-dropdown" id="ehrDrop_${n.id}" style="display:none;">
+                  <button onclick="copyForEHR('${n.id}','soap',event)">SOAP</button>
+                  <button onclick="copyForEHR('${n.id}','dap',event)">DAP</button>
+                  <button onclick="copyForEHR('${n.id}','narrative',event)">Narrative</button>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${n.id}')">Edit</button>
+              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${n.id}')">Delete</button>
             </div>
           </div>
+          <div class="note-type-badge">${esc(n.session_type || 'Individual')}</div>
           <div class="note-content">
             ${n.themes ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button> <strong>Themes:</strong> ${esc(n.themes)}</div>` : ''}
             ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
             ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
             ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
             ${n.next_session_date ? `<div class="note-meta">Next session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
-            ${n.billing_justification ? `<div class="note-meta">📋 Billing justification included</div>` : ''}
+            ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
           </div>
         </div>
       `).join('');
     }
 
     function showNoteForm() {
-      const draft = loadNoteDraft();
-      const hasDraft = draft && (draft.themes || draft.observations || draft.interventions || draft.plan);
-
       const modal = document.createElement('div');
       modal.className = 'modal-overlay show';
       modal.innerHTML = `
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-header">
             <h3>Add Session Note</h3>
-            <button class="modal-close" onclick="clearNoteDraft(); this.closest('.modal-overlay').remove()">&times;</button>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
           </div>
           <div class="modal-body">
-            ${hasDraft ? '<div class="draft-restored-banner">Draft restored from earlier. <a href="#" onclick="clearNoteDraftAndReset(); return false;">Discard draft</a></div>' : ''}
             <form id="noteForm" onsubmit="saveNote(event)">
               <div class="form-grid">
                 <div class="form-group">
                   <label>Session Date</label>
-                  <input type="date" id="noteDate" value="${draft?.date || new Date().toISOString().split('T')[0]}" required>
+                  <input type="date" id="noteDate" value="${new Date().toISOString().split('T')[0]}" required>
                 </div>
                 <div class="form-group">
                   <label>Session Type</label>
                   <select id="noteType">
-                    <option value="Individual" ${draft?.type === 'Individual' ? 'selected' : ''}>Individual</option>
-                    <option value="Couples" ${draft?.type === 'Couples' ? 'selected' : ''}>Couples</option>
-                    <option value="Family" ${draft?.type === 'Family' ? 'selected' : ''}>Family</option>
-                    <option value="Group" ${draft?.type === 'Group' ? 'selected' : ''}>Group</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Couples">Couples</option>
+                    <option value="Family">Family</option>
+                    <option value="Group">Group</option>
                   </select>
                 </div>
                 <div class="form-group full">
                   <label>Themes (Subjective)</label>
-                  <textarea id="noteThemes" placeholder="What did the client share?" oninput="setFormDirty(true)">${esc(draft?.themes || '')}</textarea>
+                  <textarea id="noteThemes" placeholder="What did the client share?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Observations (Objective)</label>
-                  <textarea id="noteObs" placeholder="What did you observe?" oninput="setFormDirty(true)">${esc(draft?.observations || '')}</textarea>
+                  <textarea id="noteObs" placeholder="What did you observe?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Interventions (Assessment)</label>
-                  <textarea id="noteInt" placeholder="What did you do?" oninput="setFormDirty(true)">${esc(draft?.interventions || '')}</textarea>
+                  <textarea id="noteInt" placeholder="What did you do?" oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group full">
                   <label>Plan</label>
-                  <textarea id="notePlan" placeholder="Next steps..." oninput="setFormDirty(true)">${esc(draft?.plan || '')}</textarea>
+                  <textarea id="notePlan" placeholder="Next steps..." oninput="setFormDirty(true)"></textarea>
                 </div>
                 <div class="form-group">
                   <label>Next Session Date</label>
-                  <input type="date" id="noteNextSession" value="${draft?.nextSession || ''}">
+                  <input type="date" id="noteNextSession">
                 </div>
                 <div class="form-group form-group-inline">
-                  <input type="checkbox" id="noteBilling" class="checkbox-inline" ${draft?.billing ? 'checked' : ''}>
+                  <input type="checkbox" id="noteBilling" class="checkbox-inline">
                   <label for="noteBilling" class="label-inline">Include billing justification</label>
                 </div>
               </div>
               <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="clearNoteDraft(); this.closest('.modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="saveNoteBtn">Save Note</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `;
-      modal.onclick = (e) => { if (e.target === modal) { saveNoteDraft(); modal.remove(); } };
-      document.body.appendChild(modal);
-      startNoteDraftAutoSave();
-    }
-
-    function clearNoteDraftAndReset() {
-      clearNoteDraft();
-      const banner = document.querySelector('.draft-restored-banner');
-      if (banner) banner.remove();
-      document.getElementById('noteDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('noteType').value = 'Individual';
-      document.getElementById('noteThemes').value = '';
-      document.getElementById('noteObs').value = '';
-      document.getElementById('noteInt').value = '';
-      document.getElementById('notePlan').value = '';
-      document.getElementById('noteNextSession').value = '';
-      document.getElementById('noteBilling').checked = false;
-    }
-
-    function showEditNoteForm(noteId) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay show';
-      modal.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h3>Edit Session Note</h3>
-            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
-          </div>
-          <div class="modal-body">
-            <form id="noteEditForm" onsubmit="editNote(event, '${noteId}')">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Session Date</label>
-                  <input type="date" id="editNoteDate" value="${n.session_date || ''}" required>
-                </div>
-                <div class="form-group">
-                  <label>Session Type</label>
-                  <select id="editNoteType">
-                    <option value="Individual" ${n.session_type === 'Individual' ? 'selected' : ''}>Individual</option>
-                    <option value="Couples" ${n.session_type === 'Couples' ? 'selected' : ''}>Couples</option>
-                    <option value="Family" ${n.session_type === 'Family' ? 'selected' : ''}>Family</option>
-                    <option value="Group" ${n.session_type === 'Group' ? 'selected' : ''}>Group</option>
-                    <option value="Quick Note" ${n.session_type === 'Quick Note' ? 'selected' : ''}>Quick Note</option>
-                  </select>
-                </div>
-                <div class="form-group full">
-                  <label>Themes (Subjective)</label>
-                  <textarea id="editNoteThemes" oninput="setFormDirty(true)">${esc(n.themes || '')}</textarea>
-                </div>
-                <div class="form-group full">
-                  <label>Observations (Objective)</label>
-                  <textarea id="editNoteObs" oninput="setFormDirty(true)">${esc(n.observations || '')}</textarea>
-                </div>
-                <div class="form-group full">
-                  <label>Interventions (Assessment)</label>
-                  <textarea id="editNoteInt" oninput="setFormDirty(true)">${esc(n.interventions || '')}</textarea>
-                </div>
-                <div class="form-group full">
-                  <label>Plan</label>
-                  <textarea id="editNotePlan" oninput="setFormDirty(true)">${esc(n.plan || '')}</textarea>
-                </div>
-                <div class="form-group">
-                  <label>Next Session Date</label>
-                  <input type="date" id="editNoteNextSession" value="${n.next_session_date || ''}">
-                </div>
-                <div class="form-group form-group-inline">
-                  <input type="checkbox" id="editNoteBilling" class="checkbox-inline" ${n.billing_justification ? 'checked' : ''}>
-                  <label for="editNoteBilling" class="label-inline">Include billing justification</label>
-                </div>
-              </div>
-              <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="editNoteBtn">Save Changes</button>
+                <button type="submit" class="btn btn-primary">Save Note</button>
               </div>
             </form>
           </div>
@@ -2225,101 +2014,6 @@ async function submitPasswordReset(accessToken) {
       `;
       modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
       document.body.appendChild(modal);
-      startNoteDraftAutoSave();
-    }
-
-    async function editNote(e, noteId) {
-      e.preventDefault();
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const btn = document.getElementById('editNoteBtn');
-      setButtonLoading(btn, true, 'Saving...');
-
-      try {
-        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            session_date: document.getElementById('editNoteDate').value,
-            session_type: document.getElementById('editNoteType').value,
-            themes: document.getElementById('editNoteThemes').value,
-            observations: document.getElementById('editNoteObs').value,
-            interventions: document.getElementById('editNoteInt').value,
-            plan: document.getElementById('editNotePlan').value,
-            next_session_date: document.getElementById('editNoteNextSession').value || null,
-            billing_justification: document.getElementById('editNoteBilling').checked
-          }),
-          prefer: 'return=minimal'
-        });
-
-        delete clientNotes[cacheKey];
-        await loadClientData(cacheKey);
-        renderNotes(cacheKey);
-        renderSessionPrep(cacheKey);
-
-        e.target.closest('.modal-overlay').remove();
-        clearNoteDraft();
-        toast('Note updated');
-        setFormDirty(false);
-      } catch (err) {
-        console.error(err);
-        toast('Error updating note');
-      } finally {
-        setButtonLoading(btn, false, 'Save Changes');
-      }
-    }
-
-    function confirmDeleteNote(noteId) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const notes = clientNotes[cacheKey] || [];
-      const n = notes.find(note => note.id === noteId);
-      if (!n) return;
-
-      const dateLabel = new Date(n.session_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay show';
-      overlay.id = 'deleteNoteOverlay';
-      overlay.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation()" style="max-width: 380px;">
-          <div class="modal-header">
-            <h3>Delete Note</h3>
-            <button class="modal-close" onclick="document.getElementById('deleteNoteOverlay')?.remove()">&times;</button>
-          </div>
-          <div class="modal-body">
-            <p style="font-size: 0.875rem;">Delete the session note from <strong>${dateLabel}</strong>? This cannot be undone.</p>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="document.getElementById('deleteNoteOverlay')?.remove()">Cancel</button>
-            <button class="btn btn-danger-outline" id="deleteNoteBtn" onclick="deleteNote('${noteId}')">Delete Note</button>
-          </div>
-        </div>
-      `;
-      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-      document.body.appendChild(overlay);
-    }
-
-    async function deleteNote(noteId) {
-      const cacheKey = currentClient.client_id || currentClient.id;
-      const btn = document.getElementById('deleteNoteBtn');
-      setButtonLoading(btn, true, 'Deleting...');
-
-      try {
-        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
-          method: 'DELETE',
-          prefer: 'return=minimal'
-        });
-
-        document.getElementById('deleteNoteOverlay')?.remove();
-        delete clientNotes[cacheKey];
-        await loadClientData(cacheKey);
-        renderNotes(cacheKey);
-        renderSessionPrep(cacheKey);
-        toast('Note deleted');
-      } catch (err) {
-        console.error(err);
-        toast('Error deleting note');
-      } finally {
-        setButtonLoading(btn, false, 'Delete Note');
-      }
     }
 
         async function saveNote(e) {
@@ -2329,8 +2023,7 @@ async function submitPasswordReset(accessToken) {
         return;
       }
       const cacheKey = currentClient.client_id || currentClient.id;
-      const btn = document.getElementById('saveNoteBtn');
-      setButtonLoading(btn, true, 'Saving...');
+
 
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
@@ -2354,13 +2047,188 @@ async function submitPasswordReset(accessToken) {
         e.target.closest('.modal-overlay').remove();
         toast('Note saved');
         setFormDirty(false);
-        clearNoteDraft();
       } catch (err) {
         console.error(err);
         toast('Error saving note');
-      } finally {
-        setButtonLoading(btn, false, 'Save Note');
       }
+    }
+
+    // =====================================================
+    // NOTE EDIT + DELETE (Batch 5)
+    // =====================================================
+    function showEditNoteForm(noteId) {
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Edit Session Note</h3>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="editNoteForm" onsubmit="updateNote('${noteId}', event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Session Date</label>
+                  <input type="date" id="editNoteDate" value="${note.session_date || ''}" required>
+                </div>
+                <div class="form-group">
+                  <label>Session Type</label>
+                  <select id="editNoteType">
+                    <option value="Individual" ${note.session_type === 'Individual' ? 'selected' : ''}>Individual</option>
+                    <option value="Couples" ${note.session_type === 'Couples' ? 'selected' : ''}>Couples</option>
+                    <option value="Family" ${note.session_type === 'Family' ? 'selected' : ''}>Family</option>
+                    <option value="Group" ${note.session_type === 'Group' ? 'selected' : ''}>Group</option>
+                  </select>
+                </div>
+                <div class="form-group full">
+                  <label>Themes (Subjective)</label>
+                  <textarea id="editNoteThemes">${esc(note.themes || '')}</textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Observations (Objective)</label>
+                  <textarea id="editNoteObs">${esc(note.observations || '')}</textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Interventions (Assessment)</label>
+                  <textarea id="editNoteInt">${esc(note.interventions || '')}</textarea>
+                </div>
+                <div class="form-group full">
+                  <label>Plan</label>
+                  <textarea id="editNotePlan">${esc(note.plan || '')}</textarea>
+                </div>
+                <div class="form-group">
+                  <label>Next Session Date</label>
+                  <input type="date" id="editNoteNextSession" value="${note.next_session_date || ''}">
+                </div>
+                <div class="form-group form-group-inline">
+                  <input type="checkbox" id="editNoteBilling" class="checkbox-inline" ${note.billing_justification ? 'checked' : ''}>
+                  <label for="editNoteBilling" class="label-inline">Include billing justification</label>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
+
+    async function updateNote(noteId, e) {
+      e.preventDefault();
+      const cacheKey = currentClient.client_id || currentClient.id;
+      try {
+        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            session_date: document.getElementById('editNoteDate').value,
+            session_type: document.getElementById('editNoteType').value,
+            themes: document.getElementById('editNoteThemes').value,
+            observations: document.getElementById('editNoteObs').value,
+            interventions: document.getElementById('editNoteInt').value,
+            plan: document.getElementById('editNotePlan').value,
+            next_session_date: document.getElementById('editNoteNextSession').value || null,
+            billing_justification: document.getElementById('editNoteBilling').checked
+          }),
+          prefer: 'return=minimal'
+        });
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+        e.target.closest('.modal-overlay').remove();
+        toast('Note updated');
+      } catch (err) {
+        console.error(err);
+        toast('Error updating note');
+      }
+    }
+
+    async function deleteNote(noteId) {
+      if (!confirm('Delete this session note? This cannot be undone.')) return;
+      const cacheKey = currentClient.client_id || currentClient.id;
+      try {
+        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
+          method: 'DELETE',
+          prefer: 'return=minimal'
+        });
+        delete clientNotes[cacheKey];
+        await loadClientData(cacheKey);
+        renderNotes(cacheKey);
+        renderSessionPrep(cacheKey);
+        toast('Note deleted');
+      } catch (err) {
+        console.error(err);
+        toast('Error deleting note');
+      }
+    }
+
+    // =====================================================
+    // COPY FOR EHR (Batch 6)
+    // =====================================================
+    function toggleEhrDropdown(event, noteId) {
+      event.stopPropagation();
+      // Close any open dropdowns
+      document.querySelectorAll('.ehr-dropdown').forEach(d => d.style.display = 'none');
+      const dropdown = document.getElementById('ehrDrop_' + noteId);
+      if (dropdown) dropdown.style.display = 'block';
+      // Close on outside click
+      const closeHandler = (e) => {
+        if (!e.target.closest('.ehr-dropdown-wrap')) {
+          document.querySelectorAll('.ehr-dropdown').forEach(d => d.style.display = 'none');
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeHandler), 0);
+    }
+
+    function copyForEHR(noteId, format, event) {
+      if (event) event.stopPropagation();
+      const cacheKey = currentClient.client_id || currentClient.id;
+      const notes = clientNotes[cacheKey] || [];
+      const n = notes.find(x => x.id === noteId);
+      if (!n) return;
+
+      const header = 'Based on Alowen between-session data -- review and edit before adding to client record.\n\n';
+      let text = header;
+
+      if (format === 'soap') {
+        if (n.themes) text += 'S (Subjective): ' + n.themes + '\n\n';
+        if (n.observations) text += 'O (Objective): ' + n.observations + '\n\n';
+        if (n.interventions) text += 'A (Assessment): ' + n.interventions + '\n\n';
+        if (n.plan) text += 'P (Plan): ' + n.plan + '\n\n';
+      } else if (format === 'dap') {
+        const data = [n.themes, n.observations].filter(Boolean).join(' ');
+        if (data) text += 'D (Data): ' + data + '\n\n';
+        if (n.interventions) text += 'A (Assessment): ' + n.interventions + '\n\n';
+        if (n.plan) text += 'P (Plan): ' + n.plan + '\n\n';
+      } else {
+        const parts = [];
+        if (n.themes) parts.push('Client presented with: ' + n.themes + '.');
+        if (n.observations) parts.push('Therapist observed: ' + n.observations + '.');
+        if (n.interventions) parts.push('Interventions included: ' + n.interventions + '.');
+        if (n.plan) parts.push('Plan: ' + n.plan + '.');
+        text += parts.join(' ');
+      }
+
+      if (n.billing_justification) {
+        text += '\n\nMedical Necessity: Continued therapeutic support medically necessary for symptom management and functional improvement.';
+      }
+
+      navigator.clipboard.writeText(text.trim()).then(() => {
+        toast('Copied ' + format.toUpperCase() + ' to clipboard');
+      });
+      // Close dropdown
+      document.querySelectorAll('.ehr-dropdown').forEach(d => d.style.display = 'none');
     }
 
     // =====================================================
@@ -2387,8 +2255,6 @@ async function submitPasswordReset(accessToken) {
       }
 
       const cacheKey = currentClient.client_id || currentClient.id;
-      const btn = document.querySelector('.quick-note-save');
-      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
           therapist_id: therapistId,
@@ -2409,8 +2275,6 @@ async function submitPasswordReset(accessToken) {
       } catch (err) {
         console.error(err);
         toast('Error saving note');
-      } finally {
-        setButtonLoading(btn, false, 'Save Quick Note');
       }
     }
 
@@ -2547,7 +2411,7 @@ async function submitPasswordReset(accessToken) {
       const homework = clientHomework[cacheKey] || [];
 
       if (!homework.length) {
-        document.getElementById('homeworkHistory').innerHTML = '<p class="text-muted-center">No homework yet</p>';
+        document.getElementById('homeworkHistory').innerHTML = '<p class="text-muted-center">Assigned homework will appear here. Use the form above to create your first assignment.</p>';
         return;
       }
 
@@ -2588,8 +2452,7 @@ async function submitPasswordReset(accessToken) {
         return;
       }
       const cacheKey = currentClient.client_id || currentClient.id;
-      const btn = e.target.querySelector('button[type="submit"]');
-      setButtonLoading(btn, true, 'Assigning...');
+
 
       try {
         await apiMutate('/rest/v1/homework_cards', 'POST', {
@@ -2614,8 +2477,6 @@ async function submitPasswordReset(accessToken) {
       } catch (err) {
         console.error(err);
         toast('Error assigning homework');
-      } finally {
-        setButtonLoading(btn, false, 'Assign Homework');
       }
     }
 
