@@ -802,20 +802,22 @@ async function submitForgotPassword() {
 
   setButtonLoading(btn, true, 'Sending...');
   try {
-    const res = await fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/recover', {
+    const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+    const res = await fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/recover?redirect_to=' + redirectUrl, {
       method: 'POST',
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbHNkZXpzdGJuenl4dnN2Ynl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2MDk1NDUsImV4cCI6MjA3OTE4NTU0NX0.mm1POxfEEoRXyTF08NsUZOau6qA_UdZJnoUH_5bkQas',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email: email, redirect_to: window.location.origin + window.location.pathname })
+      body: JSON.stringify({ email: email })
     });
     if (res.ok) {
-      infoEl.textContent = 'Check your email for a reset link.';
-      infoEl.style.display = 'block';
-      document.getElementById('forgotEmail').disabled = true;
-      btn.style.display = 'none';
-    } else {
+        // Replace modal content with clean success message
+        const modalBody = btn.closest('.modal').querySelector('.modal-body');
+        const modalFooter = btn.closest('.modal').querySelector('.modal-footer');
+        modalBody.innerHTML = '<div style="text-align:center; padding: 24px 0;"><div style="font-size: 2rem; margin-bottom: 12px;">✉️</div><p style="font-size: 1rem; color: var(--text); margin-bottom: 8px;">Reset link sent!</p><p style="font-size: 0.875rem; color: var(--text-muted);">Check your inbox for <strong>' + email + '</strong> and click the link to set a new password.</p></div>';
+        modalFooter.innerHTML = '<button class="btn btn-primary" onclick="this.closest(\'.modal-overlay\').remove()">Done</button>';
+      } else {
       errorEl.textContent = 'Could not send reset email. Check the address and try again.';
       errorEl.style.display = 'block';
     }
