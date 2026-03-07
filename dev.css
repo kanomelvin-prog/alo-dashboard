@@ -2587,3 +2587,52 @@ body {
 
 /* === FORGOT PASSWORD / RESET MODAL reuses existing modal styles === */
 /* login-error and login-info styles already exist, used inside modals too */
+
+/* === EMERGENCY CONTACT WARNING BANNER === */
+.emergency-warning-banner {
+  background: #FEF3CD;
+  border: 1px solid #F0D060;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.emergency-warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.emergency-warning-icon {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.emergency-warning-text {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: #665520;
+  line-height: 1.5;
+}
+
+.emergency-warning-text a {
+  color: #665520;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.emergency-warning-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #997A20;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
