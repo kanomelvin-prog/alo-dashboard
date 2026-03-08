@@ -1420,28 +1420,7 @@ button, input, select, textarea { font: inherit; }
 /* === CALENDAR WIDGET === */
 
 /* Sticky client header (all screen sizes) */
-.client-sticky-header {
-  position: sticky;
-  top: 60px;
-  z-index: 51;
-  background: var(--cream, var(--bg));
-  margin-left: -24px;
-  margin-right: -24px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(29, 53, 57, 0.06);
-}
-
-.client-sticky-header .tabs {
-  position: static;
-  top: auto;
-  margin-bottom: 0;
-}
-
-.client-sticky-header .page-header {
-  padding-top: 8px;
-  margin-bottom: 0;
-}
+/* client-sticky-header styles moved to bottom of file with redesign */
 
 /* Homework zone: 2/3 form + 1/3 sidebar */
 .homework-zone {
@@ -2588,32 +2567,101 @@ body {
 /* === FORGOT PASSWORD / RESET MODAL reuses existing modal styles === */
 /* login-error and login-info styles already exist, used inside modals too */
 
+/* === CLIENT DETAIL HEADER === */
+.client-detail-header {
+  padding: 12px 0 4px;
+}
+
+.client-detail-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.client-detail-name-row .page-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  transition: color 0.15s;
+}
+
+.client-detail-name-row .page-title:hover {
+  color: var(--sage);
+}
+
+.client-edit-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  min-height: 32px;
+}
+
+.client-edit-link:hover {
+  color: var(--sage);
+  background: var(--sage-light);
+}
+
+.client-detail-meta {
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  margin: 2px 0 0;
+}
+
+/* Make sticky header stand out more */
+.client-sticky-header {
+  position: sticky;
+  top: 60px;
+  z-index: 51;
+  background: var(--white, #fff);
+  margin-left: -24px;
+  margin-right: -24px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(29, 53, 57, 0.08);
+}
+
+.client-sticky-header .tabs {
+  position: static;
+  top: auto;
+  margin-bottom: 0;
+}
+
 /* === EMERGENCY CONTACT WARNING BANNER === */
 .emergency-warning-banner {
   background: #FEF3CD;
   border: 1px solid #F0D060;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
 }
 
 .emergency-warning-content {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
 }
 
 .emergency-warning-icon {
-  font-size: 1.125rem;
-  line-height: 1.4;
+  font-size: 0.9375rem;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .emergency-warning-text {
   flex: 1;
   font-size: 0.8125rem;
   color: #665520;
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 .emergency-warning-text a {
@@ -2625,14 +2673,15 @@ body {
 .emergency-warning-close {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   color: #997A20;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0;
   line-height: 1;
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 32px;
+  min-width: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
