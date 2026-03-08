@@ -2611,17 +2611,19 @@ body {
   text-decoration: underline;
 }
 
-/* Sticky header: tinted background to stand out from content */
+/* Sticky header: white with visible border to stand out */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
-  background: #D8ECEA;
+  background: var(--white, #ffffff);
   margin-left: -24px;
   margin-right: -24px;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(58, 124, 134, 0.2);
-  box-shadow: 0 2px 8px rgba(29, 53, 57, 0.08);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-right: none;
+  box-shadow: 0 2px 6px rgba(29, 53, 57, 0.06);
 }
 
 .client-sticky-header .tabs {
