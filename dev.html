@@ -166,12 +166,11 @@
       <div class="main">
                 <div class="client-sticky-header">
           <div class="client-detail-header">
-            <div class="client-detail-name-row">
-              <h1 class="page-title" id="clientName" onclick="showEditClientModal()" style="cursor:pointer;">Client</h1>
-              <button class="client-edit-link" onclick="showEditClientModal()" title="Edit client">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                edit
-              </button>
+            <h1 class="page-title" id="clientName">Client</h1>
+            <div class="client-detail-right">
+              <span class="client-detail-meta" id="clientMeta"></span>
+              <span class="client-detail-sep">·</span>
+              <a href="#" class="client-edit-link" onclick="showEditClientModal(); return false;">Edit Patient Info</a>
               <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -179,7 +178,6 @@
                 <span id="crisisAlertButtonText">Crisis Alert</span>
               </button>
             </div>
-            <p class="client-detail-meta" id="clientMeta"></p>
           </div>
 
           <div class="tabs">
