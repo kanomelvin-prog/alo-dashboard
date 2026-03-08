@@ -2569,60 +2569,57 @@ body {
 
 /* === CLIENT DETAIL HEADER === */
 .client-detail-header {
-  padding: 12px 0 4px;
-}
-
-.client-detail-name-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 6px;
   flex-wrap: wrap;
 }
 
-.client-detail-name-row .page-title {
+.client-detail-header .page-title {
   margin: 0;
   font-size: 1.375rem;
   font-weight: 700;
   color: var(--charcoal);
-  transition: color 0.15s;
+  white-space: nowrap;
 }
 
-.client-detail-name-row .page-title:hover {
-  color: var(--sage);
-}
-
-.client-edit-link {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
-  min-height: 32px;
-}
-
-.client-edit-link:hover {
-  color: var(--sage);
-  background: var(--sage-light);
+.client-detail-right {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-light);
+  flex-wrap: wrap;
 }
 
 .client-detail-meta {
-  font-size: 0.8125rem;
-  color: var(--text-light);
-  margin: 2px 0 0;
+  margin: 0;
 }
 
-/* Make sticky header stand out more */
+.client-detail-sep {
+  color: var(--border-strong, #aaa);
+}
+
+.client-edit-link {
+  color: var(--sage);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.client-edit-link:hover {
+  text-decoration: underline;
+}
+
+/* Sticky header: light blue tint to stand out from content */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
-  background: var(--white, #fff);
+  background: var(--sage-light, #E0EDEB);
   margin-left: -24px;
   margin-right: -24px;
   padding: 0 24px;
