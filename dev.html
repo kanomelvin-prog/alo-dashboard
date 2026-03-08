@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -165,9 +165,9 @@
     <div class="layout client-page" id="clientPage">
       <div class="main">
                 <div class="client-sticky-header">
-          <div class="client-detail-header">
-            <h1 class="page-title" id="clientName">Client</h1>
-            <div class="client-detail-right">
+          <div class="client-detail-header" style="display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0 6px;">
+            <h1 class="page-title" id="clientName" style="margin:0;flex-shrink:0;white-space:nowrap;">Client</h1>
+            <div class="client-detail-right" style="display:flex;align-items:baseline;gap:6px;margin-left:auto;white-space:nowrap;">
               <span class="client-detail-meta" id="clientMeta"></span>
               <span class="client-detail-sep">·</span>
               <a href="#" class="client-edit-link" onclick="showEditClientModal(); return false;">Edit Patient Info</a>
