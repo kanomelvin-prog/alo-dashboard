@@ -1902,17 +1902,9 @@ padding: 14px 8px;
 font-size: 0.8125rem;
 min-height: 44px;
 }
-/* Sticky client header mobile overrides */
-.client-sticky-header {
-  margin-left: -16px;
-  margin-right: -16px;
-  padding: 0 16px;
-}
+/* Sticky client header: phone margins handled in redesign block */
 
 @media (max-width: 767px) {
-  .client-sticky-header {
-    top: 52px;
-  }
   .homework-zone {
     grid-template-columns: 1fr;
   }
@@ -2572,9 +2564,8 @@ body {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0 6px;
-  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px 0 6px;
 }
 
 .client-detail-header .page-title {
@@ -2583,6 +2574,7 @@ body {
   font-weight: 700;
   color: var(--charcoal);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .client-detail-right {
@@ -2591,7 +2583,9 @@ body {
   gap: 6px;
   font-size: 0.8125rem;
   color: var(--text-light);
-  flex-wrap: wrap;
+  white-space: nowrap;
+  text-align: right;
+  margin-left: auto;
 }
 
 .client-detail-meta {
@@ -2614,16 +2608,16 @@ body {
   text-decoration: underline;
 }
 
-/* Sticky header: light blue tint to stand out from content */
+/* Sticky header: tinted background to stand out from content */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
-  background: var(--sage-light, #E0EDEB);
+  background: #D8ECEA;
   margin-left: -24px;
   margin-right: -24px;
   padding: 0 24px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(58, 124, 134, 0.2);
   box-shadow: 0 2px 8px rgba(29, 53, 57, 0.08);
 }
 
@@ -2631,6 +2625,22 @@ body {
   position: static;
   top: auto;
   margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  .client-detail-header {
+    flex-wrap: wrap;
+  }
+  .client-detail-right {
+    white-space: normal;
+    margin-left: 0;
+  }
+  .client-sticky-header {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px;
+    top: 52px;
+  }
 }
 
 /* === EMERGENCY CONTACT WARNING BANNER === */
