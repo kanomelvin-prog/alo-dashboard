@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -164,33 +164,33 @@
     <!-- CLIENT DETAIL PAGE -->
     <div class="layout client-page" id="clientPage">
       <div class="main">
-                <div class="client-sticky-header" style="background:linear-gradient(180deg,#E5EDEC 0%,#EDE9E3 100%); border:1px solid rgba(58,124,134,0.12); border-radius:16px; box-shadow:0 1px 1px rgba(66,52,35,0.02),0 8px 24px rgba(66,52,35,0.05); padding:22px 24px 0; margin-bottom:16px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:18px;">
+                <div class="client-sticky-header">
+          <div class="client-header-top">
             <!-- Left: avatar + name + badge + meta -->
-            <div style="display:flex;align-items:flex-start;gap:14px;min-width:0;">
-              <div id="clientAvatar" style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,0.55);border:1px solid rgba(58,124,134,0.12);color:#2F6770;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9375rem;flex-shrink:0;">C</div>
+            <div class="client-header-left">
+              <div id="clientAvatar" class="client-header-avatar">C</div>
               <div>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                  <h1 class="page-title" id="clientName" style="margin:0;color:#2F312E;font-size:1.625rem;font-weight:650;letter-spacing:-0.02em;line-height:1.15;">Client</h1>
+                  <h1 class="client-header-name" id="clientName">Client</h1>
                   <span id="clientBadge" style="display:none;"></span>
                 </div>
-                <div id="clientMeta" style="font-size:0.8125rem;color:#7C8078;margin-top:5px;line-height:1.4;"></div>
+                <div id="clientMeta" class="client-header-meta"></div>
               </div>
             </div>
             <!-- Right: actions -->
-            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:6px;">
-              <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()" style="color:#2F6770;">
+            <div class="client-header-actions">
+              <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span id="crisisAlertButtonText">Crisis Alert</span>
               </button>
-              <button onclick="showEditClientModal()" style="background:rgba(255,255,255,0.65);color:#2F6770;border:1px solid rgba(58,124,134,0.14);border-radius:10px;padding:8px 16px;font-size:0.8125rem;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 1px 2px rgba(66,52,35,0.03);">Edit Patient</button>
+              <button class="client-header-edit-btn" onclick="showEditClientModal()">Edit Patient</button>
             </div>
           </div>
-          <div style="border-top:1px solid rgba(58,124,134,0.08);display:flex;gap:24px;padding-top:2px;">
-            <button class="tab active" onclick="switchTab('prep', this)" style="background:transparent;color:#2F6770;font-weight:600;font-size:0.875rem;border:none;border-bottom:2px solid #3A7C86;padding:10px 0 8px;cursor:pointer;">Session Prep</button>
-            <button class="tab" onclick="switchTab('tools', this)" style="background:transparent;color:#7C8078;font-weight:500;font-size:0.875rem;border:none;border-bottom:2px solid transparent;padding:10px 0 8px;cursor:pointer;">In Session</button>
+          <div class="client-header-tabs">
+            <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+            <button class="tab" onclick="switchTab('tools', this)">In Session</button>
           </div>
         </div>
 
@@ -1804,15 +1804,9 @@ function setButtonLoading(btn, loading, loadingText) {
         function switchTab(tabName, btn) {
       document.querySelectorAll('.tab').forEach(t => {
         t.classList.remove('active');
-        t.style.color = '#7C8078';
-        t.style.fontWeight = '500';
-        t.style.borderBottom = '2px solid transparent';
       });
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
-      btn.style.color = '#2F6770';
-      btn.style.fontWeight = '600';
-      btn.style.borderBottom = '2px solid #3A7C86';
       document.getElementById(`tab-${tabName}`).classList.add('active');
 
       // Scroll window so sticky header is at the top
