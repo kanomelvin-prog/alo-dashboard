@@ -1,7 +1,7 @@
 /* ============================================================
-   ALO CLINICAL DASHBOARD v3.1
-   Design: Teal-blue thinking partner (aligned with client chat palette)
-   Updated: Feb 23, 2026 — Color palette overhaul to teal-blue
+   ALO CLINICAL DASHBOARD v3.2
+   Design: Warm Desk + Linen Studio synthesis
+   Updated: Mar 9, 2026 — Visual design overhaul
    ============================================================ */
 
 /* === RESET === */
@@ -13,20 +13,21 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   --cream: #F3EDE4;
   --warm-white: #F8F4EF;
   --sage: #3A7C86;
-  --sage-light: #E0EDEB;
+  --sage-light: #E8F2F3;
   --sage-hover: #2D6B74;
-  --charcoal: #1D3539;
-  --stone: #566A6F;
+  --charcoal: #2C2622;
+  --stone: #5C5A55;
 
   --bg: var(--cream);
-  --white: #ffffff;
-  --border: rgba(58, 124, 134, 0.15);
-  --border-subtle: rgba(58, 124, 134, 0.10);
-  --border-strong: rgba(58, 124, 134, 0.28);
+  --white: #FFFEFA;
+  --border: rgba(180, 168, 152, 0.28);
+  --border-subtle: rgba(180, 168, 152, 0.18);
+  --border-strong: rgba(180, 168, 152, 0.42);
 
   --text: var(--charcoal);
-  --text-light: #4A5C5E;
-  --text-muted: var(--stone);
+  --text-light: #5C5A55;
+  --text-muted: #9B9790;
+  --text-label: #7C7870;
 
   --primary: var(--sage);
   --primary-hover: var(--sage-hover);
@@ -54,13 +55,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   --info-border: #bfdbfe;
   --info-text: #1e40af;
 
-  --shadow-sm: 0 1px 3px rgba(29, 53, 57, 0.06), 0 1px 2px rgba(29, 53, 57, 0.04);
-  --shadow-md: 0 4px 12px rgba(29, 53, 57, 0.08);
-  --shadow-lg: 0 8px 24px rgba(29, 53, 57, 0.12);
+  --shadow-sm: 0 1px 3px rgba(120, 100, 80, 0.06), 0 1px 2px rgba(120, 100, 80, 0.04);
+  --shadow-md: 0 4px 12px rgba(120, 100, 80, 0.08);
+  --shadow-lg: 0 8px 24px rgba(120, 100, 80, 0.10);
 
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-lg: 12px;
   --radius-xl: 20px;
 }
 
@@ -93,7 +94,7 @@ button, input, select, textarea { font: inherit; }
   max-width: 400px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 4px 24px rgba(29, 53, 57, 0.06);
+  box-shadow: 0 4px 24px rgba(120, 100, 80, 0.06);
 }
 
 .login-logo {
@@ -332,7 +333,7 @@ button, input, select, textarea { font: inherit; }
 
 .section-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -343,8 +344,8 @@ button, input, select, textarea { font: inherit; }
 .section-header-warning { }
 
 .section-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -354,9 +355,9 @@ button, input, select, textarea { font: inherit; }
 .section-icon.danger { background: var(--danger-bg); color: var(--danger); }
 .section-icon.warning { background: var(--warning-bg); color: var(--warning); }
 .section-icon.info { background: var(--info-bg); color: var(--info); }
-.section-icon svg { width: 18px; height: 18px; }
+.section-icon svg { width: 16px; height: 16px; }
 
-.section-title { font-size: 0.9375rem; font-weight: 600; }
+.section-title { font-size: 0.875rem; font-weight: 600; }
 
 .section-count {
   margin-left: auto;
@@ -388,7 +389,7 @@ button, input, select, textarea { font: inherit; }
   background: none;
   border: none;
   border-top: 1px solid var(--border-subtle);
-  color: var(--sage-dark);
+  color: var(--sage);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -397,7 +398,7 @@ button, input, select, textarea { font: inherit; }
 }
 
 .section-view-all:hover {
-  background: var(--sage-light);
+  background: rgba(58, 124, 134, 0.04);
 }
 
 /* === LIST ITEMS === */
@@ -498,15 +499,15 @@ button, input, select, textarea { font: inherit; }
 
 .client-item:last-child { border-bottom: none; }
 .client-item:hover { background: var(--bg); }
-.client-item.active { background: var(--primary); color: white; }
-.client-item.active .client-name { color: white; }
-.client-item.active .client-meta { color: rgba(255,255,255,0.8); }
+.client-item.active { background: rgba(58, 124, 134, 0.08); color: var(--text); }
+.client-item.active .client-name { color: var(--text); }
+.client-item.active .client-meta { color: var(--text-light); }
 
 .client-avatar {
   width: 40px;
   height: 40px;
   background: var(--bg);
-  border-radius: 50%;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -517,7 +518,7 @@ button, input, select, textarea { font: inherit; }
   position: relative;
 }
 
-.client-item.active .client-avatar { background: rgba(255,255,255,0.2); color: white; }
+.client-item.active .client-avatar { background: rgba(58, 124, 134, 0.12); color: var(--sage); }
 
 .status-badge {
   position: absolute;
@@ -529,7 +530,7 @@ button, input, select, textarea { font: inherit; }
   border: 2px solid var(--white);
 }
 
-.client-item.active .status-badge { border-color: var(--primary); }
+.client-item.active .status-badge { border-color: rgba(58, 124, 134, 0.08); }
 .status-badge.crisis { background: var(--danger); animation: pulse 2s infinite; }
 .status-badge.needs-attention { background: var(--warning); }
 .status-badge.stable { background: var(--success); }
@@ -599,28 +600,29 @@ button, input, select, textarea { font: inherit; }
   gap: 0;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-subtle);
   border-radius: 0;
   padding: 0;
   margin-bottom: 20px;
 }
 
 .tab {
-  flex: 1;
-  padding: 12px 16px;
+  flex: none;
+  padding: 12px 2px;
+  margin-right: 20px;
   border: none;
   background: none;
   border-radius: 0;
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 120ms ease, border-color 120ms ease;
 }
 
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--charcoal); border-bottom-color: var(--sage); font-weight: 600; }
+.tab:hover { color: var(--text-light); }
+.tab.active { color: #2C6069; border-bottom-color: var(--sage); font-weight: 600; }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
@@ -630,21 +632,22 @@ button, input, select, textarea { font: inherit; }
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   box-shadow: var(--shadow-sm);
-  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out, border-color 140ms ease-out;
 }
 
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
   }
 }
 
 .card-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -652,7 +655,7 @@ button, input, select, textarea { font: inherit; }
 
 .card-title { font-size: 0.9375rem; font-weight: 600; }
 
-.card-body { padding: 20px; }
+.card-body { padding: 24px; }
 .card-body p { font-size: 0.875rem; margin-bottom: 12px; }
 .card-body p:last-child { margin-bottom: 0; }
 
@@ -1898,7 +1901,8 @@ background: var(--bg);
 margin-bottom: 16px;
 }
 .tab {
-padding: 14px 8px;
+padding: 14px 2px;
+margin-right: 16px;
 font-size: 0.8125rem;
 min-height: 44px;
 }
@@ -1913,7 +1917,7 @@ min-height: 44px;
 /* Sections compact */
 
 .section-header { padding: 12px 16px; }
-.section-title { font-size: 0.875rem; }
+.section-title { font-size: 0.8125rem; }
 
 /* Cards compact */
 .card { margin-bottom: 12px; }
@@ -2084,7 +2088,7 @@ to { transform: translateY(0); }
 
 /* Fix 2: Section card shadows */
 .section {
-  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06), 0 1px 2px rgba(29, 53, 57, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Fix 3: Reduce section spacing */
@@ -2101,7 +2105,7 @@ to { transform: translateY(0); }
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .prep-stat {
@@ -2154,7 +2158,7 @@ body {
 
 /* Fix 8: Sidebar card shadow */
 .sidebar-section {
-  box-shadow: 0 1px 3px rgba(29, 53, 57, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ============================================================
@@ -2203,13 +2207,13 @@ body {
 
 /* Tier 1: "This Week" glance card — the hero card */
 #weekGlanceCard {
-  border: 1px solid var(--sage);
-  border-left: 4px solid var(--sage);
-  box-shadow: 0 2px 12px rgba(58, 124, 134, 0.12);
+  border: 1px solid rgba(58, 124, 134, 0.18);
+  border-left: 3px solid var(--sage);
+  box-shadow: 0 2px 12px rgba(120, 100, 80, 0.08);
 }
 
 #weekGlanceCard .card-header {
-  background: var(--sage-light);
+  background: rgba(58, 124, 134, 0.04);
 }
 
 #weekGlanceCard .card-title {
@@ -2233,7 +2237,7 @@ body {
 #copyPrepPackBtn:hover {
   background: #1a1815;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(29, 53, 57, 0.2);
+  box-shadow: 0 4px 12px rgba(120, 100, 80, 0.18);
 }
 
 /* Tier 4: Open Items and Messages in prep — quieter */
@@ -2282,7 +2286,7 @@ body {
 /* Crisis alerts card in Session Tools — elevated */
 #crisisAlertsCard {
   border: 2px solid var(--danger);
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.12);
+  box-shadow: 0 4px 16px rgba(196, 90, 77, 0.10);
 }
 
 /* Crisis alert button: already pulsing, add glow */
@@ -2292,8 +2296,8 @@ body {
 
 /* === SIDEBAR: ACTIVE CLIENT STRONGER === */
 .client-item.active {
-  background: var(--sage);
-  border-left: 3px solid var(--charcoal);
+  background: rgba(58, 124, 134, 0.08);
+  border-left: 3px solid var(--sage);
 }
 
 /* Crisis client in sidebar: red left accent */
@@ -2354,24 +2358,50 @@ body {
   outline-offset: -2px;
 }
 
-/* === TEXT HIERARCHY: CARD TITLES AS LABELS === */
+/* === TEXT HIERARCHY: CARD TITLES AS LABELS WITH TEAL DASH === */
 
-/* Card titles: lighter, smaller — section labels, not headlines */
+/* Card titles: title case with teal dash accent */
 .card-title {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--text-label, #7C7870);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  background: var(--sage);
+  border-radius: 1px;
+  flex-shrink: 0;
 }
 
 /* Section titles on homepage: same treatment */
 .section-title {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--text-label, #7C7870);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  background: var(--sage);
+  border-radius: 1px;
+  flex-shrink: 0;
 }
 
 /* Note dates: these ARE the content — make them the loudest */
@@ -2407,12 +2437,16 @@ body {
   color: var(--danger);
 }
 
-/* This Week card title: sage, not muted — it's the hero */
+.card-title-danger::before {
+  background: var(--danger);
+}
+
+/* This Week card title: sage accent */
 #weekGlanceCard .card-title {
   color: var(--sage-hover);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.8125rem;
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 /* Homework type name: this is the content, keep it strong */
@@ -2497,7 +2531,7 @@ body {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(29, 53, 57, 0.12);
+  box-shadow: 0 4px 12px rgba(120, 100, 80, 0.12);
   min-width: 120px;
   overflow: hidden;
 }
@@ -2544,7 +2578,7 @@ body {
     left: 0;
     right: 0;
     border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 24px rgba(29, 53, 57, 0.18);
+    box-shadow: 0 -4px 24px rgba(120, 100, 80, 0.15);
     min-width: unset;
   }
 
@@ -2611,24 +2645,105 @@ body {
   text-decoration: underline;
 }
 
-/* Sticky header: card-like with left accent */
+/* Sticky header: flush white with subtle bottom border */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
-  background: #FAFAF8;
+  background: var(--white);
   margin-left: -24px;
   margin-right: -24px;
   padding: 0 24px;
-  border-top: 3px solid var(--sage, #3A7C86);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 3px 8px rgba(29, 53, 57, 0.07);
+  box-shadow: 0 1px 0 rgba(120, 100, 80, 0.06);
 }
 
 .client-sticky-header .tabs {
   position: static;
   top: auto;
   margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* Client header: top row with avatar, name, actions */
+.client-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0 14px;
+}
+
+.client-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.client-header-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: rgba(58, 124, 134, 0.06);
+  border: 1.5px solid rgba(58, 124, 134, 0.16);
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
+}
+
+.client-header-name {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.client-header-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.client-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.client-header-edit-btn {
+  background: rgba(255, 255, 255, 0.65);
+  color: #2C6069;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.client-header-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--border-strong);
+}
+
+.client-header-tabs {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0;
 }
 
 @media (max-width: 767px) {
@@ -2645,21 +2760,35 @@ body {
     padding: 0 16px;
     top: 52px;
   }
+  .client-header-top {
+    padding: 14px 0 10px;
+    gap: 12px;
+  }
+  .client-header-name {
+    font-size: 1.25rem;
+  }
+  .client-header-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 0.8125rem;
+  }
 }
 
 /* === EMERGENCY CONTACT WARNING BANNER === */
 .emergency-warning-banner {
-  background: #FFF8F0;
-  border: 1px solid rgba(200, 160, 100, 0.2);
-  border-radius: 10px;
-  padding: 8px 14px;
-  margin-bottom: 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 3px solid #C85A3A;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 12px 16px;
+  margin-bottom: 14px;
 }
 
 .emergency-warning-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .emergency-warning-icon {
@@ -2671,12 +2800,12 @@ body {
 .emergency-warning-text {
   flex: 1;
   font-size: 0.8125rem;
-  color: #8C6D3F;
-  line-height: 1.3;
+  color: var(--text-light);
+  line-height: 1.4;
 }
 
 .emergency-warning-text a {
-  color: #7A5C30;
+  color: #B04A2D;
   font-weight: 600;
   text-decoration: underline;
 }
@@ -2685,7 +2814,7 @@ body {
   background: none;
   border: none;
   font-size: 1.125rem;
-  color: #A08050;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0;
   line-height: 1;
