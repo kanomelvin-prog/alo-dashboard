@@ -310,17 +310,34 @@ button, input, select, textarea { font: inherit; }
 /* === LAYOUT === */
 .layout {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 260px;
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 80px 24px 24px;
 }
 
+/* Client detail pages: full-width content, sidebar hidden by default */
+.layout.client-page {
+  grid-template-columns: 1fr;
+}
+
+.layout.client-page .sidebar {
+  display: none;
+}
+
+.layout.client-page.sidebar-open {
+  grid-template-columns: 1fr 260px;
+}
+
+.layout.client-page.sidebar-open .sidebar {
+  display: block;
+}
+
 .main {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* === SECTIONS === */
@@ -1425,16 +1442,15 @@ button, input, select, textarea { font: inherit; }
 /* Sticky client header (all screen sizes) */
 /* client-sticky-header styles moved to bottom of file with redesign */
 
-/* Homework zone: 2/3 form + 1/3 sidebar */
+/* Homework zone: stacked vertically (notes-dominant layout) */
 .homework-zone {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .homework-zone-form { min-width: 0; }
-.homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 
 /* Month calendar */
 .cal-month-header {
@@ -1909,9 +1925,7 @@ min-height: 44px;
 /* Sticky client header: phone margins handled in redesign block */
 
 @media (max-width: 767px) {
-  .homework-zone {
-    grid-template-columns: 1fr;
-  }
+  /* homework-zone already stacked vertically */
 }
 
 /* Sections compact */
@@ -2091,10 +2105,7 @@ to { transform: translateY(0); }
   box-shadow: var(--shadow-sm);
 }
 
-/* Fix 3: Reduce section spacing */
-.main {
-  gap: 16px;
-}
+/* Fix 3: Section spacing handled by card clusters now */
 
 /* Fix 4: Prep summary strip */
 .prep-summary-strip {
@@ -2645,17 +2656,16 @@ body {
   text-decoration: underline;
 }
 
-/* Sticky header: flush white with subtle bottom border */
+/* Sticky header: compact, within content grid */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
   background: var(--white);
-  margin-left: -24px;
-  margin-right: -24px;
-  padding: 0 24px;
   border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 0 rgba(120, 100, 80, 0.06);
+  padding: 0;
+  margin-bottom: 4px;
 }
 
 .client-sticky-header .tabs {
@@ -2665,25 +2675,67 @@ body {
   border-bottom: none;
 }
 
-/* Client header: top row with avatar, name, actions */
-.client-header-top {
+/* Compact sticky row: avatar + name + badge + tabs */
+.client-sticky-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 0 14px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
 }
 
-.client-header-left {
+.client-sticky-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: rgba(58, 124, 134, 0.06);
+  border: 1.5px solid rgba(58, 124, 134, 0.16);
+  color: var(--sage);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.client-sticky-name {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.client-sticky-tabs {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Non-sticky info row: meta + actions (scrolls with content) */
+.client-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0 8px;
+}
+
+.client-info-left {
+  display: flex;
+  align-items: center;
   gap: 14px;
   min-width: 0;
 }
 
-.client-header-avatar {
-  width: 44px;
-  height: 44px;
+.client-info-avatar {
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-lg);
   background: rgba(58, 124, 134, 0.06);
   border: 1.5px solid rgba(58, 124, 134, 0.16);
@@ -2692,11 +2744,11 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
-.client-header-name {
+.client-info-name {
   margin: 0;
   color: var(--charcoal);
   font-size: 1.5rem;
@@ -2705,19 +2757,18 @@ body {
   line-height: 1.15;
 }
 
-.client-header-meta {
+.client-info-meta {
   font-size: 0.8125rem;
   color: var(--text-muted);
-  margin-top: 5px;
+  margin-top: 4px;
   line-height: 1.4;
 }
 
-.client-header-actions {
+.client-info-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  padding-top: 4px;
 }
 
 .client-header-edit-btn {
@@ -2739,12 +2790,120 @@ body {
   border-color: var(--border-strong);
 }
 
-.client-header-tabs {
+/* Sidebar toggle button for client detail pages */
+.sidebar-toggle-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
   display: flex;
-  gap: 0;
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 0;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
+
+.sidebar-toggle-btn:hover { background: var(--bg); }
+
+/* Card clusters for Session Prep */
+.card-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-cluster + .card-cluster {
+  margin-top: 12px;
+}
+
+/* Progressive homework disclosure */
+.hw-form-expanded { display: none; }
+.hw-form-expanded.show { display: block; }
+
+.hw-expand-btn {
+  background: none;
+  border: none;
+  color: var(--sage);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.hw-expand-btn:hover { text-decoration: underline; }
+
+/* Empty card collapse */
+.card.is-empty {
+  border: 1px dashed var(--border-subtle);
+  box-shadow: none;
+}
+
+.card.is-empty .card-body {
+  padding: 10px 24px;
+}
+
+.card.is-empty .card-header {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Onboarding hero card */
+.card.is-onboarding .card-body {
+  text-align: center;
+  padding: 32px 24px;
+  color: var(--text-muted);
+}
+
+/* Unified attention card on Home */
+.attention-feed .feed-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.attention-feed .feed-item:hover { background: var(--bg); }
+
+.attention-feed .feed-item + .feed-item {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.feed-item-indicator {
+  width: 3px;
+  height: 28px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.feed-item-indicator.crisis { background: var(--danger); }
+.feed-item-indicator.message { background: var(--info); }
+
+/* Calendar strip month divider */
+.cal-strip-day.month-start {
+  border-left: 2px solid var(--sage);
+  position: relative;
+}
+
+.cal-strip-day.month-start::before {
+  content: attr(data-month);
+  position: absolute;
+  top: -14px;
+  left: 0;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--sage);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Hide the old inline month label */
+.cal-strip-month { display: none; }
 
 @media (max-width: 767px) {
   .client-detail-header {
@@ -2755,22 +2914,38 @@ body {
     margin-left: 0;
   }
   .client-sticky-header {
-    margin-left: -16px;
-    margin-right: -16px;
-    padding: 0 16px;
     top: 52px;
   }
-  .client-header-top {
-    padding: 14px 0 10px;
-    gap: 12px;
+  /* On mobile, only tabs stick — identity scrolls */
+  .client-sticky-row { display: none; }
+  .client-sticky-header .tabs {
+    border-top: none;
   }
-  .client-header-name {
+  .client-info-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .client-info-name {
     font-size: 1.25rem;
   }
-  .client-header-avatar {
+  .client-info-avatar {
     width: 38px;
     height: 38px;
     font-size: 0.8125rem;
+  }
+  .client-info-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  /* Sidebar always overlay on mobile */
+  .layout.client-page,
+  .layout.client-page.sidebar-open {
+    grid-template-columns: 1fr;
+  }
+  .layout.client-page.sidebar-open .sidebar {
+    display: block;
+    position: fixed;
+    /* handled by existing sidebar overlay CSS */
   }
 }
 
