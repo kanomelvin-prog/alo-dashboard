@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -91,41 +91,31 @@
 
     <!-- HOMEPAGE -->
     <div class="layout" id="homePage">
-      <div class="main">
+      <div class="main home-content">
         <div>
           <div class="morning-greeting" id="morningGreeting">Good morning</div>
           <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
         </div>
 
-        <!-- Crisis Alerts -->
-        <div class="section" id="alertsSection">
-          <div class="section-header section-header-danger">
-            <div class="section-icon danger">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+        <!-- Needs Attention (unified crisis + messages feed) -->
+        <div class="section" id="attentionSection">
+          <div class="section-header">
+            <span class="section-title">Needs Attention</span>
+            <span class="section-count" id="attentionCount">0</span>
+          </div>
+          <div class="section-body">
+            <!-- Crisis subsection (preserves original IDs) -->
+            <div id="alertsSection">
+              <div id="alertsList"></div>
             </div>
-            <span class="section-title">Crisis Alerts</span>
-            <span class="section-count section-count-danger" id="alertsCount">0</span>
-          </div>
-          <div class="section-body" id="alertsList">
-            <div class="loading"><div class="spinner"></div>Loading...</div>
-          </div>
-        </div>
-
-        <!-- Messages from Clients -->
-        <div class="section" id="messagesSection">
-          <div class="section-header section-header-info">
-            <div class="section-icon info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+            <span id="alertsCount" style="display:none;">0</span>
+            <!-- Messages subsection (preserves original IDs) -->
+            <div id="messagesSection">
+              <div id="messagesList"></div>
             </div>
-            <span class="section-title">Messages from Clients</span>
-            <span class="section-count section-count-info" id="messagesCount">0</span>
-          </div>
-          <div class="section-body" id="messagesList">
-            <div class="section-empty">No unread messages</div>
+            <span id="messagesCount" style="display:none;">0</span>
+            <!-- Shared empty state -->
+            <div class="section-empty" id="attentionEmpty">All clear — no items needing attention.</div>
           </div>
         </div>
 
@@ -164,39 +154,51 @@
     <!-- CLIENT DETAIL PAGE -->
     <div class="layout client-page" id="clientPage">
       <div class="main">
-                <div class="client-sticky-header">
-          <div class="client-header-top">
-            <!-- Left: avatar + name + badge + meta -->
-            <div class="client-header-left">
-              <div id="clientAvatar" class="client-header-avatar">C</div>
-              <div>
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                  <h1 class="client-header-name" id="clientName">Client</h1>
-                  <span id="clientBadge" style="display:none;"></span>
-                </div>
-                <div id="clientMeta" class="client-header-meta"></div>
+        <!-- Non-sticky: full client info (scrolls with content) -->
+        <div class="client-info-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 0 8px;">
+          <div class="client-info-left" style="display:flex;align-items:flex-start;gap:14px;min-width:0;">
+            <div id="clientAvatar" class="client-info-avatar">C</div>
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h1 class="client-info-name" id="clientName">Client</h1>
+                <span id="clientBadge" style="display:none;"></span>
               </div>
-            </div>
-            <!-- Right: actions -->
-            <div class="client-header-actions">
-              <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span id="crisisAlertButtonText">Crisis Alert</span>
-              </button>
-              <button class="client-header-edit-btn" onclick="showEditClientModal()">Edit Patient</button>
+              <div id="clientMeta" class="client-info-meta"></div>
             </div>
           </div>
-          <div class="client-header-tabs">
-            <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
-            <button class="tab" onclick="switchTab('tools', this)">In Session</button>
+          <div class="client-info-actions" style="display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:4px;">
+            <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span id="crisisAlertButtonText">Crisis Alert</span>
+            </button>
+            <button class="client-header-edit-btn" onclick="showEditClientModal()">Edit Patient</button>
+            <button class="sidebar-toggle-btn" onclick="toggleDetailSidebar()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Clients
+            </button>
+          </div>
+        </div>
+
+        <!-- Sticky: compact name + tabs only -->
+        <div class="client-sticky-header" style="position:sticky;top:60px;z-index:51;">
+          <div class="client-sticky-row" style="display:flex;align-items:center;gap:12px;padding:10px 0;">
+            <div id="clientAvatarSticky" class="client-sticky-avatar">C</div>
+            <span class="client-sticky-name" id="clientNameSticky">Client</span>
+            <span id="clientBadgeSticky" style="display:none;"></span>
+            <div class="client-sticky-tabs" style="display:flex;gap:0;margin-left:auto;flex-shrink:0;">
+              <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
+              <button class="tab" onclick="switchTab('tools', this)">In Session</button>
+            </div>
           </div>
         </div>
 
 
         <!-- Session Prep Tab -->
         <div class="tab-content active" id="tab-prep">
+          <!-- Cluster 1: Priority — clinical signals -->
+          <div class="card-cluster">
                     <div class="card" id="weekGlanceCard" style="display: none;">
             <div class="card-header">
               <span class="card-title">This Week</span>
@@ -222,7 +224,7 @@
             </div>
           </div>
 
-          <!-- Messages from Client (moved up - most actionable) -->
+          <!-- Messages from Client -->
           <div class="card">
             <div class="card-header">
               <span class="card-title">Messages from Client</span>
@@ -232,7 +234,10 @@
               <p class="text-muted-center">No messages</p>
             </div>
           </div>
+          </div>
 
+          <!-- Cluster 2: Reference — context and history -->
+          <div class="card-cluster">
           <div class="card">
             <div class="card-header">
               <span class="card-title">What Changed</span>
@@ -262,11 +267,12 @@
               <p class="text-muted-center">No session notes yet.</p>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Session Tools Tab -->
         <div class="tab-content" id="tab-tools">
-          <!-- Session Notes -->
+          <!-- Session Notes (primary — full width) -->
           <div class="card">
             <div class="card-header">
               <span class="card-title">Session Notes</span>
@@ -288,9 +294,8 @@
             </div>
           </div>
 
-          <!-- Homework Zone: 2/3 form + 1/3 calendar/history -->
+          <!-- Homework (secondary — stacked vertically) -->
           <div class="homework-zone">
-            <!-- LEFT: Assign Homework (2/3) -->
             <div class="homework-zone-form">
               <div class="card">
                 <div class="card-header"><span class="card-title">Assign Homework</span></div>
@@ -304,30 +309,6 @@
                   </div>
                   <form id="homeworkForm" onsubmit="submitHomework(event)">
                     <div class="form-grid">
-                      <div class="form-group">
-                        <label>Type</label>
-                        <select id="hwType" required>
-                          <option value="grounding">Grounding Technique</option>
-                          <option value="noticing">Noticing Practice</option>
-                          <option value="journaling">Journaling Prompt</option>
-                          <option value="behavioral">Behavioral Experiment</option>
-                          <option value="cognitive">Cognitive Exercise</option>
-                          <option value="breathing">Breathing Exercise</option>
-                          <option value="custom">Custom</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label class="tooltip-trigger">Sensitivity
-                          <span class="tooltip-icon">?</span>
-                          <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
-                        </label>
-                        <select id="hwSensitivity">
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
                       <div class="form-group full">
                         <label>Title</label>
                         <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
@@ -336,17 +317,47 @@
                         <label>Goal / Instructions</label>
                         <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
                       </div>
-                      <div class="form-group full">
-                        <label>Treatment Plan Goal (SimplePractice)</label>
-                        <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
-                        <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
-                      </div>
-                      <div class="form-group full">
-                        <label>Clinical Rationale (private)</label>
-                        <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                        <span class="form-hint">For your records only -- client never sees this</span>
+                    </div>
+                    <!-- Expanded fields (hidden by default) -->
+                    <div class="hw-form-expanded" id="hwFormExpanded">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Type</label>
+                          <select id="hwType" required>
+                            <option value="grounding">Grounding Technique</option>
+                            <option value="noticing">Noticing Practice</option>
+                            <option value="journaling">Journaling Prompt</option>
+                            <option value="behavioral">Behavioral Experiment</option>
+                            <option value="cognitive">Cognitive Exercise</option>
+                            <option value="breathing">Breathing Exercise</option>
+                            <option value="custom">Custom</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label class="tooltip-trigger">Sensitivity
+                            <span class="tooltip-icon">?</span>
+                            <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
+                          </label>
+                          <select id="hwSensitivity">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                          </select>
+                        </div>
+                        <div class="form-group full">
+                          <label>Treatment Plan Goal (SimplePractice)</label>
+                          <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                          <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                        </div>
+                        <div class="form-group full">
+                          <label>Clinical Rationale (private)</label>
+                          <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                          <span class="form-hint">For your records only -- client never sees this</span>
+                        </div>
                       </div>
                     </div>
+                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, sensitivity, rationale)</button>
                     <div class="form-actions">
                       <button type="submit" class="btn btn-primary">Assign Homework</button>
                     </div>
@@ -356,9 +367,20 @@
               </div>
             </div>
 
-            <!-- RIGHT: Month Calendar + Homework History (1/3) -->
+            <!-- Homework History + Month Calendar (stacked below form) -->
             <div class="homework-zone-sidebar">
-              <!-- Month Calendar -->
+              <!-- Homework History (more useful mid-session than calendar) -->
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">Homework History</span>
+                  <button class="btn btn-sm btn-secondary" id="viewAllHomeworkBtn" style="display:none;" onclick="openHomeworkDrawer()">View All</button>
+                </div>
+                <div class="card-body" id="homeworkHistory">
+                  <p class="text-muted-center">No homework yet</p>
+                </div>
+              </div>
+
+              <!-- Month Calendar (compact, below history) -->
               <div class="card">
                 <div class="card-header">
                   <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
@@ -375,17 +397,6 @@
                     <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
                   </div>
                   <div class="calendar-detail" id="calMonthDetail" style="display:none;"></div>
-                </div>
-              </div>
-
-              <!-- Homework History (compact) -->
-              <div class="card">
-                <div class="card-header">
-                  <span class="card-title">Homework History</span>
-                  <button class="btn btn-sm btn-secondary" id="viewAllHomeworkBtn" style="display:none;" onclick="openHomeworkDrawer()">View All</button>
-                </div>
-                <div class="card-body" id="homeworkHistory">
-                  <p class="text-muted-center">No homework yet</p>
                 </div>
               </div>
             </div>
@@ -405,12 +416,8 @@
             <div class="card-body" id="crisisAlertsList"></div>
           </div>
 
-          <!-- Messages from Client (truncated) -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Messages from Client</span>
-              <button class="btn btn-sm btn-secondary" id="viewAllMessagesToolsBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
-            </div>
+          <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
+          <div class="card" id="inSessionMessagesCard" style="display: none;">
             <div class="card-body" id="activityMessages">
               <p class="text-muted-center">No messages</p>
             </div>
@@ -1361,6 +1368,7 @@ function setButtonLoading(btn, loading, loadingText) {
         renderMessages(messages || []);
         renderTriage();
         renderClientsList();
+        updateAttentionCard();
 
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
@@ -1709,20 +1717,26 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('clientPage').classList.add('active');
 
       document.getElementById('clientName').textContent = client.display_name || 'Client';
+      document.getElementById('clientNameSticky').textContent = client.display_name || 'Client';
 
       // Avatar initials
       const initials = (client.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       document.getElementById('clientAvatar').textContent = initials;
+      document.getElementById('clientAvatarSticky').textContent = initials;
 
       const isPending = !client.client_id;
 
       // Badge (next to name)
       const badgeEl = document.getElementById('clientBadge');
+      const badgeStickyEl = document.getElementById('clientBadgeSticky');
       if (isPending) {
         badgeEl.style.display = 'inline-block';
         badgeEl.innerHTML = '<span style="background:#fff3cd;color:#856404;border-radius:999px;padding:3px 10px;font-size:0.6875rem;font-weight:600;">Pending signup</span>';
+        badgeStickyEl.style.display = 'inline-block';
+        badgeStickyEl.innerHTML = '<span style="background:#fff3cd;color:#856404;border-radius:999px;padding:2px 8px;font-size:0.625rem;font-weight:600;">Pending</span>';
       } else {
         badgeEl.style.display = 'none';
+        badgeStickyEl.style.display = 'none';
       }
 
       // Meta line (below name)
@@ -1779,6 +1793,7 @@ function setButtonLoading(btn, loading, loadingText) {
     function showHomePage() {
       document.getElementById('homePage').style.display = 'grid';
       document.getElementById('clientPage').classList.remove('active');
+      document.getElementById('clientPage').classList.remove('sidebar-open');
       currentClient = null;
       renderClientsList();
     }
@@ -1816,6 +1831,49 @@ function setButtonLoading(btn, loading, loadingText) {
         const top = stickyHeader.getBoundingClientRect().top + window.scrollY - headerHeight;
         window.scrollTo({ top: top, behavior: 'auto' });
       }
+    }
+
+
+    // =====================================================
+    // DETAIL PAGE UTILITIES
+    // =====================================================
+    function toggleDetailSidebar() {
+      const layout = document.getElementById('clientPage');
+      if (layout) {
+        layout.classList.toggle('sidebar-open');
+      }
+    }
+
+    function toggleHwForm() {
+      const expanded = document.getElementById('hwFormExpanded');
+      if (expanded) {
+        expanded.classList.toggle('show');
+        const btn = expanded.previousElementSibling?.previousElementSibling;
+        // No — find the expand button properly
+        const expandBtn = document.querySelector('.hw-expand-btn');
+        if (expandBtn) {
+          expandBtn.textContent = expanded.classList.contains('show')
+            ? '− Less options'
+            : '+ More options (type, sensitivity, rationale)';
+        }
+      }
+    }
+
+    function updateAttentionCard() {
+      const alertsCount = parseInt(document.getElementById('alertsCount')?.textContent || '0');
+      const messagesCount = parseInt(document.getElementById('messagesCount')?.textContent || '0');
+      const total = alertsCount + messagesCount;
+      const countEl = document.getElementById('attentionCount');
+      const emptyEl = document.getElementById('attentionEmpty');
+      if (countEl) countEl.textContent = total;
+      if (emptyEl) {
+        emptyEl.style.display = total === 0 ? 'block' : 'none';
+      }
+      // Hide subsections when empty
+      const alertsSection = document.getElementById('alertsSection');
+      const messagesSection = document.getElementById('messagesSection');
+      if (alertsSection) alertsSection.style.display = alertsCount > 0 ? 'block' : 'none';
+      if (messagesSection) messagesSection.style.display = messagesCount > 0 ? 'block' : 'none';
     }
 
 
@@ -2777,11 +2835,12 @@ function setButtonLoading(btn, loading, loadingText) {
 
         stripDays.push({ date: d, ...activity, messages: dayMessages, homework: dayHw, notes: dayNotes, sessions: daySessions, crisis: dayCrisis });
 
-        const monthLabel = d.getDate() === 1 || i === 13 ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' })}</div>` : '';
+        const isMonthStart = d.getDate() === 1 || i === 13;
+        const monthAttr = isMonthStart ? ` data-month="${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}"` : '';
+        const monthClass = isMonthStart ? ' month-start' : '';
 
         stripHtml += `
-          <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0">
-            ${monthLabel}
+          <div class="cal-strip-day${monthClass} ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0"${monthAttr}>
             <div class="cal-label">${dayNames[d.getDay()]}</div>
             <div class="cal-num">${d.getDate()}</div>
             <div class="cal-dots">${dotsHtml}</div>
@@ -3135,8 +3194,10 @@ function setButtonLoading(btn, loading, loadingText) {
           if (updated) {
             currentClient = updated;
             document.getElementById('clientName').textContent = updated.display_name || 'Client';
+            document.getElementById('clientNameSticky').textContent = updated.display_name || 'Client';
             const updInitials = (updated.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             document.getElementById('clientAvatar').textContent = updInitials;
+            document.getElementById('clientAvatarSticky').textContent = updInitials;
             const isPending = !updated.client_id;
             document.getElementById('clientMeta').innerHTML = isPending
               ? `Invite: ${esc(updated.invite_code)}`
