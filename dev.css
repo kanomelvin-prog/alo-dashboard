@@ -1521,7 +1521,7 @@ button, input, select, textarea { font: inherit; }
 .cal-strip-day {
   flex: 0 0 56px;
   text-align: center;
-  padding: 14px 4px 6px;
+  padding: 6px 4px;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s;
@@ -1533,9 +1533,16 @@ button, input, select, textarea { font: inherit; }
 .cal-strip-month {
   font-size: 0.5625rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--sage);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 2px;
+  height: 12px;
+  line-height: 12px;
+}
+
+.cal-strip-month-spacer {
+  height: 12px;
   margin-bottom: 2px;
 }
 
@@ -2776,22 +2783,7 @@ body {
 .feed-item-indicator.crisis { background: var(--danger); }
 .feed-item-indicator.message { background: var(--info); }
 
-/* Calendar strip month divider */
-.cal-strip-day.month-start { border-left: 2px solid var(--sage); }
-.cal-strip-day.month-start::before {
-  content: attr(data-month);
-  position: absolute;
-  top: 2px;
-  left: 0;
-  right: 0;
-  font-size: 0.5625rem;
-  font-weight: 700;
-  color: var(--sage);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-.cal-strip-month { display: none; }
+/* Calendar strip month divider — labels are inline DOM elements now */
 
 /* === EMERGENCY CONTACT WARNING BANNER === */
 .emergency-warning-banner {
