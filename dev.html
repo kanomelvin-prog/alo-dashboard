@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=23">
+  <link rel="stylesheet" href="dev.css?v=24">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -143,6 +143,9 @@
             <div class="sidebar-header-actions">
               <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
             </div>
+          </div>
+          <div class="sidebar-search">
+            <input type="text" id="clientSearchInput" placeholder="Filter clients..." oninput="filterClientList(this.value)">
           </div>
           <div class="sidebar-list" id="clientsList">
             <div class="section-empty">No clients yet</div>
@@ -290,13 +293,15 @@
                 <div class="card-body" id="notesContainer">
                   <p class="text-muted-center">No session notes yet.</p>
                 </div>
-                <div class="note-quick-capture" id="quickNoteCapture">
-                  <div class="quick-note-inner">
-                    <label class="quick-note-label">Quick Note</label>
-                    <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
-                    <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
-                    <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
-                  </div>
+              </div>
+
+              <!-- Quick Note — sticky at bottom of scroll -->
+              <div class="quick-note-sticky" id="quickNoteCapture">
+                <div class="quick-note-inner">
+                  <label class="quick-note-label">Quick Note</label>
+                  <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
+                  <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                  <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
                 </div>
               </div>
             </div>
@@ -331,12 +336,16 @@
               <div class="card">
                 <div class="card-header"><span class="card-title">Assign Homework</span></div>
                 <div class="card-body">
-                  <div class="templates">
-                    <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
-                    <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
-                    <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
-                    <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
-                    <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
+                  <div class="template-picker">
+                    <label class="template-picker-label">Quick template:</label>
+                    <select class="template-picker-select" onchange="applyTemplate(this.value); this.value='';">
+                      <option value="">Choose a template...</option>
+                      <option value="grounding">Grounding — 5-4-3-2-1 exercise</option>
+                      <option value="noticing">Noticing — observe anxiety patterns</option>
+                      <option value="journaling">Journaling — 10 min daily</option>
+                      <option value="behavioral">Behavioral — boundary practice</option>
+                      <option value="breathing">Breathing — 4-7-8 technique</option>
+                    </select>
                   </div>
                   <form id="homeworkForm" onsubmit="submitHomework(event)">
                     <div class="form-grid">
@@ -427,6 +436,9 @@
           <div class="sidebar-header">
             <div class="sidebar-header-left"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
             <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
+          </div>
+          <div class="sidebar-search">
+            <input type="text" id="clientSearchInput2" placeholder="Filter clients..." oninput="filterClientList(this.value)">
           </div>
           <div class="sidebar-list" id="clientsList2"></div>
         </div>
@@ -1369,13 +1381,19 @@ function setButtonLoading(btn, loading, loadingText) {
 
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
+        const activeHw = allClients.reduce((sum, c) => sum + (c.homeworkCount || 0), 0);
+        const summaryParts = [];
+        summaryParts.push(allClients.length + ' client' + (allClients.length !== 1 ? 's' : ''));
+        if (totalMessages > 0) summaryParts.push(totalMessages + ' unread message' + (totalMessages > 1 ? 's' : ''));
+        if (totalAlerts > 0) summaryParts.push(totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : ''));
+        if (activeHw > 0) summaryParts.push(activeHw + ' active homework');
         const summaryEl = document.getElementById('morningSummary');
         if (totalAlerts > 0) {
-          summaryEl.textContent = totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : '') + ' need your attention.';
+          summaryEl.textContent = summaryParts.join(' · ') + ' — alerts need your attention.';
         } else if (totalMessages > 0) {
-          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients.';
+          summaryEl.textContent = summaryParts.join(' · ');
         } else {
-          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', no items needing attention.';
+          summaryEl.textContent = 'All clear. ' + summaryParts.join(' · ') + '.';
         }
 
       } catch (err) {
@@ -1473,7 +1491,11 @@ function setButtonLoading(btn, loading, loadingText) {
         return;
       }
 
-      document.getElementById('messagesList').innerHTML = messages.map(m => {
+      const maxVisible = 5;
+      const visible = messages.slice(0, maxVisible);
+      const remaining = messages.length - maxVisible;
+
+      let msgHtml = visible.map(m => {
         const client = allClients.find(c => c.client_id === m.client_id);
         const name = client?.display_name || 'Client';
         return `
@@ -1487,6 +1509,48 @@ function setButtonLoading(btn, loading, loadingText) {
           </div>
         `;
       }).join('');
+
+      if (remaining > 0) {
+        msgHtml += `<button class="section-view-all" onclick="showAllMessages()">View all ${messages.length} messages</button>`;
+      }
+
+      document.getElementById('messagesList').innerHTML = msgHtml;
+      window._allHomeMessages = messages;
+    }
+
+    function showAllMessages() {
+      const messages = window._allHomeMessages || [];
+      const html = messages.map(m => {
+        const client = allClients.find(c => c.client_id === m.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer;" onclick="document.getElementById('allMessagesOverlay')?.remove(); showClient('${m.client_id}')">
+            <div style="width: 8px; height: 8px; background: #4A90D9; border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 14px;">${esc(name)}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${esc(truncate(m.content, 100))}</div>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">${timeAgo(new Date(m.created_at))}</span>
+          </div>
+        `;
+      }).join('');
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'allMessagesOverlay';
+      overlay.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>All Unread Messages (${messages.length})</h3>
+            <button class="modal-close" onclick="document.getElementById('allMessagesOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            ${html || '<p class="text-muted-center">No messages</p>'}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function renderTriage() {
@@ -1548,7 +1612,7 @@ function setButtonLoading(btn, loading, loadingText) {
         }
 
         return `
-          <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')">
+          <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')" data-name="${esc(c.display_name || 'Client').toLowerCase()}">
             <div class="client-avatar">
               ${initials}
               ${!isPending ? `<div class="status-badge ${c.status}"></div>` : ''}
@@ -1559,7 +1623,7 @@ function setButtonLoading(btn, loading, loadingText) {
                 <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
               </div>
               <div class="client-meta">
-                ${isPending ? '<span class="pending-label">Pending signup</span>' : `${c.sessionCount} sessions · ${timeAgo(new Date(c.lastActivity || c.created_at))}`}
+                ${isPending ? '<span class="pending-label">Pending signup</span>' : timeAgo(new Date(c.lastActivity || c.created_at))}
               </div>
             </div>
           </div>
@@ -2545,18 +2609,21 @@ function setButtonLoading(btn, loading, loadingText) {
       const preview = homework.slice(0, 2);
       const hasMore = homework.length > 2;
 
-      document.getElementById('homeworkHistory').innerHTML = preview.map(h => {
+      document.getElementById('homeworkHistory').innerHTML = preview.map((h, i) => {
         const viewedInfo = h.viewed_at ? ' · Seen ' + new Date(h.viewed_at).toLocaleDateString() : '';
+        const dateInfo = h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString();
         return `
-        <div class="homework-item">
+        <div class="homework-item hw-compact" onclick="this.classList.toggle('hw-expanded')">
           <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
             ${h.completed_at ? '✓' : '○'}
           </div>
           <div class="homework-content">
-            <div class="homework-type">${esc(h.title)}</div>
-            <div class="homework-desc">${esc(h.goal)}</div>
-            ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
-            <div class="homework-meta">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}${viewedInfo}</div>
+            <div class="homework-type">${esc(h.title)} <span class="homework-type-label">${esc(h.homework_type || '')}</span></div>
+            <div class="hw-detail">
+              <div class="homework-desc">${esc(h.goal)}</div>
+              ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
+              <div class="homework-meta">${dateInfo}${viewedInfo}</div>
+            </div>
           </div>
         </div>
       `}).join('');
@@ -2570,6 +2637,25 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('hwTitle').value = title;
       document.getElementById('hwGoal').value = goal;
       document.getElementById('hwRationale').value = rationale;
+    }
+
+    function applyTemplate(value) {
+      const templates = {
+        grounding: ['grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness'],
+        noticing: ['noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers'],
+        journaling: ['journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns'],
+        behavioral: ['behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills'],
+        breathing: ['breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms']
+      };
+      if (templates[value]) useTemplate(...templates[value]);
+    }
+
+    function filterClientList(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.client-item').forEach(item => {
+        const name = item.getAttribute('data-name') || '';
+        item.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
     }
 
         async function submitHomework(e) {
