@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=15">
+  <link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -156,32 +156,29 @@
       <div class="main">
         <!-- Single sticky header -->
         <div class="client-sticky-header" style="position:sticky;top:60px;z-index:51;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0 0;">
-            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-              <div id="clientAvatar" class="client-header-avatar">C</div>
-              <div style="min-width:0;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span class="client-header-name" id="clientName">Client</span>
-                  <span id="clientBadge" style="display:none;"></span>
-                </div>
-                <div class="client-header-sub">
-                  <span id="clientMeta" class="client-header-meta"></span>
-                  <span class="client-header-sep">·</span>
-                  <a href="#" class="client-header-edit" onclick="showEditClientModal(); return false;">Edit</a>
-                  <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span id="crisisAlertButtonText">Crisis Alert</span>
-                  </button>
-                </div>
-              </div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 0 0;">
+            <div style="display:flex;align-items:baseline;gap:8px;min-width:0;flex-wrap:wrap;">
+              <span class="client-header-name" id="clientName">Client</span>
+              <span id="clientBadge" style="display:none;"></span>
+            </div>
+            <div class="client-header-sub" style="display:flex;align-items:baseline;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+              <span id="clientMeta" class="client-header-meta"></span>
+              <span class="client-header-sep">·</span>
+              <a href="#" class="client-header-edit" onclick="showEditClientModal(); return false;">Edit</a>
+              <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span id="crisisAlertButtonText">Crisis Alert</span>
+              </button>
             </div>
           </div>
           <div style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin-top:8px;">
             <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
             <button class="tab" onclick="switchTab('tools', this)">In Session</button>
           </div>
+          <!-- Hidden avatar element for JS compatibility -->
+          <div id="clientAvatar" style="display:none;">C</div>
         </div>
 
 
@@ -2840,11 +2837,11 @@ function setButtonLoading(btn, loading, loadingText) {
         stripDays.push({ date: d, ...activity, messages: dayMessages, homework: dayHw, notes: dayNotes, sessions: daySessions, crisis: dayCrisis });
 
         const isMonthStart = d.getDate() === 1 || i === 13;
-        const monthAttr = isMonthStart ? ` data-month="${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}"` : '';
-        const monthClass = isMonthStart ? ' month-start' : '';
+        const monthLabel = isMonthStart ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>` : '<div class="cal-strip-month-spacer"></div>';
 
         stripHtml += `
-          <div class="cal-strip-day${monthClass} ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0"${monthAttr}>
+          <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0">
+            ${monthLabel}
             <div class="cal-label">${dayNames[d.getDay()]}</div>
             <div class="cal-num">${d.getDate()}</div>
             <div class="cal-dots">${dotsHtml}</div>
