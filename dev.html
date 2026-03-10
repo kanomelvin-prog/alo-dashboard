@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=28">
+  <link rel="stylesheet" href="dev.css?v=29">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -1970,7 +1970,6 @@ function setButtonLoading(btn, loading, loadingText) {
       const list = document.getElementById('clientPulseList');
       if (!section || !list) return;
 
-      // Only show for non-pending clients
       const active = allClients.filter(c => c.client_id);
       if (!active.length) {
         section.style.display = 'none';
@@ -1990,44 +1989,39 @@ function setButtonLoading(btn, loading, loadingText) {
       const visible = sorted.slice(0, maxVisible);
 
       list.innerHTML = visible.map(c => {
-        const isPending = !c.client_id;
         const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-        // Alo activity
-        let aloText = 'No Alo activity';
-        if (c.lastActivity) {
-          const ago = timeAgo(new Date(c.lastActivity));
-          aloText = c.sessionCount > 0
-            ? `${c.sessionCount} Alo session${c.sessionCount > 1 ? 's' : ''} this week · last ${ago}`
-            : `Last Alo: ${ago}`;
-        }
+        // Last Alo activity — relative time
+        const lastAlo = c.lastActivity
+          ? 'Last Alo: ' + timeAgo(new Date(c.lastActivity))
+          : 'No Alo activity yet';
 
-        // Homework
-        let hwText = '';
+        // Homework summary
+        let hwBadge = '';
         if (c.homeworkCount > 0) {
-          hwText = `${c.homeworkCount} active HW`;
+          hwBadge = '<span style="font-size:0.6875rem;font-weight:500;color:var(--sage);background:rgba(58,124,134,0.08);padding:1px 6px;border-radius:4px;margin-left:6px;">' + c.homeworkCount + ' active HW</span>';
         }
 
-        // Status dot color
+        // Status dot
         const dotColor = c.status === 'crisis' ? '#dc2626'
           : c.status === 'needs-attention' ? '#E8913A'
           : c.status === 'dormant' ? '#9CA3AF'
           : '#3A7C86';
 
         return `
-          <div class="pulse-item" onclick="showClient('${c.client_id || c.id}')">
-            <div class="pulse-avatar">${initials}</div>
-            <div class="pulse-content">
-              <div class="pulse-name">${esc(c.display_name || 'Client')}${hwText ? ' <span class="pulse-hw">' + hwText + '</span>' : ''}</div>
-              <div class="pulse-detail">${aloText}</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border-subtle);" onclick="showClient('${c.client_id || c.id}')" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(58,124,134,0.06);border:1.5px solid rgba(58,124,134,0.16);color:var(--sage);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.6875rem;flex-shrink:0;">${initials}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8125rem;font-weight:600;color:var(--charcoal);">${esc(c.display_name || 'Client')}${hwBadge}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px;">${lastAlo}</div>
             </div>
-            <div class="pulse-dot" style="background:${dotColor};"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
           </div>
         `;
       }).join('');
 
       if (sorted.length > maxVisible) {
-        list.innerHTML += `<div class="pulse-more">${sorted.length - maxVisible} more client${sorted.length - maxVisible > 1 ? 's' : ''} in sidebar</div>`;
+        list.innerHTML += '<div style="font-size:0.75rem;color:var(--text-muted);text-align:center;padding:8px;">' + (sorted.length - maxVisible) + ' more in sidebar</div>';
       }
     }
 
