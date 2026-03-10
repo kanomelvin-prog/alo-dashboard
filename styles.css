@@ -2984,9 +2984,17 @@ body {
 
 @media (max-width: 767px) {
   .client-sticky-header { top: 52px; }
+  .client-sticky-header > div:first-child {
+    flex-wrap: wrap !important;
+    gap: 4px 16px !important;
+  }
   .client-header-name { font-size: 1rem; }
   .client-header-avatar { width: 30px; height: 30px; font-size: 0.6875rem; }
-  .client-header-sub { font-size: 0.6875rem; }
+  .client-header-sub {
+    font-size: 0.6875rem;
+    flex-shrink: 1 !important;
+    justify-content: flex-start !important;
+  }
   .layout.client-page,
   .layout.client-page.sidebar-open { grid-template-columns: 1fr; }
   .layout.client-page.sidebar-open .sidebar { display: block; position: fixed; }
