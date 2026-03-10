@@ -2326,14 +2326,17 @@ body {
 
 /* === SESSION TOOLS: GROUP VISUALLY === */
 
-/* Notes card: primary action area */
+/* Notes card: primary action — dominant button */
 .add-note-btn {
-  background: var(--charcoal);
+  background: var(--sage);
   color: white;
+  font-size: 0.875rem;
+  padding: 8px 16px;
+  font-weight: 600;
 }
 
 .add-note-btn:hover {
-  background: #1a1815;
+  background: #2C6069;
 }
 
 /* Homework templates: warmer background to invite interaction */
