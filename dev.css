@@ -1461,16 +1461,17 @@ button, input, select, textarea { font: inherit; }
   gap: 14px;
 }
 
-/* Homework zone: side-by-side with calendar */
-.homework-zone-grid {
+/* In Session: side-by-side rows (main content + side panel) */
+.tools-row {
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 14px;
   align-items: start;
+  margin-bottom: 14px;
 }
 
-.homework-zone-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-.homework-zone-cal { min-width: 0; position: sticky; top: 140px; }
+.tools-row-main { min-width: 0; }
+.tools-row-side { min-width: 0; position: sticky; top: 140px; }
 
 .homework-zone-form { min-width: 0; }
 .homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
@@ -1951,11 +1952,11 @@ min-height: 44px;
 /* Sticky client header: phone margins handled in redesign block */
 
 @media (max-width: 767px) {
-  /* homework-zone-grid stacks on mobile */
-  .homework-zone-grid {
+  /* tools-row stacks on mobile */
+  .tools-row {
     grid-template-columns: 1fr;
   }
-  .homework-zone-cal {
+  .tools-row-side {
     position: static;
   }
 }
@@ -2696,7 +2697,7 @@ body {
   position: sticky;
   top: 60px;
   z-index: 51;
-  background: var(--white);
+  background: #FAF8F4;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
