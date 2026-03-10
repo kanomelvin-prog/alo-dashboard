@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="dev.css?v=26">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -81,7 +81,6 @@
 
       <div class="header-right">
         <span class="user-name" id="therapistName"></span>
-        <div class="user-avatar" id="therapistAvatar"></div>
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
     </header>
@@ -91,41 +90,31 @@
 
     <!-- HOMEPAGE -->
     <div class="layout" id="homePage">
-      <div class="main">
+      <div class="main home-content">
         <div>
           <div class="morning-greeting" id="morningGreeting">Good morning</div>
           <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
         </div>
 
-        <!-- Crisis Alerts -->
-        <div class="section" id="alertsSection">
-          <div class="section-header section-header-danger">
-            <div class="section-icon danger">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+        <!-- Needs Attention (unified crisis + messages feed) -->
+        <div class="section" id="attentionSection">
+          <div class="section-header">
+            <span class="section-title">Needs Attention</span>
+            <span class="section-count" id="attentionCount">0</span>
+          </div>
+          <div class="section-body">
+            <!-- Crisis subsection (preserves original IDs) -->
+            <div id="alertsSection">
+              <div id="alertsList"></div>
             </div>
-            <span class="section-title">Crisis Alerts</span>
-            <span class="section-count section-count-danger" id="alertsCount">0</span>
-          </div>
-          <div class="section-body" id="alertsList">
-            <div class="loading"><div class="spinner"></div>Loading...</div>
-          </div>
-        </div>
-
-        <!-- Messages from Clients -->
-        <div class="section" id="messagesSection">
-          <div class="section-header section-header-info">
-            <div class="section-icon info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+            <span id="alertsCount" style="display:none;">0</span>
+            <!-- Messages subsection (preserves original IDs) -->
+            <div id="messagesSection">
+              <div id="messagesList"></div>
             </div>
-            <span class="section-title">Messages from Clients</span>
-            <span class="section-count section-count-info" id="messagesCount">0</span>
-          </div>
-          <div class="section-body" id="messagesList">
-            <div class="section-empty">No unread messages</div>
+            <span id="messagesCount" style="display:none;">0</span>
+            <!-- Shared empty state -->
+            <div class="section-empty" id="attentionEmpty">All clear — no items needing attention.</div>
           </div>
         </div>
 
@@ -155,8 +144,14 @@
               <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
             </div>
           </div>
+          <div class="sidebar-search">
+            <input type="text" id="clientSearchInput" placeholder="Filter clients..." oninput="filterClientList(this.value)">
+          </div>
           <div class="sidebar-list" id="clientsList">
             <div class="section-empty">No clients yet</div>
+          </div>
+          <div class="sidebar-footer">
+            <a href="#" class="sidebar-archived-link" onclick="showArchivedClients(); return false;">View Archived Clients</a>
           </div>
         </div>
       </div>
@@ -164,60 +159,51 @@
     <!-- CLIENT DETAIL PAGE -->
     <div class="layout client-page" id="clientPage">
       <div class="main">
-                <div class="client-sticky-header">
-          <div class="page-header">
-            <div class="page-header-row">
-              <div>
-                <h1 class="page-title" id="clientName">Client</h1>
-                <p class="page-meta" id="clientMeta"></p>
-              </div>
-              <div class="page-header-actions">
-                <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <span id="crisisAlertButtonText">Crisis Alert</span>
-                </button>
-                <button class="btn btn-secondary btn-sm" onclick="showEditClientModal()">Edit</button>
-              </div>
+        <!-- Single sticky header -->
+        <div class="client-sticky-header" style="position:sticky;top:60px;z-index:51;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 20px 0;">
+            <div style="display:flex;align-items:baseline;gap:8px;min-width:0;flex-wrap:wrap;">
+              <a href="#" class="client-header-name" id="clientName" onclick="showEditClientModal(); return false;">Client</a>
+              <span id="clientBadge" style="display:none;"></span>
+            </div>
+            <div class="client-header-sub" style="display:flex;align-items:baseline;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+              <span id="clientMeta" class="client-header-meta"></span>
+              <span class="client-header-sep">·</span>
+              <a href="#" class="client-header-edit" onclick="showEditClientModal(); return false;">Edit</a>
+              <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span id="crisisAlertButtonText">Crisis Alert</span>
+              </button>
             </div>
           </div>
-
-          <div class="tabs">
+          <div style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin:8px 20px 0;padding-top:0;">
             <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
             <button class="tab" onclick="switchTab('tools', this)">In Session</button>
           </div>
+          <!-- Hidden avatar element for JS compatibility -->
+          <div id="clientAvatar" style="display:none;">C</div>
         </div>
 
 
         <!-- Session Prep Tab -->
         <div class="tab-content active" id="tab-prep">
-                    <div class="card" id="weekGlanceCard" style="display: none;">
+          <!-- This Week (full width — the clinical headline) -->
+          <div class="card" id="weekGlanceCard" style="display: none;">
             <div class="card-header">
               <span class="card-title">This Week</span>
+              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                Copy Prep Pack
+              </button>
             </div>
             <div class="card-body" id="weekGlanceBody">
               <div class="loading"><div class="spinner"></div></div>
             </div>
           </div>
 
-          <!-- Activity Calendar -->
-          <div class="card" id="calendarCard">
-            <div class="card-header"><span class="card-title">Activity</span></div>
-            <div class="card-body" id="calendarBody">
-              <div class="calendar-strip" id="calendarStrip"></div>
-              <div class="calendar-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Message</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>Homework</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
-              </div>
-              <div class="calendar-detail" id="calendarDetail" style="display:none;"></div>
-            </div>
-          </div>
-
-          <!-- Messages from Client (moved up - most actionable) -->
+          <!-- Messages from Client (full width — most actionable) -->
           <div class="card">
             <div class="card-header">
               <span class="card-title">Messages from Client</span>
@@ -228,26 +214,26 @@
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">What Changed</span>
-              <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                Copy Prep Pack
-              </button>
+          <!-- What Changed + Open Items (50/50) -->
+          <div class="prep-half-row">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">What Changed</span>
+              </div>
+              <div class="card-body" id="prepSummary">
+                <div class="loading"><div class="spinner"></div></div>
+              </div>
             </div>
-            <div class="card-body" id="prepSummary">
-              <div class="loading"><div class="spinner"></div></div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title">Open Items</span></div>
+              <div class="card-body" id="prepOpenItems">
+                <p class="text-muted-center">No open items</p>
+              </div>
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-header"><span class="card-title">Open Items</span></div>
-            <div class="card-body" id="prepOpenItems">
-              <p class="text-muted-center">No open items</p>
-            </div>
-          </div>
-
+          <!-- Recent Session Notes (full width) -->
           <div class="card" id="lastSessionsCard">
             <div class="card-header">
               <span class="card-title">Recent Session Notes</span>
@@ -257,103 +243,74 @@
               <p class="text-muted-center">No session notes yet.</p>
             </div>
           </div>
+
+          <!-- Month Calendar (reference — bottom of prep) -->
+          <div class="card">
+            <div class="card-header">
+              <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
+              <span class="card-title" id="calMonthLabelPrep">March 2026</span>
+              <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
+            </div>
+            <div class="card-body" style="padding: 8px 12px;">
+              <div class="cal-month" id="calMonthPrep"></div>
+              <div class="calendar-legend" style="margin-top: 8px;">
+                <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+              </div>
+              <div class="calendar-detail" id="calMonthDetailPrep" style="display:none;"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Session Tools Tab -->
         <div class="tab-content" id="tab-tools">
-          <!-- Session Notes -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Session Notes</span>
-              <button class="btn btn-sm btn-primary add-note-btn" onclick="showNoteForm()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                Add Note
-              </button>
+          <!-- Crisis Alerts — ABOVE notes when active (safety first) -->
+          <div class="card" id="crisisAlertsCard" style="display: none;">
+            <div class="card-header card-header-danger">
+              <span class="card-title card-title-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Crisis Alerts
+              </span>
+              <span class="crisis-count-badge" id="crisisAlertCount"></span>
             </div>
-            <div class="card-body" id="notesContainer">
-              <p class="text-muted-center">No session notes yet.</p>
-            </div>
-            <div class="note-quick-capture" id="quickNoteCapture">
-              <div class="quick-note-inner">
-                <label class="quick-note-label">Quick Note</label>
-                <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
-                <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
-                <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
-              </div>
-            </div>
+            <div class="card-body" id="crisisAlertsList"></div>
           </div>
 
-          <!-- Homework Zone: 2/3 form + 1/3 calendar/history -->
-          <div class="homework-zone">
-            <!-- LEFT: Assign Homework (2/3) -->
-            <div class="homework-zone-form">
+          <!-- Row 1: Session Notes + Month Calendar side by side -->
+          <div class="tools-row">
+            <!-- LEFT: Session Notes (primary) -->
+            <div class="tools-row-main">
               <div class="card">
-                <div class="card-header"><span class="card-title">Assign Homework</span></div>
-                <div class="card-body">
-                  <div class="templates">
-                    <button class="template-btn" onclick="useTemplate('grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness')">Grounding</button>
-                    <button class="template-btn" onclick="useTemplate('noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers')">Noticing</button>
-                    <button class="template-btn" onclick="useTemplate('journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns')">Journaling</button>
-                    <button class="template-btn" onclick="useTemplate('behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills')">Behavioral</button>
-                    <button class="template-btn" onclick="useTemplate('breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms')">Breathing</button>
-                  </div>
-                  <form id="homeworkForm" onsubmit="submitHomework(event)">
-                    <div class="form-grid">
-                      <div class="form-group">
-                        <label>Type</label>
-                        <select id="hwType" required>
-                          <option value="grounding">Grounding Technique</option>
-                          <option value="noticing">Noticing Practice</option>
-                          <option value="journaling">Journaling Prompt</option>
-                          <option value="behavioral">Behavioral Experiment</option>
-                          <option value="cognitive">Cognitive Exercise</option>
-                          <option value="breathing">Breathing Exercise</option>
-                          <option value="custom">Custom</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label class="tooltip-trigger">Sensitivity
-                          <span class="tooltip-icon">?</span>
-                          <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
-                        </label>
-                        <select id="hwSensitivity">
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
-                      <div class="form-group full">
-                        <label>Title</label>
-                        <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
-                      </div>
-                      <div class="form-group full">
-                        <label>Goal / Instructions</label>
-                        <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
-                      </div>
-                      <div class="form-group full">
-                        <label>Treatment Plan Goal (SimplePractice)</label>
-                        <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
-                        <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
-                      </div>
-                      <div class="form-group full">
-                        <label>Clinical Rationale (private)</label>
-                        <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                        <span class="form-hint">For your records only -- client never sees this</span>
-                      </div>
-                    </div>
-                    <div class="form-actions">
-                      <button type="submit" class="btn btn-primary">Assign Homework</button>
-                    </div>
-                  </form>
-                  <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
+                <div class="card-header">
+                  <span class="card-title">Session Notes</span>
+                  <button class="btn btn-primary add-note-btn" onclick="showNoteForm()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    Add Note
+                  </button>
+                </div>
+                <div class="card-body" id="notesContainer">
+                  <p class="text-muted-center">No session notes yet.</p>
+                </div>
+              </div>
+
+              <!-- Quick Note — sticky at bottom of scroll -->
+              <div class="quick-note-sticky" id="quickNoteCapture">
+                <div class="quick-note-inner">
+                  <label class="quick-note-label">Quick Note</label>
+                  <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
+                  <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                  <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
                 </div>
               </div>
             </div>
 
-            <!-- RIGHT: Month Calendar + Homework History (1/3) -->
-            <div class="homework-zone-sidebar">
-              <!-- Month Calendar -->
+            <!-- RIGHT: Month Calendar -->
+            <div class="tools-row-side">
               <div class="card">
                 <div class="card-header">
                   <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
@@ -372,8 +329,89 @@
                   <div class="calendar-detail" id="calMonthDetail" style="display:none;"></div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- Homework History (compact) -->
+          <!-- Row 2: Assign Homework + Homework History side by side -->
+          <div class="tools-row">
+            <!-- LEFT: Assign Homework -->
+            <div class="tools-row-main">
+              <div class="card">
+                <div class="card-header"><span class="card-title">Assign Homework</span></div>
+                <div class="card-body">
+                  <div class="template-picker">
+                    <label class="template-picker-label">Quick template:</label>
+                    <select class="template-picker-select" onchange="applyTemplate(this.value); this.value='';">
+                      <option value="">Choose a template...</option>
+                      <option value="grounding">Grounding — 5-4-3-2-1 exercise</option>
+                      <option value="noticing">Noticing — observe anxiety patterns</option>
+                      <option value="journaling">Journaling — 10 min daily</option>
+                      <option value="behavioral">Behavioral — boundary practice</option>
+                      <option value="breathing">Breathing — 4-7-8 technique</option>
+                    </select>
+                  </div>
+                  <form id="homeworkForm" onsubmit="submitHomework(event)">
+                    <div class="form-grid">
+                      <div class="form-group full">
+                        <label>Title</label>
+                        <input type="text" id="hwTitle" placeholder="Short title for this homework" required>
+                      </div>
+                      <div class="form-group full">
+                        <label>Goal / Instructions</label>
+                        <textarea id="hwGoal" placeholder="What should the client practice?" required></textarea>
+                      </div>
+                    </div>
+                    <!-- Expanded fields (hidden by default) -->
+                    <div class="hw-form-expanded" id="hwFormExpanded">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Type</label>
+                          <select id="hwType">
+                            <option value="grounding">Grounding Technique</option>
+                            <option value="noticing">Noticing Practice</option>
+                            <option value="journaling">Journaling Prompt</option>
+                            <option value="behavioral">Behavioral Experiment</option>
+                            <option value="cognitive">Cognitive Exercise</option>
+                            <option value="breathing">Breathing Exercise</option>
+                            <option value="custom">Custom</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label class="tooltip-trigger">Sensitivity
+                            <span class="tooltip-icon">?</span>
+                            <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
+                          </label>
+                          <select id="hwSensitivity">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                          </select>
+                        </div>
+                        <div class="form-group full">
+                          <label>Treatment Plan Goal (SimplePractice)</label>
+                          <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
+                          <span class="form-hint">Links this homework to a treatment plan goal for clinical documentation</span>
+                        </div>
+                        <div class="form-group full">
+                          <label>Clinical Rationale (private)</label>
+                          <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
+                          <span class="form-hint">For your records only -- client never sees this</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, sensitivity, rationale)</button>
+                    <div class="form-actions">
+                      <button type="submit" class="btn btn-primary">Assign Homework</button>
+                    </div>
+                  </form>
+                  <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Homework History -->
+            <div class="tools-row-side">
               <div class="card">
                 <div class="card-header">
                   <span class="card-title">Homework History</span>
@@ -386,26 +424,8 @@
             </div>
           </div>
 
-          <!-- Crisis Alerts Card -->
-          <div class="card" id="crisisAlertsCard" style="display: none;">
-            <div class="card-header card-header-danger">
-              <span class="card-title card-title-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Crisis Alerts
-              </span>
-              <span class="crisis-count-badge" id="crisisAlertCount"></span>
-            </div>
-            <div class="card-body" id="crisisAlertsList"></div>
-          </div>
-
-          <!-- Messages from Client (truncated) -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Messages from Client</span>
-              <button class="btn btn-sm btn-secondary" id="viewAllMessagesToolsBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
-            </div>
+          <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
+          <div class="card" id="inSessionMessagesCard" style="display: none;">
             <div class="card-body" id="activityMessages">
               <p class="text-muted-center">No messages</p>
             </div>
@@ -419,6 +439,9 @@
           <div class="sidebar-header">
             <div class="sidebar-header-left"><button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button><span class="sidebar-title">Clients</span></div>
             <button class="btn btn-sm btn-primary sidebar-invite-btn" onclick="showInviteModal()">+ Invite</button>
+          </div>
+          <div class="sidebar-search">
+            <input type="text" id="clientSearchInput2" placeholder="Filter clients..." oninput="filterClientList(this.value)">
           </div>
           <div class="sidebar-list" id="clientsList2"></div>
         </div>
@@ -559,7 +582,7 @@
         <div class="form-group danger-zone">
           <label class="danger-zone-label">Danger Zone</label>
           <button class="btn btn-sm btn-danger-outline" onclick="confirmDeleteClient()">Archive Client</button>
-          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
+          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Restore anytime from the bottom of the Clients sidebar.</span>
         </div>
       </div>
       <div class="modal-footer">
@@ -827,6 +850,22 @@ async function submitForgotPassword() {
   } finally {
     setButtonLoading(btn, false);
   }
+}
+
+// === CLIPBOARD UTILITY (works on HTTP and HTTPS) ===
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return copyToClipboard(text);
+  }
+  // Fallback for HTTP
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+  return Promise.resolve();
 }
 
 // === BUTTON LOADING UTILITY ===
@@ -1191,7 +1230,8 @@ function setButtonLoading(btn, loading, loadingText) {
 
       document.getElementById('therapistName').textContent = name;
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      document.getElementById('therapistAvatar').textContent = initials;
+      const avatarEl = document.getElementById('therapistAvatar');
+      if (avatarEl) avatarEl.textContent = initials;
 
       const hour = new Date().getHours();
       const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -1340,16 +1380,23 @@ function setButtonLoading(btn, loading, loadingText) {
         renderMessages(messages || []);
         renderTriage();
         renderClientsList();
+        updateAttentionCard();
 
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
+        const activeHw = allClients.reduce((sum, c) => sum + (c.homeworkCount || 0), 0);
+        const summaryParts = [];
+        summaryParts.push(allClients.length + ' client' + (allClients.length !== 1 ? 's' : ''));
+        if (totalMessages > 0) summaryParts.push(totalMessages + ' unread message' + (totalMessages > 1 ? 's' : ''));
+        if (totalAlerts > 0) summaryParts.push(totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : ''));
+        if (activeHw > 0) summaryParts.push(activeHw + ' active homework');
         const summaryEl = document.getElementById('morningSummary');
         if (totalAlerts > 0) {
-          summaryEl.textContent = totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : '') + ' need your attention.';
+          summaryEl.textContent = summaryParts.join(' · ') + ' — alerts need your attention.';
         } else if (totalMessages > 0) {
-          summaryEl.textContent = totalMessages + ' unread message' + (totalMessages > 1 ? 's' : '') + ' from clients.';
+          summaryEl.textContent = summaryParts.join(' · ');
         } else {
-          summaryEl.textContent = 'All clear. ' + allClients.length + ' client' + (allClients.length !== 1 ? 's' : '') + ', no items needing attention.';
+          summaryEl.textContent = 'All clear. ' + summaryParts.join(' · ') + '.';
         }
 
       } catch (err) {
@@ -1447,7 +1494,11 @@ function setButtonLoading(btn, loading, loadingText) {
         return;
       }
 
-      document.getElementById('messagesList').innerHTML = messages.map(m => {
+      const maxVisible = 5;
+      const visible = messages.slice(0, maxVisible);
+      const remaining = messages.length - maxVisible;
+
+      let msgHtml = visible.map(m => {
         const client = allClients.find(c => c.client_id === m.client_id);
         const name = client?.display_name || 'Client';
         return `
@@ -1461,6 +1512,48 @@ function setButtonLoading(btn, loading, loadingText) {
           </div>
         `;
       }).join('');
+
+      if (remaining > 0) {
+        msgHtml += `<button class="section-view-all" onclick="showAllMessages()">View all ${messages.length} messages</button>`;
+      }
+
+      document.getElementById('messagesList').innerHTML = msgHtml;
+      window._allHomeMessages = messages;
+    }
+
+    function showAllMessages() {
+      const messages = window._allHomeMessages || [];
+      const html = messages.map(m => {
+        const client = allClients.find(c => c.client_id === m.client_id);
+        const name = client?.display_name || 'Client';
+        return `
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer;" onclick="document.getElementById('allMessagesOverlay')?.remove(); showClient('${m.client_id}')">
+            <div style="width: 8px; height: 8px; background: #4A90D9; border-radius: 50%; flex-shrink: 0;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 14px;">${esc(name)}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${esc(truncate(m.content, 100))}</div>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">${timeAgo(new Date(m.created_at))}</span>
+          </div>
+        `;
+      }).join('');
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'allMessagesOverlay';
+      overlay.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3>All Unread Messages (${messages.length})</h3>
+            <button class="modal-close" onclick="document.getElementById('allMessagesOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="modal-body">
+            ${html || '<p class="text-muted-center">No messages</p>'}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function renderTriage() {
@@ -1522,7 +1615,7 @@ function setButtonLoading(btn, loading, loadingText) {
         }
 
         return `
-          <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')">
+          <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')" data-name="${esc(c.display_name || 'Client').toLowerCase()}">
             <div class="client-avatar">
               ${initials}
               ${!isPending ? `<div class="status-badge ${c.status}"></div>` : ''}
@@ -1533,7 +1626,7 @@ function setButtonLoading(btn, loading, loadingText) {
                 <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
               </div>
               <div class="client-meta">
-                ${isPending ? '<span class="pending-label">Pending signup</span>' : `${c.sessionCount} sessions · ${timeAgo(new Date(c.lastActivity || c.created_at))}`}
+                ${isPending ? '<span class="pending-label">Pending signup</span>' : timeAgo(new Date(c.lastActivity || c.created_at))}
               </div>
             </div>
           </div>
@@ -1681,6 +1774,7 @@ function setButtonLoading(btn, loading, loadingText) {
 
             currentClient = client;
       calendarOffset = 0;
+      stripOffset = 0;
 
       const cacheKey = client.client_id || client.id;
 
@@ -1689,16 +1783,31 @@ function setButtonLoading(btn, loading, loadingText) {
 
       document.getElementById('clientName').textContent = client.display_name || 'Client';
 
+      // Avatar initials
+      const initials = (client.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('clientAvatar').textContent = initials;
+
       const isPending = !client.client_id;
+
+      // Badge (next to name)
+      const badgeEl = document.getElementById('clientBadge');
+      if (isPending) {
+        badgeEl.style.display = 'inline-block';
+        badgeEl.innerHTML = '<span style="background:#fff3cd;color:#856404;border-radius:999px;padding:2px 8px;font-size:0.6875rem;font-weight:600;">Pending</span>';
+      } else {
+        badgeEl.style.display = 'none';
+      }
+
+      // Meta line (below name)
       document.getElementById('clientMeta').innerHTML = isPending
-        ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(client.invite_code)}</span>`
+        ? `Invite: ${esc(client.invite_code)}`
         : `${client.sessionCount} sessions this week · ${client.homeworkCount} active homework`;
 
       // Clear all containers immediately to prevent stale data bleed
       document.getElementById('notesContainer').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('homeworkHistory').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('activityMessages').innerHTML = '<p class="text-muted-center">No messages</p>';
-      ['calendarDetail', 'calMonthDetail'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      ['calendarDetail', 'calMonthDetail', 'calMonthDetailPrep'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
       document.getElementById('prepSummary').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
@@ -1743,6 +1852,7 @@ function setButtonLoading(btn, loading, loadingText) {
     function showHomePage() {
       document.getElementById('homePage').style.display = 'grid';
       document.getElementById('clientPage').classList.remove('active');
+      document.getElementById('clientPage').classList.remove('sidebar-open');
       currentClient = null;
       renderClientsList();
     }
@@ -1766,7 +1876,9 @@ function setButtonLoading(btn, loading, loadingText) {
     }
 
         function switchTab(tabName, btn) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+      });
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
@@ -1778,6 +1890,46 @@ function setButtonLoading(btn, loading, loadingText) {
         const top = stickyHeader.getBoundingClientRect().top + window.scrollY - headerHeight;
         window.scrollTo({ top: top, behavior: 'auto' });
       }
+    }
+
+
+    // =====================================================
+    // DETAIL PAGE UTILITIES
+    // =====================================================
+    function toggleDetailSidebar() {
+      const layout = document.getElementById('clientPage');
+      if (layout) {
+        layout.classList.toggle('sidebar-open');
+      }
+    }
+
+    function toggleHwForm() {
+      const expanded = document.getElementById('hwFormExpanded');
+      if (!expanded) return;
+      expanded.classList.toggle('show');
+      const expandBtn = document.querySelector('.hw-expand-btn');
+      if (expandBtn) {
+        expandBtn.textContent = expanded.classList.contains('show')
+          ? '− Less options'
+          : '+ More options (type, sensitivity, rationale)';
+      }
+    }
+
+    function updateAttentionCard() {
+      const alertsCount = parseInt(document.getElementById('alertsCount')?.textContent || '0');
+      const messagesCount = parseInt(document.getElementById('messagesCount')?.textContent || '0');
+      const total = alertsCount + messagesCount;
+      const countEl = document.getElementById('attentionCount');
+      const emptyEl = document.getElementById('attentionEmpty');
+      if (countEl) countEl.textContent = total;
+      if (emptyEl) {
+        emptyEl.style.display = total === 0 ? 'block' : 'none';
+      }
+      // Hide subsections when empty
+      const alertsSection = document.getElementById('alertsSection');
+      const messagesSection = document.getElementById('messagesSection');
+      if (alertsSection) alertsSection.style.display = alertsCount > 0 ? 'block' : 'none';
+      if (messagesSection) messagesSection.style.display = messagesCount > 0 ? 'block' : 'none';
     }
 
 
@@ -2229,7 +2381,7 @@ function setButtonLoading(btn, loading, loadingText) {
         text += '\n\nMedical Necessity: Continued therapeutic support medically necessary for symptom management and functional improvement.';
       }
 
-      navigator.clipboard.writeText(text.trim()).then(() => {
+      copyToClipboard(text.trim()).then(() => {
         toast('Copied ' + format.toUpperCase() + ' to clipboard');
       });
       // Close dropdown
@@ -2347,7 +2499,7 @@ function setButtonLoading(btn, loading, loadingText) {
         }
       }
 
-      navigator.clipboard.writeText(text).then(() => {
+      copyToClipboard(text).then(() => {
         const btn = event.target;
         const originalText = btn.textContent;
         btn.classList.add('copied');
@@ -2437,7 +2589,7 @@ function setButtonLoading(btn, loading, loadingText) {
         if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
       }
 
-      navigator.clipboard.writeText(prepPack).then(() => {
+      copyToClipboard(prepPack).then(() => {
         const btn = document.getElementById('copyPrepPackBtn');
         const originalHTML = btn.innerHTML;
         btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg> Copied!';
@@ -2460,18 +2612,21 @@ function setButtonLoading(btn, loading, loadingText) {
       const preview = homework.slice(0, 2);
       const hasMore = homework.length > 2;
 
-      document.getElementById('homeworkHistory').innerHTML = preview.map(h => {
+      document.getElementById('homeworkHistory').innerHTML = preview.map((h, i) => {
         const viewedInfo = h.viewed_at ? ' · Seen ' + new Date(h.viewed_at).toLocaleDateString() : '';
+        const dateInfo = h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString();
         return `
-        <div class="homework-item">
+        <div class="homework-item hw-compact" onclick="this.classList.toggle('hw-expanded')">
           <div class="homework-status ${h.completed_at ? 'completed' : 'active'}">
             ${h.completed_at ? '✓' : '○'}
           </div>
           <div class="homework-content">
-            <div class="homework-type">${esc(h.title)}</div>
-            <div class="homework-desc">${esc(h.goal)}</div>
-            ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
-            <div class="homework-meta">${h.completed_at ? 'Completed ' + new Date(h.completed_at).toLocaleDateString() : 'Assigned ' + new Date(h.created_at).toLocaleDateString()}${viewedInfo}</div>
+            <div class="homework-type">${esc(h.title)} <span class="homework-type-label">${esc(h.homework_type || '')}</span></div>
+            <div class="hw-detail">
+              <div class="homework-desc">${esc(h.goal)}</div>
+              ${h.treatment_plan_goal ? `<div class="homework-meta">Treatment Plan Goal: ${esc(h.treatment_plan_goal)}</div>` : ''}
+              <div class="homework-meta">${dateInfo}${viewedInfo}</div>
+            </div>
           </div>
         </div>
       `}).join('');
@@ -2485,6 +2640,25 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('hwTitle').value = title;
       document.getElementById('hwGoal').value = goal;
       document.getElementById('hwRationale').value = rationale;
+    }
+
+    function applyTemplate(value) {
+      const templates = {
+        grounding: ['grounding', '5-4-3-2-1 grounding exercise', '5-4-3-2-1 grounding exercise when feeling overwhelmed', 'Improve emotion regulation and present-moment awareness'],
+        noticing: ['noticing', 'Noticing practice', 'Notice and log moments of anxiety without trying to change them', 'Build awareness of anxiety patterns and triggers'],
+        journaling: ['journaling', 'Daily journal', 'Journal for 10 minutes each morning', 'Process emotions and identify patterns'],
+        behavioral: ['behavioral', 'Boundary practice', 'Practice one boundary-setting conversation', 'Build assertiveness and relationship skills'],
+        breathing: ['breathing', '4-7-8 Breathing', '4-7-8 breathing technique twice daily', 'Reduce physiological anxiety symptoms']
+      };
+      if (templates[value]) useTemplate(...templates[value]);
+    }
+
+    function filterClientList(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.client-item').forEach(item => {
+        const name = item.getAttribute('data-name') || '';
+        item.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
     }
 
         async function submitHomework(e) {
@@ -2616,9 +2790,22 @@ function setButtonLoading(btn, loading, loadingText) {
     // CALENDAR WIDGET
     // =====================================================
     let calendarOffset = 0; // 0 = current month, -1 = prev, etc.
+    let stripOffset = 0; // 0 = today as last day, -1 = 14 days earlier, +1 = 14 days later
 
     function navigateCalendar(dir) {
       calendarOffset += dir;
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      if (cacheKey) renderCalendar(cacheKey);
+    }
+
+    function navigateStrip(dir) {
+      if (dir === 0) {
+        stripOffset = 0; // Home = reset to today
+      } else {
+        stripOffset += dir;
+      }
+      // Don't go into the future
+      if (stripOffset > 0) stripOffset = 0;
       const cacheKey = currentClient?.client_id || currentClient?.id;
       if (cacheKey) renderCalendar(cacheKey);
     }
@@ -2709,19 +2896,27 @@ function setButtonLoading(btn, loading, loadingText) {
       const monthEl = document.getElementById('calMonth');
       if (monthEl) monthEl.innerHTML = monthHtml;
 
+      // Also populate Session Prep calendar (same data, different elements)
+      const monthElPrep = document.getElementById('calMonthPrep');
+      if (monthElPrep) monthElPrep.innerHTML = monthHtml;
+      const labelElPrep = document.getElementById('calMonthLabelPrep');
+      if (labelElPrep) labelElPrep.textContent = monthName;
+
       window._monthDays = monthDays;
 
       // === 14-DAY STRIP (Session Prep) ===
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const stripDays = [];
       let stripHtml = '';
+      const stripBaseOffset = stripOffset * 14; // Each click shifts 14 days
       for (let i = 13; i >= 0; i--) {
         const d = new Date();
-        d.setDate(d.getDate() - i);
+        d.setDate(d.getDate() - i + stripBaseOffset);
         d.setHours(0, 0, 0, 0);
         const end = new Date(d);
         end.setHours(23, 59, 59, 999);
-        const isToday = i === 0;
+        const stripToday = new Date(); stripToday.setHours(0,0,0,0);
+        const isToday = d.getTime() === stripToday.getTime();
 
         const activity = getActivityForDate(d, end, sessions, messages, homework, crisis, notes);
         const dotsHtml = activity.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('');
@@ -2739,7 +2934,8 @@ function setButtonLoading(btn, loading, loadingText) {
 
         stripDays.push({ date: d, ...activity, messages: dayMessages, homework: dayHw, notes: dayNotes, sessions: daySessions, crisis: dayCrisis });
 
-        const monthLabel = d.getDate() === 1 || i === 13 ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' })}</div>` : '';
+        const isMonthStart = d.getDate() === 1 || i === 13;
+        const monthLabel = isMonthStart ? `<div class="cal-strip-month">${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</div>` : '<div class="cal-strip-month-spacer"></div>';
 
         stripHtml += `
           <div class="cal-strip-day ${isToday ? 'cal-today' : ''} ${activity.dots.length ? 'cal-has-data' : ''}" onclick="showDayPopup(${stripDays.length - 1}, 'strip')" role="button" tabindex="0">
@@ -3050,7 +3246,7 @@ function setButtonLoading(btn, loading, loadingText) {
 
     function copyInviteCode() {
       const code = document.getElementById('inviteCodeDisplay').textContent;
-      navigator.clipboard.writeText(code).then(() => toast('Invite code copied'));
+      copyToClipboard(code).then(() => toast('Invite code copied'));
     }
 
     function showEditClientModal() {
@@ -3097,9 +3293,11 @@ function setButtonLoading(btn, loading, loadingText) {
           if (updated) {
             currentClient = updated;
             document.getElementById('clientName').textContent = updated.display_name || 'Client';
+            const updInitials = (updated.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('clientAvatar').textContent = updInitials;
             const isPending = !updated.client_id;
             document.getElementById('clientMeta').innerHTML = isPending
-              ? `<span class="invite-badge">Pending signup</span> <span>Invite: ${esc(updated.invite_code)}</span>`
+              ? `Invite: ${esc(updated.invite_code)}`
               : `${updated.sessionCount} sessions this week · ${updated.homeworkCount} active homework`;
           }
         }
@@ -3134,6 +3332,54 @@ function setButtonLoading(btn, loading, loadingText) {
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
+      }
+    }
+
+    async function showArchivedClients() {
+      try {
+        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.archived&select=*`);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay show';
+        overlay.id = 'archivedClientsOverlay';
+        overlay.innerHTML = `
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Archived Clients</h3>
+              <button class="modal-close" onclick="document.getElementById('archivedClientsOverlay')?.remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+              ${archived.length ? archived.map(c => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+                  <div>
+                    <div style="font-weight:600;font-size:0.875rem;">${esc(c.display_name || 'Client')}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">Archived ${c.updated_at ? new Date(c.updated_at).toLocaleDateString() : ''}</div>
+                  </div>
+                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}')">Restore</button>
+                </div>
+              `).join('') : '<p class="text-muted-center">No archived clients</p>'}
+            </div>
+          </div>
+        `;
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        document.body.appendChild(overlay);
+      } catch (err) {
+        console.error(err);
+        toast('Error loading archived clients');
+      }
+    }
+
+    async function restoreClient(linkId) {
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
+          status: 'active'
+        });
+        document.getElementById('archivedClientsOverlay')?.remove();
+        toast('Client restored');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error restoring client');
       }
     }
 
