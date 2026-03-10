@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=20">
+  <link rel="stylesheet" href="dev.css?v=21">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -183,62 +183,40 @@
 
         <!-- Session Prep Tab -->
         <div class="tab-content active" id="tab-prep">
-          <!-- Row 1: This Week + Month Calendar -->
-          <div class="tools-row">
-            <div class="tools-row-main">
-              <div class="card" id="weekGlanceCard" style="display: none;">
-                <div class="card-header">
-                  <span class="card-title">This Week</span>
-                </div>
-                <div class="card-body" id="weekGlanceBody">
-                  <div class="loading"><div class="spinner"></div></div>
-                </div>
-              </div>
+          <!-- Copy Prep Pack — prominent standalone action -->
+          <div class="prep-action-bar">
+            <button class="btn btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              Copy Prep Pack
+            </button>
+          </div>
 
-              <!-- Messages from Client -->
-              <div class="card">
-                <div class="card-header">
-                  <span class="card-title">Messages from Client</span>
-                  <button class="btn btn-sm btn-secondary" id="viewAllMessagesBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
-                </div>
-                <div class="card-body" id="clientMessagesPrep">
-                  <p class="text-muted-center">No messages</p>
-                </div>
-              </div>
+          <!-- This Week (full width — the clinical headline) -->
+          <div class="card" id="weekGlanceCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-title">This Week</span>
             </div>
-
-            <!-- Month Calendar (right side, sticky) -->
-            <div class="tools-row-side">
-              <div class="card">
-                <div class="card-header">
-                  <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
-                  <span class="card-title" id="calMonthLabelPrep">March 2026</span>
-                  <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
-                </div>
-                <div class="card-body" style="padding: 8px 12px;">
-                  <div class="cal-month" id="calMonthPrep"></div>
-                  <div class="calendar-legend" style="margin-top: 8px;">
-                    <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
-                  </div>
-                  <div class="calendar-detail" id="calMonthDetailPrep" style="display:none;"></div>
-                </div>
-              </div>
+            <div class="card-body" id="weekGlanceBody">
+              <div class="loading"><div class="spinner"></div></div>
             </div>
           </div>
 
-          <!-- Row 2: What Changed + Open Items (50/50) -->
+          <!-- Messages from Client (full width — most actionable) -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllMessagesBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
+            </div>
+            <div class="card-body" id="clientMessagesPrep">
+              <p class="text-muted-center">No messages</p>
+            </div>
+          </div>
+
+          <!-- What Changed + Open Items (50/50) -->
           <div class="prep-half-row">
             <div class="card">
               <div class="card-header">
                 <span class="card-title">What Changed</span>
-                <button class="btn btn-sm btn-primary" onclick="copyPrepPack()" id="copyPrepPackBtn">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  Copy Prep Pack
-                </button>
               </div>
               <div class="card-body" id="prepSummary">
                 <div class="loading"><div class="spinner"></div></div>
@@ -263,10 +241,44 @@
               <p class="text-muted-center">No session notes yet.</p>
             </div>
           </div>
+
+          <!-- Month Calendar (reference — bottom of prep) -->
+          <div class="card">
+            <div class="card-header">
+              <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
+              <span class="card-title" id="calMonthLabelPrep">March 2026</span>
+              <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
+            </div>
+            <div class="card-body" style="padding: 8px 12px;">
+              <div class="cal-month" id="calMonthPrep"></div>
+              <div class="calendar-legend" style="margin-top: 8px;">
+                <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+              </div>
+              <div class="calendar-detail" id="calMonthDetailPrep" style="display:none;"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Session Tools Tab -->
         <div class="tab-content" id="tab-tools">
+          <!-- Crisis Alerts — ABOVE notes when active (safety first) -->
+          <div class="card" id="crisisAlertsCard" style="display: none;">
+            <div class="card-header card-header-danger">
+              <span class="card-title card-title-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Crisis Alerts
+              </span>
+              <span class="crisis-count-badge" id="crisisAlertCount"></span>
+            </div>
+            <div class="card-body" id="crisisAlertsList"></div>
+          </div>
+
           <!-- Row 1: Session Notes + Month Calendar side by side -->
           <div class="tools-row">
             <!-- LEFT: Session Notes (primary) -->
@@ -402,20 +414,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Crisis Alerts Card -->
-          <div class="card" id="crisisAlertsCard" style="display: none;">
-            <div class="card-header card-header-danger">
-              <span class="card-title card-title-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Crisis Alerts
-              </span>
-              <span class="crisis-count-badge" id="crisisAlertCount"></span>
-            </div>
-            <div class="card-body" id="crisisAlertsList"></div>
           </div>
 
           <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
