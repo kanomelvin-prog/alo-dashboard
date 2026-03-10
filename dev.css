@@ -2986,7 +2986,11 @@ body {
   .client-sticky-header { top: 52px; }
   .client-sticky-header > div:first-child {
     flex-wrap: wrap !important;
-    gap: 4px 16px !important;
+    gap: 2px 16px !important;
+  }
+  .client-sticky-header > div:first-child > div:first-child {
+    flex: 1 0 100% !important;
+  }
   }
   .client-header-name { font-size: 1rem; }
   .client-header-avatar { width: 30px; height: 30px; font-size: 0.6875rem; }
