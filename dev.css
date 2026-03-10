@@ -3002,6 +3002,7 @@ body {
   .layout.client-page,
   .layout.client-page.sidebar-open { grid-template-columns: 1fr; }
   .layout.client-page.sidebar-open .sidebar { display: block; position: fixed; }
+  .layout.client-page .sidebar.open { display: block; }
 }
 
 /* Card clusters for Session Prep */
