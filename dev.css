@@ -1461,6 +1461,17 @@ button, input, select, textarea { font: inherit; }
   gap: 14px;
 }
 
+/* Homework zone: side-by-side with calendar */
+.homework-zone-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 14px;
+  align-items: start;
+}
+
+.homework-zone-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.homework-zone-cal { min-width: 0; position: sticky; top: 140px; }
+
 .homework-zone-form { min-width: 0; }
 .homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 
@@ -1940,7 +1951,13 @@ min-height: 44px;
 /* Sticky client header: phone margins handled in redesign block */
 
 @media (max-width: 767px) {
-  /* homework-zone already stacked vertically */
+  /* homework-zone-grid stacks on mobile */
+  .homework-zone-grid {
+    grid-template-columns: 1fr;
+  }
+  .homework-zone-cal {
+    position: static;
+  }
 }
 
 /* Sections compact */
@@ -2674,16 +2691,17 @@ body {
   text-decoration: underline;
 }
 
-/* Sticky header: single unified bar */
+/* Sticky header: single unified bar with outline */
 .client-sticky-header {
   position: sticky;
   top: 60px;
   z-index: 51;
   background: var(--white);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(120, 100, 80, 0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: 0;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 
 .client-sticky-header .tabs {
@@ -2694,18 +2712,7 @@ body {
 }
 
 .client-header-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  background: rgba(58, 124, 134, 0.06);
-  border: 1.5px solid rgba(58, 124, 134, 0.16);
-  color: var(--sage);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.8125rem;
-  flex-shrink: 0;
+  display: none;
 }
 
 .client-header-name {
@@ -2718,6 +2725,12 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.client-header-name:hover {
+  color: var(--sage);
 }
 
 .client-header-sub {
