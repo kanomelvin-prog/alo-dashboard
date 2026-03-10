@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -154,9 +154,9 @@
     <!-- CLIENT DETAIL PAGE -->
     <div class="layout client-page" id="clientPage">
       <div class="main">
-        <!-- Single sticky header: name + meta/edit on left, tabs on right -->
+        <!-- Single sticky header -->
         <div class="client-sticky-header" style="position:sticky;top:60px;z-index:51;">
-          <div class="client-header-row" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 0 0;">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;">
               <div id="clientAvatar" class="client-header-avatar">C</div>
               <div style="min-width:0;">
@@ -177,14 +177,8 @@
                 </div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-              <button class="sidebar-toggle-btn" onclick="toggleDetailSidebar()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                Clients
-              </button>
-            </div>
           </div>
-          <div class="client-header-tabs" style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin-top:8px;">
+          <div style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin-top:8px;">
             <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
             <button class="tab" onclick="switchTab('tools', this)">In Session</button>
           </div>
@@ -206,7 +200,14 @@
 
           <!-- Activity Calendar -->
           <div class="card" id="calendarCard">
-            <div class="card-header"><span class="card-title">Activity</span></div>
+            <div class="card-header">
+              <span class="card-title">Activity</span>
+              <div style="display:flex;align-items:center;gap:4px;margin-left:auto;">
+                <button class="cal-nav-btn" onclick="navigateStrip(-1)" title="Earlier">‹</button>
+                <button class="cal-nav-btn" onclick="navigateStrip(0)" title="Today" style="font-size:0.6875rem;padding:2px 8px;">Today</button>
+                <button class="cal-nav-btn" onclick="navigateStrip(1)" title="Later">›</button>
+              </div>
+            </div>
             <div class="card-body" id="calendarBody">
               <div class="calendar-strip" id="calendarStrip"></div>
               <div class="calendar-legend">
@@ -1706,6 +1707,7 @@ function setButtonLoading(btn, loading, loadingText) {
 
             currentClient = client;
       calendarOffset = 0;
+      stripOffset = 0;
 
       const cacheKey = client.client_id || client.id;
 
@@ -2699,9 +2701,22 @@ function setButtonLoading(btn, loading, loadingText) {
     // CALENDAR WIDGET
     // =====================================================
     let calendarOffset = 0; // 0 = current month, -1 = prev, etc.
+    let stripOffset = 0; // 0 = today as last day, -1 = 14 days earlier, +1 = 14 days later
 
     function navigateCalendar(dir) {
       calendarOffset += dir;
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      if (cacheKey) renderCalendar(cacheKey);
+    }
+
+    function navigateStrip(dir) {
+      if (dir === 0) {
+        stripOffset = 0; // Home = reset to today
+      } else {
+        stripOffset += dir;
+      }
+      // Don't go into the future
+      if (stripOffset > 0) stripOffset = 0;
       const cacheKey = currentClient?.client_id || currentClient?.id;
       if (cacheKey) renderCalendar(cacheKey);
     }
@@ -2798,13 +2813,15 @@ function setButtonLoading(btn, loading, loadingText) {
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const stripDays = [];
       let stripHtml = '';
+      const stripBaseOffset = stripOffset * 14; // Each click shifts 14 days
       for (let i = 13; i >= 0; i--) {
         const d = new Date();
-        d.setDate(d.getDate() - i);
+        d.setDate(d.getDate() - i + stripBaseOffset);
         d.setHours(0, 0, 0, 0);
         const end = new Date(d);
         end.setHours(23, 59, 59, 999);
-        const isToday = i === 0;
+        const stripToday = new Date(); stripToday.setHours(0,0,0,0);
+        const isToday = d.getTime() === stripToday.getTime();
 
         const activity = getActivityForDate(d, end, sessions, messages, homework, crisis, notes);
         const dotsHtml = activity.dots.map(c => `<span class="cal-dot" style="background:${c};"></span>`).join('');
