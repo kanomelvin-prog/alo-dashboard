@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=26">
+  <link rel="stylesheet" href="dev.css?v=27">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -189,6 +189,20 @@
 
         <!-- Session Prep Tab -->
         <div class="tab-content active" id="tab-prep">
+          <!-- Crisis Alerts — visible on prep too (safety first) -->
+          <div class="card crisis-alerts-prep" id="crisisAlertsPrepCard" style="display: none;">
+            <div class="card-header card-header-danger">
+              <span class="card-title card-title-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Crisis Alerts
+              </span>
+              <span class="crisis-count-badge" id="crisisAlertPrepCount"></span>
+            </div>
+            <div class="card-body" id="crisisAlertsPrepList"></div>
+          </div>
+
           <!-- This Week (full width — the clinical headline) -->
           <div class="card" id="weekGlanceCard" style="display: none;">
             <div class="card-header">
@@ -1813,6 +1827,8 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
       document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">Session notes will appear here after your first documented session.</p>';
       document.getElementById('crisisAlertsCard').style.display = 'none';
+      const prepCrisisCard = document.getElementById('crisisAlertsPrepCard');
+      if (prepCrisisCard) prepCrisisCard.style.display = 'none';
       document.getElementById('crisisAlertButton').classList.remove('visible');
       const quickNote = document.getElementById('quickNoteText');
       if (quickNote) quickNote.value = '';
@@ -2705,16 +2721,24 @@ function setButtonLoading(btn, loading, loadingText) {
       const weekAgo = new Date(Date.now() - 7 * 86400000);
       const recentResolved = crisis.filter(c => c.acknowledged && c.acknowledged_at && new Date(c.acknowledged_at) > weekAgo);
 
+      // Prep card mirrors In Session card
+      const prepCard = document.getElementById('crisisAlertsPrepCard');
+      const prepList = document.getElementById('crisisAlertsPrepList');
+      const prepCount = document.getElementById('crisisAlertPrepCount');
+
       if (!unacknowledged.length && !recentResolved.length) {
         document.getElementById('crisisAlertsCard').style.display = 'none';
+        if (prepCard) prepCard.style.display = 'none';
         document.getElementById('crisisAlertButton').classList.remove('visible');
         return;
       }
 // Show card for either unresolved or recently resolved
       document.getElementById('crisisAlertsCard').style.display = 'block';
+      if (prepCard) prepCard.style.display = 'block';
       if (unacknowledged.length > 0) {
         document.getElementById('crisisAlertButton').classList.add('visible');
         document.getElementById('crisisAlertCount').textContent = unacknowledged.length;
+        if (prepCount) prepCount.textContent = unacknowledged.length;
         document.getElementById('crisisAlertButtonText').textContent = `${unacknowledged.length} Crisis Alert${unacknowledged.length > 1 ? 's' : ''}`;
       } else {
         document.getElementById('crisisAlertButton').classList.remove('visible');
@@ -2737,9 +2761,7 @@ function setButtonLoading(btn, loading, loadingText) {
         </div>
       `;
 
-
-      document.getElementById('crisisAlertsList').innerHTML =
-        emergencyPanel +
+      const alertsHtml = emergencyPanel +
         unacknowledged.map(c => `
         <div class="crisis-alert-item">
           <div class="crisis-alert-header">
@@ -2754,9 +2776,9 @@ function setButtonLoading(btn, loading, loadingText) {
         </div>
       `).join('');
 
-      // Recently resolved (last 7 days) — collapsed audit trail
+      let resolvedHtml = '';
       if (recentResolved.length > 0) {
-        const resolvedHtml = recentResolved.map(c => `
+        const resolvedItems = recentResolved.map(c => `
           <div style="padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
             <div style="display: flex; justify-content: space-between;">
               <span>${esc(c.category)}</span>
@@ -2768,20 +2790,31 @@ function setButtonLoading(btn, loading, loadingText) {
           </div>
         `).join('');
 
-        document.getElementById('crisisAlertsList').innerHTML += `
+        resolvedHtml = `
           <details style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
             <summary style="cursor: pointer; font-size: 0.8125rem; color: var(--text-muted); font-weight: 500;">
               Recently resolved (${recentResolved.length})
             </summary>
-            <div style="margin-top: 8px;">${resolvedHtml}</div>
+            <div style="margin-top: 8px;">${resolvedItems}</div>
           </details>
         `;
       }
+
+      const fullHtml = alertsHtml + resolvedHtml;
+      document.getElementById('crisisAlertsList').innerHTML = fullHtml;
+      if (prepList) prepList.innerHTML = fullHtml;
     }
 
     function goToCrisisAlerts() {
-      switchTab('tools', document.querySelectorAll('.tab')[1]);
-      document.getElementById('crisisAlertsCard').scrollIntoView({ behavior: 'smooth' });
+      // Scroll to crisis card on whichever tab is active
+      const prepTab = document.getElementById('tab-prep');
+      if (prepTab && prepTab.classList.contains('active')) {
+        const prepCard = document.getElementById('crisisAlertsPrepCard');
+        if (prepCard) prepCard.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        switchTab('tools', document.querySelectorAll('.tab')[1]);
+        document.getElementById('crisisAlertsCard').scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     
