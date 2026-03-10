@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=27">
+  <link rel="stylesheet" href="dev.css?v=28">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -103,19 +103,29 @@
             <span class="section-count" id="attentionCount">0</span>
           </div>
           <div class="section-body">
-            <!-- Crisis subsection (preserves original IDs) -->
+            <!-- Crisis subsection -->
             <div id="alertsSection">
+              <div class="feed-sub-label feed-sub-crisis" id="alertsLabel" style="display:none;">ALERTS</div>
               <div id="alertsList"></div>
             </div>
             <span id="alertsCount" style="display:none;">0</span>
-            <!-- Messages subsection (preserves original IDs) -->
+            <!-- Messages subsection -->
             <div id="messagesSection">
+              <div class="feed-sub-label feed-sub-messages" id="messagesLabel" style="display:none;">MESSAGES</div>
               <div id="messagesList"></div>
             </div>
             <span id="messagesCount" style="display:none;">0</span>
             <!-- Shared empty state -->
             <div class="section-empty" id="attentionEmpty">All clear — no items needing attention.</div>
           </div>
+        </div>
+
+        <!-- Client Pulse -->
+        <div class="section" id="clientPulseSection" style="display:none;">
+          <div class="section-header">
+            <span class="section-title">Client Pulse</span>
+          </div>
+          <div class="section-body" id="clientPulseList"></div>
         </div>
 
         <!-- Triage (hidden for pilot — redundant with Messages) -->
@@ -1395,6 +1405,7 @@ function setButtonLoading(btn, loading, loadingText) {
         renderTriage();
         renderClientsList();
         updateAttentionCard();
+        renderClientPulse();
 
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
@@ -1946,6 +1957,78 @@ function setButtonLoading(btn, loading, loadingText) {
       const messagesSection = document.getElementById('messagesSection');
       if (alertsSection) alertsSection.style.display = alertsCount > 0 ? 'block' : 'none';
       if (messagesSection) messagesSection.style.display = messagesCount > 0 ? 'block' : 'none';
+      // Show sub-labels only when both types present
+      const bothPresent = alertsCount > 0 && messagesCount > 0;
+      const alertsLabel = document.getElementById('alertsLabel');
+      const messagesLabel = document.getElementById('messagesLabel');
+      if (alertsLabel) alertsLabel.style.display = bothPresent ? 'block' : 'none';
+      if (messagesLabel) messagesLabel.style.display = bothPresent ? 'block' : 'none';
+    }
+
+    function renderClientPulse() {
+      const section = document.getElementById('clientPulseSection');
+      const list = document.getElementById('clientPulseList');
+      if (!section || !list) return;
+
+      // Only show for non-pending clients
+      const active = allClients.filter(c => c.client_id);
+      if (!active.length) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+
+      // Sort by most recent activity
+      const sorted = [...active].sort((a, b) => {
+        const aTime = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
+        const bTime = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      const maxVisible = 5;
+      const visible = sorted.slice(0, maxVisible);
+
+      list.innerHTML = visible.map(c => {
+        const isPending = !c.client_id;
+        const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        // Alo activity
+        let aloText = 'No Alo activity';
+        if (c.lastActivity) {
+          const ago = timeAgo(new Date(c.lastActivity));
+          aloText = c.sessionCount > 0
+            ? `${c.sessionCount} Alo session${c.sessionCount > 1 ? 's' : ''} this week · last ${ago}`
+            : `Last Alo: ${ago}`;
+        }
+
+        // Homework
+        let hwText = '';
+        if (c.homeworkCount > 0) {
+          hwText = `${c.homeworkCount} active HW`;
+        }
+
+        // Status dot color
+        const dotColor = c.status === 'crisis' ? '#dc2626'
+          : c.status === 'needs-attention' ? '#E8913A'
+          : c.status === 'dormant' ? '#9CA3AF'
+          : '#3A7C86';
+
+        return `
+          <div class="pulse-item" onclick="showClient('${c.client_id || c.id}')">
+            <div class="pulse-avatar">${initials}</div>
+            <div class="pulse-content">
+              <div class="pulse-name">${esc(c.display_name || 'Client')}${hwText ? ' <span class="pulse-hw">' + hwText + '</span>' : ''}</div>
+              <div class="pulse-detail">${aloText}</div>
+            </div>
+            <div class="pulse-dot" style="background:${dotColor};"></div>
+          </div>
+        `;
+      }).join('');
+
+      if (sorted.length > maxVisible) {
+        list.innerHTML += `<div class="pulse-more">${sorted.length - maxVisible} more client${sorted.length - maxVisible > 1 ? 's' : ''} in sidebar</div>`;
+      }
     }
 
 
