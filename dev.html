@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=24">
+  <link rel="stylesheet" href="dev.css?v=25">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -149,6 +149,9 @@
           </div>
           <div class="sidebar-list" id="clientsList">
             <div class="section-empty">No clients yet</div>
+          </div>
+          <div class="sidebar-footer">
+            <a href="#" class="sidebar-archived-link" onclick="showArchivedClients(); return false;">View Archived Clients</a>
           </div>
         </div>
       </div>
@@ -579,7 +582,7 @@
         <div class="form-group danger-zone">
           <label class="danger-zone-label">Danger Zone</label>
           <button class="btn btn-sm btn-danger-outline" onclick="confirmDeleteClient()">Archive Client</button>
-          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Contact support to restore.</span>
+          <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Restore anytime from "View Archived Clients" in the sidebar.</span>
         </div>
       </div>
       <div class="modal-footer">
@@ -3329,6 +3332,54 @@ function setButtonLoading(btn, loading, loadingText) {
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
+      }
+    }
+
+    async function showArchivedClients() {
+      try {
+        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.archived&select=*`);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay show';
+        overlay.id = 'archivedClientsOverlay';
+        overlay.innerHTML = `
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Archived Clients</h3>
+              <button class="modal-close" onclick="document.getElementById('archivedClientsOverlay')?.remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+              ${archived.length ? archived.map(c => `
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+                  <div>
+                    <div style="font-weight:600;font-size:0.875rem;">${esc(c.display_name || 'Client')}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">Archived ${c.updated_at ? new Date(c.updated_at).toLocaleDateString() : ''}</div>
+                  </div>
+                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}')">Restore</button>
+                </div>
+              `).join('') : '<p class="text-muted-center">No archived clients</p>'}
+            </div>
+          </div>
+        `;
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+        document.body.appendChild(overlay);
+      } catch (err) {
+        console.error(err);
+        toast('Error loading archived clients');
+      }
+    }
+
+    async function restoreClient(linkId) {
+      try {
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
+          status: 'active'
+        });
+        document.getElementById('archivedClientsOverlay')?.remove();
+        toast('Client restored');
+        loadDashboard();
+      } catch (err) {
+        console.error(err);
+        toast('Error restoring client');
       }
     }
 
