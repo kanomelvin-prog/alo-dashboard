@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=17">
+  <link rel="stylesheet" href="dev.css?v=18">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -81,7 +81,6 @@
 
       <div class="header-right">
         <span class="user-name" id="therapistName"></span>
-        <div class="user-avatar" id="therapistAvatar"></div>
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
     </header>
@@ -156,9 +155,9 @@
       <div class="main">
         <!-- Single sticky header -->
         <div class="client-sticky-header" style="position:sticky;top:60px;z-index:51;">
-          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 0 0;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 20px 0;">
             <div style="display:flex;align-items:baseline;gap:8px;min-width:0;flex-wrap:wrap;">
-              <span class="client-header-name" id="clientName">Client</span>
+              <a href="#" class="client-header-name" id="clientName" onclick="showEditClientModal(); return false;">Client</a>
               <span id="clientBadge" style="display:none;"></span>
             </div>
             <div class="client-header-sub" style="display:flex;align-items:baseline;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
@@ -173,7 +172,7 @@
               </button>
             </div>
           </div>
-          <div style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin-top:8px;">
+          <div style="display:flex;gap:0;border-top:1px solid rgba(180,168,152,0.18);margin:8px 20px 0;padding-top:0;">
             <button class="tab active" onclick="switchTab('prep', this)">Session Prep</button>
             <button class="tab" onclick="switchTab('tools', this)">In Session</button>
           </div>
@@ -288,9 +287,10 @@
             </div>
           </div>
 
-          <!-- Homework (secondary — stacked vertically) -->
-          <div class="homework-zone">
-            <div class="homework-zone-form">
+          <!-- Homework + Calendar side by side -->
+          <div class="homework-zone-grid">
+            <!-- LEFT: Assign Homework + History -->
+            <div class="homework-zone-main">
               <div class="card">
                 <div class="card-header"><span class="card-title">Assign Homework</span></div>
                 <div class="card-body">
@@ -359,11 +359,7 @@
                   <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
                 </div>
               </div>
-            </div>
 
-            <!-- Homework History + Month Calendar (stacked below form) -->
-            <div class="homework-zone-sidebar">
-              <!-- Homework History (more useful mid-session than calendar) -->
               <div class="card">
                 <div class="card-header">
                   <span class="card-title">Homework History</span>
@@ -373,8 +369,10 @@
                   <p class="text-muted-center">No homework yet</p>
                 </div>
               </div>
+            </div>
 
-              <!-- Month Calendar (compact, below history) -->
+            <!-- RIGHT: Month Calendar -->
+            <div class="homework-zone-cal">
               <div class="card">
                 <div class="card-header">
                   <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
@@ -1213,7 +1211,8 @@ function setButtonLoading(btn, loading, loadingText) {
 
       document.getElementById('therapistName').textContent = name;
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      document.getElementById('therapistAvatar').textContent = initials;
+      const avatarEl = document.getElementById('therapistAvatar');
+      if (avatarEl) avatarEl.textContent = initials;
 
       const hour = new Date().getHours();
       const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
