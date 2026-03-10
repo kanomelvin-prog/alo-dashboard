@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=18">
+  <link rel="stylesheet" href="dev.css?v=19">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -265,32 +265,59 @@
 
         <!-- Session Tools Tab -->
         <div class="tab-content" id="tab-tools">
-          <!-- Session Notes (primary — full width) -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Session Notes</span>
-              <button class="btn btn-sm btn-primary add-note-btn" onclick="showNoteForm()">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                Add Note
-              </button>
+          <!-- Row 1: Session Notes + Month Calendar side by side -->
+          <div class="tools-row">
+            <!-- LEFT: Session Notes (primary) -->
+            <div class="tools-row-main">
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">Session Notes</span>
+                  <button class="btn btn-sm btn-primary add-note-btn" onclick="showNoteForm()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    Add Note
+                  </button>
+                </div>
+                <div class="card-body" id="notesContainer">
+                  <p class="text-muted-center">No session notes yet.</p>
+                </div>
+                <div class="note-quick-capture" id="quickNoteCapture">
+                  <div class="quick-note-inner">
+                    <label class="quick-note-label">Quick Note</label>
+                    <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
+                    <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                    <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card-body" id="notesContainer">
-              <p class="text-muted-center">No session notes yet.</p>
-            </div>
-            <div class="note-quick-capture" id="quickNoteCapture">
-              <div class="quick-note-inner">
-                <label class="quick-note-label">Quick Note</label>
-                <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
-                <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
-                <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
+
+            <!-- RIGHT: Month Calendar -->
+            <div class="tools-row-side">
+              <div class="card">
+                <div class="card-header">
+                  <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
+                  <span class="card-title" id="calMonthLabel">February 2026</span>
+                  <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
+                </div>
+                <div class="card-body" style="padding: 8px 12px;">
+                  <div class="cal-month" id="calMonth"></div>
+                  <div class="calendar-legend" style="margin-top: 8px;">
+                    <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
+                  </div>
+                  <div class="calendar-detail" id="calMonthDetail" style="display:none;"></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Homework + Calendar side by side -->
-          <div class="homework-zone-grid">
-            <!-- LEFT: Assign Homework + History -->
-            <div class="homework-zone-main">
+          <!-- Row 2: Assign Homework + Homework History side by side -->
+          <div class="tools-row">
+            <!-- LEFT: Assign Homework -->
+            <div class="tools-row-main">
               <div class="card">
                 <div class="card-header"><span class="card-title">Assign Homework</span></div>
                 <div class="card-body">
@@ -359,7 +386,10 @@
                   <div class="homework-mobile-hint">Custom homework available on desktop/tablet</div>
                 </div>
               </div>
+            </div>
 
+            <!-- RIGHT: Homework History -->
+            <div class="tools-row-side">
               <div class="card">
                 <div class="card-header">
                   <span class="card-title">Homework History</span>
@@ -367,28 +397,6 @@
                 </div>
                 <div class="card-body" id="homeworkHistory">
                   <p class="text-muted-center">No homework yet</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- RIGHT: Month Calendar -->
-            <div class="homework-zone-cal">
-              <div class="card">
-                <div class="card-header">
-                  <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
-                  <span class="card-title" id="calMonthLabel">February 2026</span>
-                  <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
-                </div>
-                <div class="card-body" style="padding: 8px 12px;">
-                  <div class="cal-month" id="calMonth"></div>
-                  <div class="calendar-legend" style="margin-top: 8px;">
-                    <span class="legend-item"><span class="legend-dot" style="background:#3A7C86;"></span>Alo</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#4A90D9;"></span>Msg</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#E8913A;"></span>HW</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Alert</span>
-                    <span class="legend-item"><span class="legend-dot" style="background:#9CA3AF;"></span>Note</span>
-                  </div>
-                  <div class="calendar-detail" id="calMonthDetail" style="display:none;"></div>
                 </div>
               </div>
             </div>
