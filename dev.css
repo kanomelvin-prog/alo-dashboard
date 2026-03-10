@@ -1470,8 +1470,16 @@ button, input, select, textarea { font: inherit; }
   margin-bottom: 14px;
 }
 
-.tools-row-main { min-width: 0; }
+.tools-row-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .tools-row-side { min-width: 0; position: sticky; top: 140px; }
+
+/* Session Prep: 50/50 split row */
+.prep-half-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
 
 .homework-zone-form { min-width: 0; }
 .homework-zone-sidebar { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
@@ -1952,8 +1960,9 @@ min-height: 44px;
 /* Sticky client header: phone margins handled in redesign block */
 
 @media (max-width: 767px) {
-  /* tools-row stacks on mobile */
-  .tools-row {
+  /* tools-row and prep-half-row stack on mobile */
+  .tools-row,
+  .prep-half-row {
     grid-template-columns: 1fr;
   }
   .tools-row-side {
