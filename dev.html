@@ -1804,6 +1804,8 @@ function setButtonLoading(btn, loading, loadingText) {
       const cacheKey = client.client_id || client.id;
 
       document.getElementById('homePage').style.display = 'none';
+          const clientsBtn = document.querySelector('.header-clients-btn');
+if (clientsBtn) clientsBtn.style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
 
       document.getElementById('clientName').textContent = client.display_name || 'Client';
@@ -1878,6 +1880,8 @@ function setButtonLoading(btn, loading, loadingText) {
 
     function showHomePage() {
       document.getElementById('homePage').style.display = 'grid';
+      const clientsBtn = document.querySelector('.header-clients-btn');
+if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('clientPage').classList.remove('active');
       document.getElementById('clientPage').classList.remove('sidebar-open');
       currentClient = null;
