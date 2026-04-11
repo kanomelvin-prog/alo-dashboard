@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=29">
+  <link rel="stylesheet" href="dev.css?v=30">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -445,6 +445,16 @@
                   <p class="text-muted-center">No homework yet</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Shared Journal Entries -->
+          <div class="card" id="sharedJournalCard" style="display:none;">
+            <div class="card-header">
+              <span class="card-title">Shared Journal Entries</span>
+            </div>
+            <div class="card-body" id="sharedJournalContainer">
+              <p class="text-muted-center">No shared entries yet.</p>
             </div>
           </div>
 
@@ -1839,6 +1849,10 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
       document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">Session notes will appear here after your first documented session.</p>';
+      var sharedJournalCardEl = document.getElementById('sharedJournalCard');
+      if (sharedJournalCardEl) sharedJournalCardEl.style.display = 'none';
+      var sharedJournalContainerEl = document.getElementById('sharedJournalContainer');
+      if (sharedJournalContainerEl) sharedJournalContainerEl.innerHTML = '<p class="text-muted-center">No shared entries yet.</p>';
       document.getElementById('crisisAlertsCard').style.display = 'none';
       const prepCrisisCard = document.getElementById('crisisAlertsPrepCard');
       if (prepCrisisCard) prepCrisisCard.style.display = 'none';
@@ -1868,6 +1882,11 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       renderClientMessages(cacheKey);
       renderCalendar(cacheKey);
 
+      // Load shared journal entries (uses currentClient.client_id)
+      if (currentClient && currentClient.client_id) {
+        loadSharedJournal(currentClient.client_id);
+      }
+
       // Mark unread messages as read AFTER rendering (so UI shows unread state first)
       if (client.client_id) {
         markClientMessagesRead(client.client_id);
@@ -1886,6 +1905,67 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('clientPage').classList.remove('sidebar-open');
       currentClient = null;
       renderClientsList();
+    }
+
+    // =====================================================
+    // SHARED JOURNAL ENTRIES
+    // =====================================================
+    async function loadSharedJournal(clientIdParam) {
+      var card = document.getElementById('sharedJournalCard');
+      var container = document.getElementById('sharedJournalContainer');
+      if (!card || !container) return;
+
+      try {
+        var entries = await api(
+          '/rest/v1/journal_entries?client_id=eq.' + clientIdParam
+          + '&shared_with_therapist=eq.true'
+          + '&order=created_at.desc'
+          + '&limit=30'
+          + '&select=id,title,content,source,created_at,entry_type'
+        );
+
+        if (!entries || entries.length === 0) {
+          card.style.display = 'none';
+          return;
+        }
+
+        card.style.display = '';
+        var titleEl = document.querySelector('#sharedJournalCard .card-title');
+        if (titleEl) {
+          titleEl.textContent = 'Shared Journal Entries (' + entries.length + ')';
+        }
+
+        container.innerHTML = entries.map(function(entry) {
+          var date = new Date(entry.created_at);
+          var dateStr = date.toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric'
+          });
+          var isAlo = entry.source === 'alo';
+          var sourceBadge = isAlo
+            ? '<span class="journal-shared-source from-alo">From Alo</span>'
+            : '<span class="journal-shared-source from-client">Client</span>';
+
+          var preview = (entry.content || '').substring(0, 150);
+          if ((entry.content || '').length > 150) preview += '...';
+
+          return '<div class="journal-shared-entry" onclick="toggleJournalExpand(this)">' +
+            '<div class="journal-shared-meta">' +
+              '<span class="journal-shared-date">' + dateStr + '</span>' +
+              sourceBadge +
+            '</div>' +
+            '<div class="journal-shared-preview">' + esc(preview) + '</div>' +
+            '<div class="journal-shared-full">' + esc(entry.content || '').replace(/\n/g, '<br>') + '</div>' +
+          '</div>';
+        }).join('');
+
+      } catch (err) {
+        console.error('[Dashboard] Shared journal load failed:', err);
+        card.style.display = 'none';
+      }
+    }
+
+    function toggleJournalExpand(el) {
+      el.classList.toggle('expanded');
     }
 
     async function loadClientData(cacheKey) {
