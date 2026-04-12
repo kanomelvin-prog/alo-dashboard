@@ -2976,6 +2976,35 @@ body {
 }
 .client-header-edit:hover { color: var(--sage); text-decoration: underline; }
 
+.client-header-settings-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  margin: 0 0 0 2px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 6px);
+  line-height: 0;
+  min-width: 32px;
+  min-height: 32px;
+  transition: color 0.15s, background 0.15s;
+}
+.client-header-settings-btn:hover,
+.client-header-settings-btn:focus-visible {
+  color: var(--sage);
+  background: var(--bg);
+  outline: none;
+}
+.client-header-settings-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(58, 124, 134, 0.25);
+}
+.client-header-settings-btn svg {
+  display: block;
+}
+
 .client-header-sub .crisis-alert-btn {
   font-size: 0.75rem;
   padding: 2px 8px;
