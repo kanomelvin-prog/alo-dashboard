@@ -3464,8 +3464,9 @@ if (clientsBtn) clientsBtn.style.display = '';
           safety_notes: document.getElementById('editSafetyNotes').value,
           allow_homework: document.getElementById('settingHomework').checked,
           allow_messages: document.getElementById('settingMessages').checked,
-          allow_history: document.getElementById('settingHistory').checked,
+         allow_history: document.getElementById('settingHistory').checked,
           allow_journal_sharing: document.getElementById('settingJournalSharing').checked
+        });
 
         closeModal('editClientModal');
         toast('Client updated');
