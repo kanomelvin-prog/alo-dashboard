@@ -3031,7 +3031,7 @@ body {
   .client-sticky-header > div:first-child > div:first-child {
     flex: 1 0 100% !important;
   }
-  }
+  
   .client-header-name { font-size: 1rem; }
   .client-header-avatar { width: 30px; height: 30px; font-size: 0.6875rem; }
   .client-header-sub {
