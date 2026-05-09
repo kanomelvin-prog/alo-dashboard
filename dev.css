@@ -2276,12 +2276,19 @@ font-style: italic;
 .note-header .copy-btn:last-child { display: flex; }
 
 /* Modals + drawers: convert to bottom sheets on mobile */
-.modal-overlay { align-items: flex-end; padding: 0; }
+.modal-overlay {
+  align-items: flex-end;
+  padding: 0;
+  overflow: hidden;
+}
 .modal,
 .drawer {
 max-width: 100%;
 border-radius: 16px 16px 0 0;
+max-height: 90dvh;
 max-height: 90vh;
+max-height: calc(100vh - env(safe-area-inset-top, 0px));
+max-height: 90dvh;
 animation: sheetSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .modal-header::before,
@@ -2296,7 +2303,11 @@ margin: 0 auto 12px;
 }
 .modal-header { padding: 12px 20px 16px; }
 .drawer-header { padding: 12px 20px 16px; }
-.modal-body { padding: 16px 20px; }
+.modal-body {
+  padding: 16px 20px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 .drawer-body { padding: 16px 20px; }
 .modal-footer {
 padding: 12px 20px;
