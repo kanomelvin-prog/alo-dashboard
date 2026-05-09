@@ -590,16 +590,6 @@
           </div>
           <div class="setting-row">
             <div>
-              <div class="setting-label">Share conversation summary</div>
-              <div class="setting-hint">Client can share AI-generated session summaries with you</div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingSummary" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="setting-row">
-            <div>
               <div class="setting-label">Conversation history</div>
               <div class="setting-hint">Client can view their own past sessions</div>
             </div>
@@ -663,16 +653,6 @@
           </div>
           <label class="toggle">
             <input type="checkbox" id="defaultMessages" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Share conversation summary</div>
-            <div class="setting-hint">Client can share AI-generated session summaries</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultSummary" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -3465,7 +3445,6 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('editSafetyNotes').value = currentClient.safety_notes || '';
       document.getElementById('settingHomework').checked = currentClient.allow_homework ?? true;
       document.getElementById('settingMessages').checked = currentClient.allow_messages ?? true;
-      document.getElementById('settingSummary').checked = currentClient.allow_summary ?? true;
       document.getElementById('settingHistory').checked = currentClient.allow_history ?? true;
       document.getElementById('settingJournalSharing').checked = currentClient.allow_journal_sharing ?? true;
 
@@ -3485,10 +3464,8 @@ if (clientsBtn) clientsBtn.style.display = '';
           safety_notes: document.getElementById('editSafetyNotes').value,
           allow_homework: document.getElementById('settingHomework').checked,
           allow_messages: document.getElementById('settingMessages').checked,
-          allow_summary: document.getElementById('settingSummary').checked,
           allow_history: document.getElementById('settingHistory').checked,
           allow_journal_sharing: document.getElementById('settingJournalSharing').checked
-        });
 
         closeModal('editClientModal');
         toast('Client updated');
@@ -3598,7 +3575,6 @@ if (clientsBtn) clientsBtn.style.display = '';
       localStorage.setItem('alo_default_settings', JSON.stringify({
         homework: document.getElementById('defaultHomework').checked,
         messages: document.getElementById('defaultMessages').checked,
-        summary: document.getElementById('defaultSummary').checked,
         history: document.getElementById('defaultHistory').checked
       }));
       closeModal('defaultSettingsModal');
