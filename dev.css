@@ -2990,6 +2990,8 @@ body {
 .client-header-settings-btn {
   background: none;
   border: none;
+  -webkit-appearance: none;
+  appearance: none;
   padding: 4px 6px;
   margin: 0 0 0 2px;
   color: var(--text-muted);
