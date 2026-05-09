@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -178,8 +178,9 @@
             </div>
             <div class="client-header-sub" style="display:flex;align-items:baseline;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
               <span id="clientMeta" class="client-header-meta"></span>
-              <span class="client-header-sep">·</span>
-              <a href="#" class="client-header-edit" onclick="showEditClientModal(); return false;">Edit</a>
+              <button type="button" class="client-header-settings-btn" onclick="showEditClientModal()" aria-label="Client Settings" title="Client Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </button>
               <button class="btn crisis-alert-btn" id="crisisAlertButton" onclick="goToCrisisAlerts()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -448,6 +449,16 @@
             </div>
           </div>
 
+          <!-- Shared Journal Entries -->
+          <div class="card" id="sharedJournalCard" style="display:none;">
+            <div class="card-header">
+              <span class="card-title">Shared Journal Entries</span>
+            </div>
+            <div class="card-body" id="sharedJournalContainer">
+              <p class="text-muted-center">No shared entries yet.</p>
+            </div>
+          </div>
+
           <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
           <div class="card" id="inSessionMessagesCard" style="display: none;">
             <div class="card-body" id="activityMessages">
@@ -507,7 +518,7 @@
   <div class="modal-overlay" id="editClientModal" onclick="closeModal('editClientModal', event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3>Edit Client</h3>
+        <h3>Client Settings</h3>
         <button class="modal-close" onclick="closeModal('editClientModal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -579,21 +590,21 @@
           </div>
           <div class="setting-row">
             <div>
-              <div class="setting-label">Share conversation summary</div>
-              <div class="setting-hint">Client can share AI-generated session summaries with you</div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="settingSummary" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="setting-row">
-            <div>
               <div class="setting-label">Conversation history</div>
               <div class="setting-hint">Client can view their own past sessions</div>
             </div>
             <label class="toggle">
               <input type="checkbox" id="settingHistory" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Share journal entries</div>
+              <div class="setting-hint">Client can share individual journal entries with you</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="settingJournalSharing" checked>
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -642,16 +653,6 @@
           </div>
           <label class="toggle">
             <input type="checkbox" id="defaultMessages" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Share conversation summary</div>
-            <div class="setting-hint">Client can share AI-generated session summaries</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultSummary" checked>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1839,6 +1840,10 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       document.getElementById('prepOpenItems').innerHTML = '<p class="text-muted-center">No open items</p>';
       document.getElementById('clientMessagesPrep').innerHTML = '<p class="text-muted-center">No messages</p>';
       document.getElementById('lastSessionsPreview').innerHTML = '<p class="text-muted-center">Session notes will appear here after your first documented session.</p>';
+      var sharedJournalCardEl = document.getElementById('sharedJournalCard');
+      if (sharedJournalCardEl) sharedJournalCardEl.style.display = 'none';
+      var sharedJournalContainerEl = document.getElementById('sharedJournalContainer');
+      if (sharedJournalContainerEl) sharedJournalContainerEl.innerHTML = '<p class="text-muted-center">No shared entries yet.</p>';
       document.getElementById('crisisAlertsCard').style.display = 'none';
       const prepCrisisCard = document.getElementById('crisisAlertsPrepCard');
       if (prepCrisisCard) prepCrisisCard.style.display = 'none';
@@ -1868,6 +1873,11 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       renderClientMessages(cacheKey);
       renderCalendar(cacheKey);
 
+      // Load shared journal entries (uses currentClient.client_id)
+      if (currentClient && currentClient.client_id) {
+        loadSharedJournal(currentClient.client_id);
+      }
+
       // Mark unread messages as read AFTER rendering (so UI shows unread state first)
       if (client.client_id) {
         markClientMessagesRead(client.client_id);
@@ -1886,6 +1896,67 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('clientPage').classList.remove('sidebar-open');
       currentClient = null;
       renderClientsList();
+    }
+
+    // =====================================================
+    // SHARED JOURNAL ENTRIES
+    // =====================================================
+    async function loadSharedJournal(clientIdParam) {
+      var card = document.getElementById('sharedJournalCard');
+      var container = document.getElementById('sharedJournalContainer');
+      if (!card || !container) return;
+
+      try {
+        var entries = await api(
+          '/rest/v1/journal_entries?client_id=eq.' + clientIdParam
+          + '&shared_with_therapist=eq.true'
+          + '&order=created_at.desc'
+          + '&limit=30'
+          + '&select=id,title,content,source,created_at,entry_type'
+        );
+
+        if (!entries || entries.length === 0) {
+          card.style.display = 'none';
+          return;
+        }
+
+        card.style.display = '';
+        var titleEl = document.querySelector('#sharedJournalCard .card-title');
+        if (titleEl) {
+          titleEl.textContent = 'Shared Journal Entries (' + entries.length + ')';
+        }
+
+        container.innerHTML = entries.map(function(entry) {
+          var date = new Date(entry.created_at);
+          var dateStr = date.toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric'
+          });
+          var isAlo = entry.source === 'alo';
+          var sourceBadge = isAlo
+            ? '<span class="journal-shared-source from-alo">From Alo</span>'
+            : '<span class="journal-shared-source from-client">Client</span>';
+
+          var preview = (entry.content || '').substring(0, 150);
+          if ((entry.content || '').length > 150) preview += '...';
+
+          return '<div class="journal-shared-entry" onclick="toggleJournalExpand(this)">' +
+            '<div class="journal-shared-meta">' +
+              '<span class="journal-shared-date">' + dateStr + '</span>' +
+              sourceBadge +
+            '</div>' +
+            '<div class="journal-shared-preview">' + esc(preview) + '</div>' +
+            '<div class="journal-shared-full">' + esc(entry.content || '').replace(/\n/g, '<br>') + '</div>' +
+          '</div>';
+        }).join('');
+
+      } catch (err) {
+        console.error('[Dashboard] Shared journal load failed:', err);
+        card.style.display = 'none';
+      }
+    }
+
+    function toggleJournalExpand(el) {
+      el.classList.toggle('expanded');
     }
 
     async function loadClientData(cacheKey) {
@@ -3374,8 +3445,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('editSafetyNotes').value = currentClient.safety_notes || '';
       document.getElementById('settingHomework').checked = currentClient.allow_homework ?? true;
       document.getElementById('settingMessages').checked = currentClient.allow_messages ?? true;
-      document.getElementById('settingSummary').checked = currentClient.allow_summary ?? true;
       document.getElementById('settingHistory').checked = currentClient.allow_history ?? true;
+      document.getElementById('settingJournalSharing').checked = currentClient.allow_journal_sharing ?? true;
 
       document.getElementById('editClientModal').classList.add('show');
     }
@@ -3393,8 +3464,8 @@ if (clientsBtn) clientsBtn.style.display = '';
           safety_notes: document.getElementById('editSafetyNotes').value,
           allow_homework: document.getElementById('settingHomework').checked,
           allow_messages: document.getElementById('settingMessages').checked,
-          allow_summary: document.getElementById('settingSummary').checked,
-          allow_history: document.getElementById('settingHistory').checked
+         allow_history: document.getElementById('settingHistory').checked,
+          allow_journal_sharing: document.getElementById('settingJournalSharing').checked
         });
 
         closeModal('editClientModal');
@@ -3505,7 +3576,6 @@ if (clientsBtn) clientsBtn.style.display = '';
       localStorage.setItem('alo_default_settings', JSON.stringify({
         homework: document.getElementById('defaultHomework').checked,
         messages: document.getElementById('defaultMessages').checked,
-        summary: document.getElementById('defaultSummary').checked,
         history: document.getElementById('defaultHistory').checked
       }));
       closeModal('defaultSettingsModal');
