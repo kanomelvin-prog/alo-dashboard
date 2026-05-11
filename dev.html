@@ -1681,7 +1681,11 @@ function setButtonLoading(btn, loading, loadingText) {
           prefer: 'return=minimal'
         });
       } catch (err) {
+        // A7/D5+D12 — previously silent. UI/server mismatch left unread
+        // badges stale with no user signal. Surface failure via toast so
+        // the therapist knows the read-state update didn't land.
         console.error('Mark read failed:', err);
+        toast('Could not update message read status. Try reopening the client.');
       }
     }
 
@@ -3442,12 +3446,22 @@ if (clientsBtn) clientsBtn.style.display = '';
         document.getElementById('inviteResult').style.display = 'block';
         document.getElementById('generateInviteBtn').style.display = 'none';
 
-        loadDashboard();
+        // A7/D3 — Await refresh and surface failures. Without this, a failed
+        // loadDashboard() after a successful invite insert would leave the
+        // user looking at a stale client list with no indication anything
+        // went wrong. The invite itself already succeeded (the await api()
+        // above resolved), so refresh failure is a distinct error mode and
+        // gets its own toast.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after invite generation:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error generating invite');
       }
-    }
 
     function copyInviteCode() {
       const code = document.getElementById('inviteCodeDisplay').textContent;
@@ -3533,7 +3547,18 @@ if (clientsBtn) clientsBtn.style.display = '';
         closeModal('editClientModal');
         toast('Client archived');
         showHomePage();
-        loadDashboard();
+
+        // A7/D3 — Await refresh and surface failures. showHomePage() above is
+        // synchronous (and bumps the D2 generation counter), so ordering is
+        // preserved. If the refresh fails, the user has already navigated home
+        // and would otherwise see a stale list with the archived client still
+        // present until next page load.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after archive:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
@@ -3581,7 +3606,16 @@ if (clientsBtn) clientsBtn.style.display = '';
         });
         document.getElementById('archivedClientsOverlay')?.remove();
         toast('Client restored');
-        loadDashboard();
+
+        // A7/D3 — Await refresh and surface failures. Without this, a failed
+        // refresh after restore would leave the restored client missing from
+        // the active list until manual reload, with no indication of failure.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after restore:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error restoring client');
