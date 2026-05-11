@@ -924,6 +924,12 @@ function setButtonLoading(btn, loading, loadingText) {
     let clientSessions = {};
     let clientCrisis = {};
 
+    // A7/D2 — Generation counter for showClient(). Each call claims a token.
+    // After any await, the call checks whether a newer showClient() (or
+    // showHomePage()) has incremented the counter. If so, the older call
+    // abandons its render so stale data can't bleed into the wrong client.
+    let showClientGeneration = 0;
+
     // =====================================================
     // SUPABASE API HELPER
     // =====================================================
@@ -1793,6 +1799,10 @@ function setButtonLoading(btn, loading, loadingText) {
       const client = allClients.find(c => c.client_id === clientIdOrLinkId || c.id === clientIdOrLinkId);
       if (!client) return;
 
+      // A7/D2 — claim a generation token before any synchronous state
+      // mutation. We re-check it after every await below.
+      const myGeneration = ++showClientGeneration;
+
       const sidebar = document.querySelector('.sidebar');
       if (sidebar && sidebar.classList.contains('open')) {
         toggleSidebar();
@@ -1861,10 +1871,17 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       try {
         await loadClientData(cacheKey);
       } catch (err) {
+        // A7/D2 — if a newer showClient() has superseded us, stay quiet.
+        // The user has already moved on and the toast would be confusing.
+        if (myGeneration !== showClientGeneration) return;
         console.error('Error loading client data:', err);
         toast('Error loading client data. Try again.');
         return;
       }
+
+      // A7/D2 — another showClient() (or showHomePage()) ran while we
+      // were awaiting. Abandon render entirely; the newer call owns the UI.
+      if (myGeneration !== showClientGeneration) return;
 
       renderSessionPrep(cacheKey);
       renderNotes(cacheKey);
@@ -1889,6 +1906,9 @@ if (clientsBtn) clientsBtn.style.display = 'none';
     }
 
     function showHomePage() {
+      // A7/D2 — invalidate any in-flight showClient() loads so a
+      // late-resolving fetch can't render client data into the home view.
+      ++showClientGeneration;
       document.getElementById('homePage').style.display = 'grid';
       const clientsBtn = document.querySelector('.header-clients-btn');
 if (clientsBtn) clientsBtn.style.display = '';
