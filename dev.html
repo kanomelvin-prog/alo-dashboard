@@ -944,9 +944,26 @@ function setButtonLoading(btn, loading, loadingText) {
       };
       const res = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers });
 
-      // Retry once on 401 (token expired after ~60 min)
+            // Retry once on 401 (token expired after ~60 min)
       if (res.status === 401 && session?.refresh_token) {
-        const refreshed = await refreshSession(session.refresh_token);
+        // A7/D6 — retry up to 2 more times with backoff if refresh fails
+        // due to a network error specifically. A real auth rejection
+        // (refreshSession returning null) stops retrying immediately.
+        let refreshed = null;
+        try {
+          refreshed = await refreshSession(session.refresh_token);
+        } catch (refreshErr) {
+          if (refreshErr.isNetworkError) {
+            for (let attempt = 1; attempt <= 2 && !refreshed; attempt++) {
+              await new Promise(r => setTimeout(r, attempt * 1500));
+              try {
+                refreshed = await refreshSession(session.refresh_token);
+              } catch (retryErr) {
+                if (!retryErr.isNetworkError) break;
+              }
+            }
+          }
+        }
         if (refreshed) {
           session = refreshed;
           therapistId = refreshed.user.id;
@@ -1054,7 +1071,7 @@ function setButtonLoading(btn, loading, loadingText) {
       if (e.key === 'Enter') handleSignup();
     });
 
-    async function refreshSession(refreshToken) {
+        async function refreshSession(refreshToken) {
       try {
         const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
           method: 'POST',
@@ -1064,9 +1081,18 @@ function setButtonLoading(btn, loading, loadingText) {
           },
           body: JSON.stringify({ refresh_token: refreshToken })
         });
+        // A7/D6 — !res.ok means the server actually responded and rejected
+        // the token (a real auth failure). null here signals "don't retry."
         if (!res.ok) return null;
         return await res.json();
-      } catch { return null; }
+      } catch (err) {
+        // A7/D6 — the fetch itself failed (no response at all) — this is a
+        // connectivity blip, not an auth rejection. Signal it distinctly
+        // so the caller knows retrying is worth it.
+        const networkErr = new Error('Network error during token refresh');
+        networkErr.isNetworkError = true;
+        throw networkErr;
+      }
     }
 
     function toggleAuthForm(mode) {
@@ -1275,11 +1301,18 @@ function setButtonLoading(btn, loading, loadingText) {
     // =====================================================
     // UTILITY FUNCTIONS
     // =====================================================
-    function esc(str) {
+        function esc(str) {
       if (!str) return '';
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
+    }
+
+    // A7/D8 — safe for embedding inside a single-quoted onclick attribute.
+    // IDs are UUIDs today so this is precautionary, not fixing an active
+    // exploit — but the pattern itself is the risk the audit flagged.
+    function escJsAttr(str) {
+      return esc(str).replace(/'/g, '&#39;');
     }
 
     function timeAgo(date) {
@@ -1983,10 +2016,15 @@ if (clientsBtn) clientsBtn.style.display = '';
       el.classList.toggle('expanded');
     }
 
-    async function loadClientData(cacheKey) {
+        async function loadClientData(cacheKey) {
       const clientId = currentClient.client_id || currentClient.id;
 
-      const [notes, homework, messages, sessions, crisis] = await Promise.all([
+      // A7/D7 — allSettled instead of all: one failed section no longer
+      // blocks the other four from rendering. Failed sections fall back
+      // to an empty array and get flagged so you know data is missing,
+      // not that the client genuinely has none.
+      const labels = ['notes', 'homework', 'messages', 'sessions', 'crisis'];
+      const results = await Promise.allSettled([
         api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
         api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
         api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
@@ -1994,11 +2032,24 @@ if (clientsBtn) clientsBtn.style.display = '';
         api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`)
       ]);
 
-      clientNotes[cacheKey] = notes || [];
-      clientHomework[cacheKey] = homework || [];
-      clientMessages[cacheKey] = messages || [];
-      clientSessions[cacheKey] = sessions || [];
-      clientCrisis[cacheKey] = crisis || [];
+      const [notesR, homeworkR, messagesR, sessionsR, crisisR] = results;
+      const failed = [];
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          failed.push(labels[i]);
+          console.error(`[loadClientData] ${labels[i]} failed:`, r.reason);
+        }
+      });
+
+      clientNotes[cacheKey] = notesR.status === 'fulfilled' ? (notesR.value || []) : [];
+      clientHomework[cacheKey] = homeworkR.status === 'fulfilled' ? (homeworkR.value || []) : [];
+      clientMessages[cacheKey] = messagesR.status === 'fulfilled' ? (messagesR.value || []) : [];
+      clientSessions[cacheKey] = sessionsR.status === 'fulfilled' ? (sessionsR.value || []) : [];
+      clientCrisis[cacheKey] = crisisR.status === 'fulfilled' ? (crisisR.value || []) : [];
+
+      if (failed.length > 0) {
+        toast(`Couldn't load: ${failed.join(', ')}. Try refreshing.`);
+      }
     }
 
         function switchTab(tabName, btn) {
@@ -2278,24 +2329,24 @@ if (clientsBtn) clientsBtn.style.display = '';
           <div class="note-header">
             <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             <div class="note-actions">
-              <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
-                <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${n.id}')">Copy for EHR</button>
-                <div class="ehr-dropdown" id="ehrDrop_${n.id}" style="display:none;">
-                  <button onclick="copyForEHR('${n.id}','soap',event)">SOAP</button>
-                  <button onclick="copyForEHR('${n.id}','dap',event)">DAP</button>
-                  <button onclick="copyForEHR('${n.id}','narrative',event)">Narrative</button>
+                            <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
+                <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${escJsAttr(n.id)}')">Copy for EHR</button>
+                <div class="ehr-dropdown" id="ehrDrop_${escJsAttr(n.id)}" style="display:none;">
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','soap',event)">SOAP</button>
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','dap',event)">DAP</button>
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','narrative',event)">Narrative</button>
                 </div>
               </div>
-              <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${n.id}')">Edit</button>
-              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${n.id}')">Delete</button>
+              <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${escJsAttr(n.id)}')">Edit</button>
+              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}')">Delete</button>
             </div>
           </div>
           <div class="note-type-badge">${esc(n.session_type || 'Individual')}</div>
           <div class="note-content">
-            ${n.themes ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button> <strong>Themes:</strong> ${esc(n.themes)}</div>` : ''}
-            ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
-            ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
-            ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
+            ${n.themes ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'S', event)">Copy S</button> <strong>Themes:</strong> ${esc(n.themes)}</div>` : ''}
+            ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
+            ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
+            ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
             ${n.next_session_date ? `<div class="note-meta">Next session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
             ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
           </div>
