@@ -891,7 +891,7 @@ async function submitForgotPassword() {
 // === CLIPBOARD UTILITY (works on HTTP and HTTPS) ===
 function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
-    return copyToClipboard(text);
+    return navigator.clipboard.writeText(text);
   }
   // Fallback for HTTP
   const ta = document.createElement('textarea');
