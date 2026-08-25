@@ -1056,6 +1056,12 @@ function setButtonLoading(btn, loading, loadingText) {
               return;
             }
 
+                        const locked = await isVerificationLocked(therapistId);
+            if (locked) {
+              showPendingVerification();
+              return;
+            }
+
             showApp();
             return;
           }
@@ -1260,9 +1266,15 @@ function setButtonLoading(btn, loading, loadingText) {
         therapistId = session.user.id;
         localStorage.setItem('alo_session', JSON.stringify(session));
 
-        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
+                const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
         if (!profile?.[0] || profile[0].role !== 'therapist') {
           throw new Error('This account is not a therapist account');
+        }
+
+        const locked = await isVerificationLocked(therapistId);
+        if (locked) {
+          showPendingVerification();
+          return;
         }
 
         showApp();
@@ -1281,7 +1293,41 @@ function setButtonLoading(btn, loading, loadingText) {
       showLogin();
     }
 
+        async function isVerificationLocked(id) {
+      try {
+        const rows = await api(`/rest/v1/therapists?id=eq.${id}&select=license_verified,verify_deadline`);
+        const row = rows?.[0];
+        if (!row) return false;
+        if (row.license_verified) return false;
+        if (!row.verify_deadline) return false;
+        return new Date(row.verify_deadline).getTime() < Date.now();
+      } catch (e) {
+        console.log('Verification check failed, defaulting to unlocked:', e.message);
+        return false;
+      }
+    }
+
+    function showPendingVerification() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'none';
+      let overlay = document.getElementById('pendingVerificationPage');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'pendingVerificationPage';
+        overlay.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:24px;text-align:center;font-family:inherit;';
+        overlay.innerHTML = `
+          <h2 style="margin-bottom:12px;">Account Pending Verification</h2>
+          <p style="max-width:420px;color:#555;line-height:1.5;">Your account is being reviewed before dashboard access opens up. This usually takes less than 10 days — reach out to <a href="mailto:kano@alowen.ai">kano@alowen.ai</a> if you have questions.</p>
+          <button onclick="handleLogout()" style="margin-top:20px;padding:10px 20px;border-radius:8px;border:none;background:#111;color:#fff;cursor:pointer;">Log Out</button>
+        `;
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'flex';
+    }
+
     function showLogin() {
+      const overlay = document.getElementById('pendingVerificationPage');
+      if (overlay) overlay.style.display = 'none';
       document.getElementById('loginPage').style.display = 'flex';
       document.getElementById('appContainer').style.display = 'none';
     }
