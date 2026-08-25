@@ -1195,7 +1195,8 @@ function setButtonLoading(btn, loading, loadingText) {
           console.log('Profile insert skipped (may already exist):', profileErr.message);
         }
 
-        try {
+                try {
+          const verifyDeadline = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString();
           await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
             method: 'POST',
             headers: {
@@ -1207,7 +1208,8 @@ function setButtonLoading(btn, loading, loadingText) {
             body: JSON.stringify({
               id: therapistId,
               license_type: 'pending',
-              license_verified: false
+              license_verified: false,
+              verify_deadline: verifyDeadline
             })
           });
         } catch (therapistErr) {
