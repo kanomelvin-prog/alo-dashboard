@@ -322,12 +322,15 @@
             <!-- LEFT: Session Notes (primary) -->
             <div class="tools-row-main">
               <div class="card">
-                <div class="card-header">
+                                <div class="card-header">
                   <span class="card-title">Session Notes</span>
-                  <button class="btn btn-primary add-note-btn" onclick="showNoteForm()">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    Add Note
-                  </button>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="btn btn-sm btn-secondary" id="viewAllNotesDrawerBtn" style="display:none;" onclick="openNotesDrawer()">View All</button>
+                    <button class="btn btn-primary add-note-btn" onclick="showNoteForm()">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                      Add Note
+                    </button>
+                  </div>
                 </div>
                 <div class="card-body" id="notesContainer">
                   <p class="text-muted-center">No session notes yet.</p>
@@ -2375,20 +2378,13 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     // NOTES
     // =====================================================
-    function renderNotes(cacheKey) {
-      const notes = clientNotes[cacheKey] || [];
-
-      if (!notes.length) {
-        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">Session notes will appear here after you document your first session.</p>';
-        return;
-      }
-
-      document.getElementById('notesContainer').innerHTML = notes.map(n => `
+        function renderNoteCard(n) {
+      return `
         <div class="note-card">
           <div class="note-header">
             <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             <div class="note-actions">
-                            <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
+              <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
                 <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${escJsAttr(n.id)}')">Copy for EHR</button>
                 <div class="ehr-dropdown" id="ehrDrop_${escJsAttr(n.id)}" style="display:none;">
                   <button onclick="copyForEHR('${escJsAttr(n.id)}','soap',event)">SOAP</button>
@@ -2410,7 +2406,48 @@ if (clientsBtn) clientsBtn.style.display = '';
             ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
           </div>
         </div>
-      `).join('');
+      `;
+    }
+
+    function renderNotes(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+
+      if (!notes.length) {
+        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">Session notes will appear here after you document your first session.</p>';
+        const btn = document.getElementById('viewAllNotesDrawerBtn');
+        if (btn) btn.style.display = 'none';
+        return;
+      }
+
+      const preview = notes.slice(0, 3);
+      const hasMore = notes.length > 3;
+
+      document.getElementById('notesContainer').innerHTML = preview.map(n => renderNoteCard(n)).join('');
+
+      const btn = document.getElementById('viewAllNotesDrawerBtn');
+      if (btn) { btn.style.display = hasMore ? 'inline-flex' : 'none'; if (hasMore) btn.textContent = 'View All (' + notes.length + ')'; }
+    }
+
+    function openNotesDrawer() {
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      const notes = clientNotes[cacheKey] || [];
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'notesDrawerOverlay';
+      overlay.innerHTML = `
+        <div class="drawer" onclick="event.stopPropagation()">
+          <div class="drawer-header">
+            <h3>All Session Notes — ${esc(currentClient?.display_name || 'Client')}</h3>
+            <button class="modal-close" onclick="document.getElementById('notesDrawerOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="drawer-body">
+            ${notes.length ? notes.map(n => renderNoteCard(n)).join('') : '<p class="text-muted-center">No session notes</p>'}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function showNoteForm() {
