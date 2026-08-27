@@ -1705,9 +1705,13 @@ function setButtonLoading(btn, loading, loadingText) {
       }).join('');
     }
 
-    function renderClientsList() {
+        function renderClientsList() {
       const statusOrder = { crisis: 0, 'needs-attention': 1, stable: 2, dormant: 3 };
-      allClients.sort((a, b) => {
+
+      const demoClients = allClients.filter(c => c.is_demo);
+      const regularClients = allClients.filter(c => !c.is_demo);
+
+      regularClients.sort((a, b) => {
         const isPendingA = !a.client_id;
         const isPendingB = !b.client_id;
         const sa = statusOrder[isPendingA ? 'dormant' : a.status] ?? 4;
@@ -1717,14 +1721,19 @@ function setButtonLoading(btn, loading, loadingText) {
         return (a.display_name || '').localeCompare(b.display_name || '');
       });
 
-      const html = allClients.map(c => {
+      demoClients.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+
+      const renderItem = (c) => {
         const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         const isPending = !c.client_id;
         const isActive = currentClient && ((currentClient.client_id && currentClient.client_id === c.client_id) || (!currentClient.client_id && currentClient.id === c.id));
 
         let weatherClass = '';
         let weatherLabel = '';
-        if (isPending) {
+        if (c.is_demo) {
+          weatherClass = 'weather-dormant';
+          weatherLabel = isPending ? 'TEST' : 'DEMO';
+        } else if (isPending) {
           weatherClass = 'weather-dormant';
           weatherLabel = 'PENDING';
         } else if (c.status === 'crisis') {
@@ -1741,6 +1750,15 @@ function setButtonLoading(btn, loading, loadingText) {
           weatherLabel = 'STABLE';
         }
 
+        let metaLine;
+        if (c.is_demo && isPending) {
+          metaLine = `<span class="pending-label">Code: ${esc(c.invite_code || '')}</span><button onclick="event.stopPropagation(); copyToClipboard('${escJsAttr(c.invite_code || '')}').then(() => toast('Test account code copied'))" style="margin-left:6px;font-size:0.6875rem;padding:1px 8px;border-radius:999px;border:1px solid rgba(58,124,134,0.4);background:transparent;color:#3A7C86;cursor:pointer;">Copy</button>`;
+        } else if (isPending) {
+          metaLine = '<span class="pending-label">Pending signup</span>';
+        } else {
+          metaLine = timeAgo(new Date(c.lastActivity || c.created_at));
+        }
+
         return `
           <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')" data-name="${esc(c.display_name || 'Client').toLowerCase()}">
             <div class="client-avatar">
@@ -1753,12 +1771,22 @@ function setButtonLoading(btn, loading, loadingText) {
                 <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
               </div>
               <div class="client-meta">
-                ${isPending ? '<span class="pending-label">Pending signup</span>' : timeAgo(new Date(c.lastActivity || c.created_at))}
+                ${metaLine}
               </div>
             </div>
           </div>
         `;
-      }).join('');
+      };
+
+      let html = '';
+      if (demoClients.length) {
+        html += '<div style="padding:8px 16px 4px;font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;color:var(--text-muted);">TESTING</div>';
+        html += demoClients.map(renderItem).join('');
+        if (regularClients.length) {
+          html += '<div style="border-top:1px solid var(--border);margin:8px 0 4px;"></div>';
+        }
+      }
+      html += regularClients.map(renderItem).join('');
 
       document.getElementById('clientsList').innerHTML = html || '<div class="section-empty">No clients yet</div>';
       document.getElementById('clientsList2').innerHTML = html;
@@ -1926,13 +1954,29 @@ if (clientsBtn) clientsBtn.style.display = 'none';
 
       const isPending = !client.client_id;
 
-      // Badge (next to name)
+            // Badge (next to name)
       const badgeEl = document.getElementById('clientBadge');
       if (isPending) {
         badgeEl.style.display = 'inline-block';
         badgeEl.innerHTML = '<span style="background:#fff3cd;color:#856404;border-radius:999px;padding:2px 8px;font-size:0.6875rem;font-weight:600;">Pending</span>';
+      } else if (client.is_demo) {
+        badgeEl.style.display = 'inline-block';
+        badgeEl.innerHTML = '<span style="background:rgba(58,124,134,0.1);color:#3A7C86;border-radius:999px;padding:2px 8px;font-size:0.6875rem;font-weight:600;">Demo</span>';
       } else {
         badgeEl.style.display = 'none';
+      }
+
+      // Demo banner — makes sample/test status impossible to miss
+      document.getElementById('demoClientBanner')?.remove();
+      if (client.is_demo) {
+        const demoBanner = document.createElement('div');
+        demoBanner.id = 'demoClientBanner';
+        demoBanner.style.cssText = 'margin:8px 20px 0;padding:8px 12px;background:rgba(58,124,134,0.08);border:1px solid rgba(58,124,134,0.25);border-radius:8px;font-size:0.8125rem;color:#3A7C86;';
+        demoBanner.textContent = client.client_id
+          ? 'Demo client — sample data for exploring the dashboard. Not a real person.'
+          : 'Your testing account — redeem the invite code at alowen.ai to chat with Alo as a client yourself.';
+        const stickyHeaderEl = document.querySelector('.client-sticky-header');
+        if (stickyHeaderEl) stickyHeaderEl.after(demoBanner);
       }
 
       // Meta line (below name)
