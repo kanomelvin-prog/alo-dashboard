@@ -1152,7 +1152,8 @@ function setButtonLoading(btn, loading, loadingText) {
       const btn = document.getElementById('signupBtn');
       setButtonLoading(btn, true, 'Creating account...');
       try {
-        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        const signupRedirect = encodeURIComponent(window.location.origin + window.location.pathname);
+        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup?redirect_to=${signupRedirect}`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
