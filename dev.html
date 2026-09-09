@@ -15,6 +15,12 @@
   ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
+  <!-- Phase 2, item 13a: installable app. Same-origin, dev.html only -- not linked from index.html. -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3A7C86">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
   <link rel="stylesheet" href="dev.css?v=33">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
@@ -782,6 +788,13 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
     </svg>
     <span id="toastMessage">Success</span>
+  </div>
+
+  <!-- Phase 2, item 13a: dismissible Android install affordance. Never auto-prompted. -->
+  <div class="install-banner" id="installBanner" style="display:none;" role="status">
+    <span class="install-banner-text">Install Alowen Dashboard for quicker access.</span> <!-- COPY: Kano review -->
+    <button class="btn btn-sm btn-primary" id="installBannerInstallBtn" onclick="_aloInstallPrompt()">Install</button>
+    <button class="install-banner-close" onclick="_aloDismissInstallBanner()" aria-label="Dismiss">&times;</button>
   </div>
 
   <!-- Phase 2, item 9: driver.js therapist tour -->
@@ -4073,6 +4086,45 @@ if (clientsBtn) clientsBtn.style.display = '';
       closeModal('defaultSettingsModal');
       toast('Default settings saved');
     }
+
+    // =====================================================
+    // PHASE 2, ITEM 13a -- INSTALLABLE APP (Android)
+    // Captured, never auto-prompted -- only shown as a dismissible banner
+    // the therapist can act on or ignore.
+    // =====================================================
+    let _aloDeferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _aloDeferredInstallPrompt = e;
+      if (localStorage.getItem('alo_install_dismissed') === '1') return;
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'flex';
+    });
+
+    async function _aloInstallPrompt() {
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'none';
+      if (!_aloDeferredInstallPrompt) return;
+      _aloDeferredInstallPrompt.prompt();
+      try {
+        await _aloDeferredInstallPrompt.userChoice;
+      } catch (err) {
+        console.warn('Install prompt outcome unavailable:', err);
+      }
+      _aloDeferredInstallPrompt = null;
+    }
+
+    function _aloDismissInstallBanner() {
+      localStorage.setItem('alo_install_dismissed', '1');
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    window.addEventListener('appinstalled', () => {
+      _aloDeferredInstallPrompt = null;
+      localStorage.setItem('alo_install_dismissed', '1');
+    });
 
     // =====================================================
     // PHASE 2, ITEM 9 -- THERAPIST TOUR (driver.js)

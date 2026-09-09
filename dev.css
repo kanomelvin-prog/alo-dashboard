@@ -3229,6 +3229,38 @@ body {
   display: block;
 }
 
+/* === PHASE 2, ITEM 13a: INSTALL BANNER (functional placeholder) === */
+.install-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.install-banner-text {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+.install-banner-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+
 /* === PHASE 2, ITEM 9: DRIVER.JS TOUR THEME (functional placeholder) === */
 .driver-popover {
   background: var(--warm-white);
