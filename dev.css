@@ -892,6 +892,13 @@ button, input, select, textarea { font: inherit; }
   margin-bottom: 12px;
 }
 
+/* === ROLLOUT SUMMARY (Phase 2B item 6) === */
+.rollout-summary {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
 /* === SESSION PREVIEW & NOTES === */
 .session-preview { padding: 12px 0; }
 .session-preview-border { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 16px; }

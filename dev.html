@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=36">
+  <link rel="stylesheet" href="dev.css?v=37">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -190,6 +190,7 @@
         <div>
           <div class="morning-greeting" id="morningGreeting">Good morning</div>
           <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
+          <div class="rollout-summary" id="rolloutSummary" style="display:none;"></div>
         </div>
 
         <!-- Needs Attention (unified crisis + messages feed) -->
@@ -1778,6 +1779,23 @@ function setButtonLoading(btn, loading, loadingText) {
           summaryEl.textContent = 'All clear. ' + summaryParts.join(' · ') + '.';
         }
 
+        // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
+        // derived from lastActivity, which is already computed above from
+        // already-fetched session_metadata. Excludes the therapist's own
+        // is_demo test client, which isn't part of rollout.
+        const rolloutEl = document.getElementById('rolloutSummary');
+        if (rolloutEl) {
+          const realClients = allClients.filter(c => !c.is_demo);
+          if (realClients.length > 0) {
+            const openedCount = realClients.filter(c => c.lastActivity).length;
+            const notOpenedCount = realClients.length - openedCount;
+            rolloutEl.textContent = `${openedCount} of your ${realClients.length} clients have opened Alo. ${notOpenedCount} haven't yet.`;
+            rolloutEl.style.display = 'block';
+          } else {
+            rolloutEl.style.display = 'none';
+          }
+        }
+
       } catch (err) {
         console.error('Dashboard load error:', err);
       }
@@ -2011,8 +2029,15 @@ function setButtonLoading(btn, loading, loadingText) {
           metaLine = `<span class="pending-label">Code: ${esc(c.invite_code || '')}</span><button onclick="event.stopPropagation(); copyToClipboard('${escJsAttr(c.invite_code || '')}').then(() => toast('Test account code copied'))" style="margin-left:6px;font-size:0.6875rem;padding:1px 8px;border-radius:999px;border:1px solid rgba(58,124,134,0.4);background:transparent;color:#3A7C86;cursor:pointer;">Copy</button>`;
         } else if (isPending) {
           metaLine = '<span class="pending-label">Pending signup</span>';
-        } else {
+        } else if (c.is_demo) {
           metaLine = timeAgo(new Date(c.lastActivity || c.created_at));
+        } else if (c.lastActivity) {
+          // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
+          // lastActivity comes from already-fetched session_metadata.
+          const daysAgo = Math.floor((Date.now() - new Date(c.lastActivity).getTime()) / 86400000);
+          metaLine = `${esc(rowLabel)} — last active ${daysAgo} days ago`;
+        } else {
+          metaLine = `${esc(rowLabel)} hasn't opened Alo yet.`;
         }
 
         return `
