@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=38">
+  <link rel="stylesheet" href="dev.css?v=39">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -2059,7 +2059,8 @@ function setButtonLoading(btn, loading, loadingText) {
               <div class="client-meta">
                 ${metaLine}
               </div>
-              ${c.is_demo ? '<div class="test-client-line">This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.</div>' : ''}
+              ${c.is_demo ? '<div class="test-client-line">This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.</div>' +
+                '<button class="btn btn-sm btn-secondary open-as-client-btn" onclick="event.stopPropagation(); openAsClient(this)">Open as client</button>' : ''}
             </div>
           </div>
         `;
@@ -2271,7 +2272,10 @@ if (clientsBtn) clientsBtn.style.display = 'none';
         const demoBanner = document.createElement('div');
         demoBanner.id = 'demoClientBanner';
         demoBanner.className = 'test-client-line test-client-line-detail';
-        demoBanner.textContent = 'This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.';
+        // Static copy only — no client-supplied value is interpolated here.
+        demoBanner.innerHTML =
+          '<div>This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.</div>' +
+          '<button class="btn btn-sm btn-secondary open-as-client-btn" onclick="openAsClient(this)">Open as client</button>';
         const stickyHeaderEl = document.querySelector('.client-sticky-header');
         if (stickyHeaderEl) stickyHeaderEl.after(demoBanner);
       }
@@ -4344,6 +4348,81 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error('Help menu: test client lookup failed:', err);
         toast('Error opening test client');
+      }
+    }
+
+    // =====================================================
+    // D29 -- "OPEN AS CLIENT" (spec §6 and §9)
+    //
+    // open-as-client mints a single-use, 60-second token server-side and
+    // returns the whole chat URL carrying it. This file uses that URL
+    // verbatim: it never parses the token out, never stores it, never logs
+    // it, and never writes it anywhere but the new tab's location.
+    // =====================================================
+    async function openAsClient(btn) {
+      // Opened synchronously, inside the click's user-activation window,
+      // and navigated only once the token comes back. Calling window.open()
+      // after the await instead is what a pop-up blocker stops -- Safari on
+      // an iPad especially, which is a platform therapists actually use.
+      // Opening first also makes a block detectable: with the 'noopener'
+      // window feature window.open() always returns null, so a blocked
+      // pop-up would be indistinguishable from a successful one.
+      const tab = window.open('about:blank', '_blank');
+      if (!tab) {
+        toast('Allow pop-ups for this site to open your test client.');
+        return;
+      }
+      // Sever the back-reference before anything navigates there, so the
+      // chat tab never holds a live handle to the dashboard window.
+      try { tab.opener = null; } catch (e) { /* best effort on old browsers */ }
+
+      setButtonLoading(btn, true, 'Opening...');
+      try {
+        const call = (accessToken) => fetch(`${SUPABASE_URL}/functions/v1/open-as-client`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        let res = await call(session?.access_token || '');
+
+        // open-as-client is verify_jwt = true and calls auth.getUser itself,
+        // so an hour-old access token 401s here. Refresh once and retry,
+        // mirroring api() -- without it the toast would say "try again" for
+        // a failure that trying again could never fix.
+        if (res.status === 401 && session?.refresh_token) {
+          let refreshed = null;
+          try {
+            refreshed = await refreshSession(session.refresh_token);
+          } catch (refreshErr) {
+            refreshed = null;
+          }
+          if (refreshed) {
+            session = refreshed;
+            therapistId = refreshed.user.id;
+            localStorage.setItem('alo_session', JSON.stringify(refreshed));
+            res = await call(refreshed.access_token);
+          }
+        }
+
+        if (!res.ok) throw new Error('open_as_client_rejected');
+
+        const body = await res.json();
+        if (!body || typeof body.url !== 'string') throw new Error('open_as_client_no_url');
+
+        // replace() rather than assign(): the token URL becomes that tab's
+        // only history entry, which the chat app then strips in turn.
+        tab.location.replace(body.url);
+      } catch {
+        tab.close();
+        // Deliberately generic and cause-free. Nothing that could carry the
+        // token is interpolated here -- not the response body, not an error
+        // object, not the status.
+        toast('Could not open the test client. Try again.');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
