@@ -64,8 +64,28 @@ Kano merges). Work steadily, honestly, and only on what the queue specifies.
 ## End of session
 
 1. Push the `auto/` branch.
-2. Write `SESSION_REPORT.md` at repo root (on the branch), containing:
-   - The model this session ran on (so Claude.ai can flag model/work mismatches)
+2. Write `SESSION_REPORT.md` at repo root (on the branch).
+
+   **It must OPEN with a `## Session Log` section, before the summary and
+   before any findings.** Standing requirement adopted 2026-09-08; the
+   canonical wording lives in `alo-supabase`, `docs/decisions.md` →
+   "Report conventions (standing)". The Session Log contains, in this order:
+   - **Model** — which model ran this session (so Claude.ai can flag
+     model/work mismatches)
+   - **Interruptions and restarts** — context compaction, tool failures, a
+     session resumed after a crash, a step retried. "None" is a valid entry;
+     saying nothing is not.
+   - **Deviations from this brief** — everything done differently from what
+     was asked, each with a one-line reason. Includes steps skipped because
+     they turned out to be unnecessary, and scope declined.
+   - **Checklist** — every task in the brief, marked COMPLETED or SKIPPED,
+     with a reason on every skip.
+
+   Why: the 2026-09-07 session left no written record of its end-to-end run,
+   and reconstructing what it had actually done cost most of a later session.
+   A reviewer should never have to infer the shape of a session from its diff.
+
+   Then the body:
    - Branch name and commit list (`git log --oneline main..HEAD`)
    - Per task: DONE (with acceptance-check results) / SKIPPED (why) /
      BLOCKED (the question or the proposed SQL)
