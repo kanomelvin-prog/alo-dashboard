@@ -792,7 +792,7 @@
 
   <!-- Phase 2, item 13a: dismissible Android install affordance. Never auto-prompted. -->
   <div class="install-banner" id="installBanner" style="display:none;" role="status">
-    <span class="install-banner-text">Install Alowen Dashboard for quicker access.</span> <!-- COPY: Kano review -->
+    <span class="install-banner-text">Add this dashboard to your home screen for one-tap access.</span>
     <button class="btn btn-sm btn-primary" id="installBannerInstallBtn" onclick="_aloInstallPrompt()">Install</button>
     <button class="install-banner-close" onclick="_aloDismissInstallBanner()" aria-label="Dismiss">&times;</button>
   </div>
@@ -4158,18 +4158,16 @@ if (clientsBtn) clientsBtn.style.display = '';
         {
           // Step 1: Dashboard home
           popover: {
-            title: 'Welcome to your dashboard', /* COPY: Kano review */
-            description: 'This is your home page, the first thing you see each time you sign in. ' +
-              'It gives you a daily overview so you never have to go hunting for what changed.', /* COPY: Kano review */
+            title: 'Welcome to your dashboard',
+            description: 'Your home page, every time you sign in. A daily overview, so nothing that changed goes hunting-required.',
           }
         },
         {
           // Step 2: Needs Attention
           element: '#attentionSection',
           popover: {
-            title: 'Needs Attention', /* COPY: Kano review */
-            description: 'Crisis alerts and client messages land here first. ' +
-              'It exists so the highest-priority items never get buried under routine updates.', /* COPY: Kano review */
+            title: 'Needs Attention',
+            description: 'Crisis alerts and client messages land here first. The highest-priority items never get buried under routine updates.',
             side: 'bottom',
           }
         },
@@ -4181,9 +4179,8 @@ if (clientsBtn) clientsBtn.style.display = '';
             if (sb && !sb.classList.contains('open')) toggleSidebar();
           },
           popover: {
-            title: 'Your client list', /* COPY: Kano review */
-            description: 'Every client you work with is listed here, most urgent first. ' +
-              'Click through to a client to see everything relevant to their next session.', /* COPY: Kano review */
+            title: 'Your client list',
+            description: 'Everyone you work with, most urgent first. Click a client to see everything relevant to their next session.',
             side: 'right',
             onNextClick: () => {
               const row = document.querySelector('#clientsList .client-item');
@@ -4196,9 +4193,8 @@ if (clientsBtn) clientsBtn.style.display = '';
           // Step 4: Client detail
           element: () => _aloClientActive() ? document.getElementById('clientName') : undefined,
           popover: {
-            title: 'Client detail', /* COPY: Kano review */
-            description: 'This page is everything about one client -- session prep, notes, homework, and safety info. ' +
-              'It replaces flipping between separate tools before a session.', /* COPY: Kano review */
+            title: 'Client detail',
+            description: 'Everything about one client in one place: session prep, notes, homework, safety info. No flipping between tools before a session.',
           }
         },
         {
@@ -4209,18 +4205,16 @@ if (clientsBtn) clientsBtn.style.display = '';
             if (tabs[1]) switchTab('tools', tabs[1]);
           },
           popover: {
-            title: 'Session notes', /* COPY: Kano review */
-            description: 'Add and review session notes here, in one place tied to the client. ' +
-              'Zero-Knowledge means these are your clinical notes only -- never client chat content.', /* COPY: Kano review */
+            title: 'Session notes',
+            description: 'Your clinical notes, tied to the client. Yours only -- client conversations with Alo never appear here or anywhere.',
           }
         },
         {
           // Step 6: Homework
           element: () => _aloClientActive() ? document.getElementById('homeworkForm') : undefined,
           popover: {
-            title: 'Assign homework', /* COPY: Kano review */
-            description: 'Assign an exercise from a template or write your own, and Alo carries it into the chat. ' +
-              'It exists so between-session practice is easy to hand off.', /* COPY: Kano review */
+            title: 'Assign homework',
+            description: 'Pick a template or write your own; Alo carries it into the client\'s chat. You\'ll see when it\'s marked done -- not what they said about it.',
           }
         },
         {
@@ -4231,18 +4225,16 @@ if (clientsBtn) clientsBtn.style.display = '';
             return (el && el.style.display !== 'none') ? el : undefined;
           },
           popover: {
-            title: 'Shared journal entries', /* COPY: Kano review */
-            description: 'When a client chooses to share a journal entry from Alo, it appears here. ' +
-              'This only shows entries the client explicitly shared -- never their full chat history.', /* COPY: Kano review */
+            title: 'Shared journal entries',
+            description: 'When a client chooses to share a journal entry, it appears here. Only what they explicitly shared -- never their chat history.',
           }
         },
         {
           // Step 8: Client Settings
           element: () => _aloClientActive() ? document.querySelector('.client-header-settings-btn') : undefined,
           popover: {
-            title: 'Client Settings', /* COPY: Kano review */
-            description: 'Update the client\'s name, next session date, and emergency contact from here. ' +
-              'It exists so that information stays current without leaving the client page.', /* COPY: Kano review */
+            title: 'Client Settings',
+            description: 'Name, next session date, emergency contact, and per-client feature toggles. Kept current without leaving the client\'s page.',
           }
         },
         {
@@ -4258,9 +4250,8 @@ if (clientsBtn) clientsBtn.style.display = '';
             if (tabs[0]) switchTab('prep', tabs[0]);
           },
           popover: {
-            title: 'Crisis alerts, resolved', /* COPY: Kano review */
-            description: 'Every crisis alert -- open or resolved -- stays visible here with what action was taken. ' +
-              'It exists so the safety record for a client is never just in your memory.', /* COPY: Kano review */
+            title: 'Crisis alerts',
+            description: 'Every alert, open or resolved, stays here with the action taken. The safety record never lives only in your memory.',
           }
         },
         {
@@ -4268,9 +4259,8 @@ if (clientsBtn) clientsBtn.style.display = '';
           element: () => _aloClientActive() ? document.querySelector('#editClientModal .emergency-title') : undefined,
           onHighlightStarted: () => showEditClientModal(),
           popover: {
-            title: 'Emergency contact', /* COPY: Kano review */
-            description: 'Keep a client phone number and emergency contact on file here. ' +
-              'It exists so that information is one click away during an active crisis alert.', /* COPY: Kano review */
+            title: 'Emergency contact',
+            description: 'A phone number and emergency contact on file, one click away if an alert ever comes in.',
             onNextClick: () => {
               _aloTourFinished = true;
               closeModal('editClientModal');
