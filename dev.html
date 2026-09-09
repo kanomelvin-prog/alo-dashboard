@@ -537,7 +537,23 @@
           </div>
 
           <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
+          <!-- SILENT-3 (Phase 3): renderClientMessages() targets
+               getElementById('viewAllMessagesToolsBtn'), which had no
+               matching markup anywhere in the file -- this card had no
+               header/button at all. The lookup failed silently (guarded by
+               `if (btn)`) with zero visible effect, because this whole card
+               is display:none by design per the comment above (superseded
+               by the Session Prep card's own "Messages from Client" button,
+               id="viewAllMessagesBtn", ~line 308). Added the missing button
+               below, mirroring that sibling exactly, so the id resolves and
+               the code is internally consistent if this card is ever
+               un-hidden. Card visibility is unchanged; nothing here is
+               user-visible today. -->
           <div class="card" id="inSessionMessagesCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllMessagesToolsBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
+            </div>
             <div class="card-body" id="activityMessages">
               <p class="text-muted-center">No messages</p>
             </div>
