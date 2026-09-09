@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=37">
+  <link rel="stylesheet" href="dev.css?v=38">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -619,7 +619,12 @@
           <div class="invite-display">
             <div class="invite-hint">Share this code with your client</div>
             <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
-            <div class="invite-hint">Expires in 7 days • Click to copy</div>
+            <div class="invite-hint">Expires in 7 days • Click code to copy</div>
+          </div>
+          <div class="invite-send-actions">
+            <button class="btn btn-secondary btn-full" onclick="_aloCopyInviteLink()">Copy link</button>
+            <button class="btn btn-secondary btn-full" onclick="_aloTextInvite()">Text invite</button>
+            <button class="btn btn-secondary btn-full" onclick="_aloEmailInvite()">Email invite</button>
           </div>
         </div>
       </div>
@@ -3981,6 +3986,42 @@ if (clientsBtn) clientsBtn.style.display = '';
     function copyInviteCode() {
       const code = document.getElementById('inviteCodeDisplay').textContent;
       copyToClipboard(code).then(() => toast('Invite code copied'));
+    }
+
+    // Phase 2B item 7: invite modal single-link (spec §2.6, ruling D28).
+    // mailto:/sms: + clipboard only -- no send-invite Edge Function.
+    function _aloInviteMessage(code) {
+      return `I mentioned Alo — it's for the time between our sessions. Here's your link: https://alowen.ai/?invite=${code}. Nothing you say there comes to me unless you choose to share it.`;
+    }
+
+    function _aloCopyInviteLink() {
+      const code = document.getElementById('inviteCodeDisplay').textContent;
+      copyToClipboard(`https://alowen.ai/?invite=${code}`)
+        .then(() => toast('Invite link copied'))
+        .catch(() => toast('Could not copy link'));
+    }
+
+    function _aloTextInvite() {
+      const code = document.getElementById('inviteCodeDisplay').textContent;
+      const message = _aloInviteMessage(code);
+      const ua = navigator.userAgent;
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+      if (isIOS) {
+        window.location.href = `sms:&body=${encodeURIComponent(message)}`;
+      } else if (isAndroid) {
+        window.location.href = `sms:?body=${encodeURIComponent(message)}`;
+      } else {
+        copyToClipboard(message)
+          .then(() => toast('Invite message copied — paste it into a text'))
+          .catch(() => toast('Could not copy invite message'));
+      }
+    }
+
+    function _aloEmailInvite() {
+      const code = document.getElementById('inviteCodeDisplay').textContent;
+      const message = _aloInviteMessage(code);
+      window.location.href = `mailto:?subject=${encodeURIComponent('Alo')}&body=${encodeURIComponent(message)}`;
     }
 
     function showEditClientModal() {
