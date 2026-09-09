@@ -100,7 +100,10 @@ State it before doing the thing where possible, and always after. The point is t
 - Supabase calls use raw fetch — match existing api() and apiMutate() helper pattern
 ### Code safety
 - Scan for zero-width characters (U+200B, U+200C, U+200D, U+FEFF, U+2060) before every commit. One invisible character in inline JavaScript silently breaks the page.
-- Scan command: `grep -P "[\x{200B}\x{200C}\x{200D}\x{FEFF}\x{2060}]" dev.html dev.css` — should return nothing.
+- Scan command (ruling D3, 2026-09-09, versioned per D20 into `scripts/scan-invisible.py` instead of a duplicated heredoc — not a `grep -P`/`python3 -c` one-liner, whose character class was mangled by shell quoting on 2026-09-08 and produced 2312 false positives; the same mangling can produce a false negative, and this check exists to catch a bug that silently breaks the page. Covers NBSP and smart quotes too, which the old five-codepoint form missed). Exit 0 and `CLEAN` on every line is a pass:
+```bash
+  python3 scripts/scan-invisible.py dev.html dev.css
+  ```
 - RLS policies are active — always test with therapist-scoped credentials, not service role.
 ### Schema changes
 - Supabase schema changes (ALTER TABLE, CREATE POLICY, etc.) run in Supabase SQL Editor by the developer, not by Claude Code.

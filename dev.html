@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
            <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.botpress.cloud https://cdn.jsdelivr.net https://files.bpcontent.cloud;
-    style-src 'self' 'unsafe-inline' https://cdn.botpress.cloud;
+    script-src 'self' 'unsafe-inline' https://cdn.botpress.cloud https://cdn.jsdelivr.net https://files.bpcontent.cloud https://cdnjs.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://cdn.botpress.cloud https://cdnjs.cloudflare.com;
     img-src 'self' data: blob: https://files.bpcontent.cloud https://*.supabase.co;
     connect-src 'self' https://lelsdezstbnzyxvsvbyx.supabase.co https://*.botpress.cloud wss://*.botpress.cloud https://files.bpcontent.cloud;
     frame-src 'self' https://cdn.botpress.cloud;
@@ -15,7 +15,17 @@
   ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="dev.css?v=32">
+  <!-- Phase 2, item 13a: installable app. Same-origin, dev.html only -- not linked from index.html. -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3A7C86">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+  <link rel="stylesheet" href="dev.css?v=33">
+  <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
+        integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -154,6 +164,8 @@
       </button>
 
       <div class="header-right">
+        <!-- TEMP: replaced by help menu -->
+        <a href="#" class="tour-temp-link" onclick="startAloTour(); return false;">Show me around</a>
         <span class="user-name" id="therapistName"></span>
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
@@ -405,7 +417,7 @@
                 <div class="quick-note-inner">
                   <label class="quick-note-label">Quick Note</label>
                   <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
-                  <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                  <button class="btn btn-primary btn-sm quick-note-save" id="quickNoteSaveBtn" onclick="saveQuickNote()">Save Quick Note</button>
                   <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
                 </div>
               </div>
@@ -537,7 +549,23 @@
           </div>
 
           <!-- Messages from Client (hidden — data preserved for JS, view in Session Prep) -->
+          <!-- SILENT-3 (Phase 3): renderClientMessages() targets
+               getElementById('viewAllMessagesToolsBtn'), which had no
+               matching markup anywhere in the file -- this card had no
+               header/button at all. The lookup failed silently (guarded by
+               `if (btn)`) with zero visible effect, because this whole card
+               is display:none by design per the comment above (superseded
+               by the Session Prep card's own "Messages from Client" button,
+               id="viewAllMessagesBtn", ~line 308). Added the missing button
+               below, mirroring that sibling exactly, so the id resolves and
+               the code is internally consistent if this card is ever
+               un-hidden. Card visibility is unchanged; nothing here is
+               user-visible today. -->
           <div class="card" id="inSessionMessagesCard" style="display: none;">
+            <div class="card-header">
+              <span class="card-title">Messages from Client</span>
+              <button class="btn btn-sm btn-secondary" id="viewAllMessagesToolsBtn" style="display:none;" onclick="openMessagesDrawer()">View All</button>
+            </div>
             <div class="card-body" id="activityMessages">
               <p class="text-muted-center">No messages</p>
             </div>
@@ -693,13 +721,13 @@
         <!-- Danger Zone -->
         <div class="form-group danger-zone">
           <label class="danger-zone-label">Danger Zone</label>
-          <button class="btn btn-sm btn-danger-outline" onclick="confirmDeleteClient()">Archive Client</button>
+          <button class="btn btn-sm btn-danger-outline" id="archiveClientBtn" onclick="confirmDeleteClient()">Archive Client</button>
           <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Restore anytime from the bottom of the Clients sidebar.</span>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('editClientModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
+        <button class="btn btn-primary" id="saveClientEditBtn" onclick="saveClientEdit()">Save</button>
       </div>
     </div>
   </div>
@@ -761,6 +789,18 @@
     </svg>
     <span id="toastMessage">Success</span>
   </div>
+
+  <!-- Phase 2, item 13a: dismissible Android install affordance. Never auto-prompted. -->
+  <div class="install-banner" id="installBanner" style="display:none;" role="status">
+    <span class="install-banner-text">Install Alowen Dashboard for quicker access.</span> <!-- COPY: Kano review -->
+    <button class="btn btn-sm btn-primary" id="installBannerInstallBtn" onclick="_aloInstallPrompt()">Install</button>
+    <button class="install-banner-close" onclick="_aloDismissInstallBanner()" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- Phase 2, item 9: driver.js therapist tour -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.js.iife.min.js"
+          integrity="sha512-RhwyYBNqTj+hAVmH3cyZhZ+1ExPTW3lYtpiCQrC//Oiugjd/oTHIQRVP1IhEvqcccyP4+rcSuf/1nudX3pOXxQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 // === PASSWORD RESET HANDLER (modal-based) ===
 (function() {
@@ -905,6 +945,8 @@ function showForgotPassword() {
     </div>
   `;
   document.body.appendChild(overlay);
+  var _releaseTrap = trapFocus(overlay);
+  addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
   document.getElementById('forgotEmail')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') submitForgotPassword();
   });
@@ -1446,6 +1488,7 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('morningGreeting').textContent = greeting + ', ' + firstName;
 
       await loadDashboard();
+      _aloMaybeAutoOfferTour();
     }
 
     // =====================================================
@@ -1498,11 +1541,78 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     });
 
+    // COSMETIC-1/-2 (Phase 3, backlog N3): shared focus trap, mirroring the
+    // helper of the same name and behavior added to alo-client-chat-full_v1
+    // this same session -- one implementation per app, per the task, since
+    // the two files share no runtime. Tabbing off either end of the visible
+    // modal/drawer wraps back inside it instead of reaching the page behind.
+    var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea:not([disabled]), ' +
+      'input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    function trapFocus(container) {
+      function getFocusable() {
+        return Array.prototype.filter.call(
+          container.querySelectorAll(FOCUSABLE_SELECTOR),
+          function(el) { return el.offsetParent !== null; }
+        );
+      }
+      function handleKeydown(e) {
+        if (e.key !== 'Tab') return;
+        var focusables = getFocusable();
+        if (focusables.length === 0) return;
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === first || !container.contains(active)) { e.preventDefault(); last.focus(); }
+        } else {
+          if (active === last || !container.contains(active)) { e.preventDefault(); first.focus(); }
+        }
+      }
+      container.addEventListener('keydown', handleKeydown);
+      return function releaseFocusTrap() {
+        container.removeEventListener('keydown', handleKeydown);
+      };
+    }
+
+    // Per-modal-id release functions for the three static (reused, not
+    // recreated) modals below, so closeModal() -- their one shared close
+    // path for X, Cancel, backdrop AND Escape alike -- can release the trap
+    // on every exit, not just Escape.
+    var _staticModalTrapReleases = {};
+
     function closeModal(id, event) {
       if (event && event.target !== event.currentTarget) return;
       document.getElementById(id).classList.remove('show');
       setFormDirty(false);
+      if (_staticModalTrapReleases[id]) {
+        _staticModalTrapReleases[id]();
+        _staticModalTrapReleases[id] = null;
+      }
     }
+
+    // COSMETIC-1/-2 (Phase 3, backlog N3): shared Escape-to-close helpers.
+    // See the file header comment above closeModal() for which of the two
+    // to use where.
+    function addEscToClose(el, closeFn) {
+      document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape' && document.body.contains(el)) {
+          closeFn();
+          document.removeEventListener('keydown', escHandler);
+        }
+      });
+    }
+
+    function wireEscToStaticModal(modalId) {
+      document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        var el = document.getElementById(modalId);
+        if (el && el.classList.contains('show')) closeModal(modalId);
+      });
+    }
+    wireEscToStaticModal('inviteModal');
+    wireEscToStaticModal('editClientModal');
+    wireEscToStaticModal('defaultSettingsModal');
 
     // =====================================================
     // DASHBOARD LOADING
@@ -1961,12 +2071,14 @@ function setButtonLoading(btn, loading, loadingText) {
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" onclick="document.getElementById('resolveCrisisOverlay')?.remove()">Cancel</button>
-            <button class="btn btn-primary" onclick="submitResolveCrisis('${crisisEventId}')">Resolve Alert</button>
+            <button class="btn btn-primary" id="resolveCrisisSubmitBtn" onclick="submitResolveCrisis('${crisisEventId}')">Resolve Alert</button>
           </div>
         </div>
       `;
       overlay.onclick = (evt) => { if (evt.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     async function submitResolveCrisis(crisisEventId) {
@@ -1981,6 +2093,11 @@ function setButtonLoading(btn, loading, loadingText) {
         return;
       }
 
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes a clinical
+      // record (crisis_events.acknowledged/action_taken). Disable while
+      // in-flight.
+      const btn = document.getElementById('resolveCrisisSubmitBtn');
+      setButtonLoading(btn, true, 'Resolving...');
       try {
         await apiMutate(`/rest/v1/crisis_events?id=eq.${crisisEventId}`, 'PATCH', {
           acknowledged: true,
@@ -2004,6 +2121,8 @@ function setButtonLoading(btn, loading, loadingText) {
         console.error(err);
         errorEl.textContent = 'Error resolving alert. Please try again.';
         errorEl.style.display = 'block';
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2267,13 +2386,6 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     // DETAIL PAGE UTILITIES
     // =====================================================
-    function toggleDetailSidebar() {
-      const layout = document.getElementById('clientPage');
-      if (layout) {
-        layout.classList.toggle('sidebar-open');
-      }
-    }
-
     function toggleHwForm() {
       const expanded = document.getElementById('hwFormExpanded');
       if (!expanded) return;
@@ -2525,7 +2637,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
               </div>
               <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${escJsAttr(n.id)}')">Edit</button>
-              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}')">Delete</button>
+              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}', this)">Delete</button>
             </div>
           </div>
           <div class="note-type-badge">${esc(n.session_type || 'Individual')}</div>
@@ -2580,6 +2692,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     function showNoteForm() {
@@ -2642,6 +2756,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
       document.body.appendChild(modal);
+      var _releaseTrap = trapFocus(modal);
+      addEscToClose(modal, () => { _releaseTrap(); modal.remove(); });
     }
 
         async function saveNote(e) {
@@ -2652,7 +2768,9 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
       const cacheKey = currentClient.client_id || currentClient.id;
 
-
+      // SILENT-4 (Phase 3): a double-submit here double-POSTs a session note.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
           therapist_id: therapistId,
@@ -2678,6 +2796,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error saving note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2749,11 +2869,17 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
       document.body.appendChild(modal);
+      var _releaseTrap = trapFocus(modal);
+      addEscToClose(modal, () => { _releaseTrap(); modal.remove(); });
     }
 
     async function updateNote(noteId, e) {
       e.preventDefault();
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-submit here double-PATCHes a session note.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
           method: 'PATCH',
@@ -2778,12 +2904,20 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error updating note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
-    async function deleteNote(noteId) {
+    async function deleteNote(noteId, btn) {
       if (!confirm('Delete this session note? This cannot be undone.')) return;
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-click here double-DELETEs (harmless on
+      // the second call, but the button's own row is about to be removed
+      // from the DOM by renderNotes() below -- disable it for the interval
+      // between confirm() resolving and that re-render landing).
+      setButtonLoading(btn, true, 'Deleting...');
       try {
         await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
           method: 'DELETE',
@@ -2797,6 +2931,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error deleting note');
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2920,6 +3055,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
 
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-click here double-POSTs a session note.
+      const btn = document.getElementById('quickNoteSaveBtn');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
           therapist_id: therapistId,
@@ -2940,6 +3079,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error saving note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3140,7 +3281,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
       const cacheKey = currentClient.client_id || currentClient.id;
 
-
+      // SILENT-4 (Phase 3): a double-submit here double-POSTs a homework
+      // assignment.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Assigning...');
       try {
         await apiMutate('/rest/v1/homework_cards', 'POST', {
           therapist_id: therapistId,
@@ -3164,6 +3308,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error assigning homework');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3282,18 +3428,6 @@ if (clientsBtn) clientsBtn.style.display = '';
 
     function navigateCalendar(dir) {
       calendarOffset += dir;
-      const cacheKey = currentClient?.client_id || currentClient?.id;
-      if (cacheKey) renderCalendar(cacheKey);
-    }
-
-    function navigateStrip(dir) {
-      if (dir === 0) {
-        stripOffset = 0; // Home = reset to today
-      } else {
-        stripOffset += dir;
-      }
-      // Don't go into the future
-      if (stripOffset > 0) stripOffset = 0;
       const cacheKey = currentClient?.client_id || currentClient?.id;
       if (cacheKey) renderCalendar(cacheKey);
     }
@@ -3533,6 +3667,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       popup.className = 'cal-popup';
       popup.innerHTML = html;
       document.body.appendChild(popup);
+      var _releaseTrap = trapFocus(popup);
+      addEscToClose(popup, () => { _releaseTrap(); popup.remove(); });
 
       // Close on outside click
       setTimeout(() => {
@@ -3570,6 +3706,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     // =====================================================
@@ -3607,6 +3745,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     function getHomeworkMonths(homework) {
@@ -3700,6 +3840,7 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     function showInviteModal() {
       document.getElementById('inviteModal').classList.add('show');
+      _staticModalTrapReleases['inviteModal'] = trapFocus(document.getElementById('inviteModal'));
       document.getElementById('inviteResult').style.display = 'none';
       document.getElementById('inviteClientName').value = '';
       document.getElementById('generateInviteBtn').style.display = 'inline-flex';
@@ -3708,6 +3849,13 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function generateInvite() {
       const name = document.getElementById('inviteClientName').value.trim();
 
+      // SILENT-4 (Phase 3): the audit's named example -- a double-click here
+      // double-fires and mints two invite_code rows for one client. Disable
+      // while in-flight; the button is hidden on success below regardless
+      // (existing behavior), so this only matters for the window before
+      // that happens and for the failure path, where it must re-enable.
+      const btn = document.getElementById('generateInviteBtn');
+      setButtonLoading(btn, true, 'Generating...');
       try {
         const code = 'ALO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -3740,6 +3888,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error generating invite');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3763,11 +3913,16 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('settingJournalSharing').checked = currentClient.allow_journal_sharing ?? true;
 
       document.getElementById('editClientModal').classList.add('show');
+      _staticModalTrapReleases['editClientModal'] = trapFocus(document.getElementById('editClientModal'));
     }
 
     async function saveClientEdit() {
       if (!currentClient) return;
 
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes the client
+      // record, including safety_notes and emergency contact fields.
+      const btn = document.getElementById('saveClientEditBtn');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
           display_name: document.getElementById('editClientName').value,
@@ -3807,6 +3962,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error updating client');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3819,6 +3976,12 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function archiveClient() {
       if (!currentClient) return;
 
+      // SILENT-4 (Phase 3): a double-click here (between confirm() resolving
+      // and this PATCH landing) double-archives the same record. Harmless in
+      // that both PATCHes set the same status, but disabling matches the
+      // rest of this batch's treatment for clinical-record mutations.
+      const btn = document.getElementById('archiveClientBtn');
+      setButtonLoading(btn, true, 'Archiving...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
           status: 'archived'
@@ -3842,6 +4005,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3865,7 +4030,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                     <div style="font-weight:600;font-size:0.875rem;">${esc(c.display_name || 'Client')}</div>
                     <div style="font-size:0.75rem;color:var(--text-muted);">Archived ${c.updated_at ? new Date(c.updated_at).toLocaleDateString() : ''}</div>
                   </div>
-                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}')">Restore</button>
+                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}', this)">Restore</button>
                 </div>
               `).join('') : '<p class="text-muted-center">No archived clients</p>'}
             </div>
@@ -3879,7 +4044,11 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
     }
 
-    async function restoreClient(linkId) {
+    async function restoreClient(linkId, btn) {
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes the record.
+      // The whole overlay is removed on success below, so this only matters
+      // for the in-flight window and the failure path.
+      setButtonLoading(btn, true, 'Restoring...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
           status: 'active'
@@ -3899,11 +4068,13 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error restoring client');
+        setButtonLoading(btn, false);
       }
     }
 
     function showDefaultSettingsModal() {
       document.getElementById('defaultSettingsModal').classList.add('show');
+      _staticModalTrapReleases['defaultSettingsModal'] = trapFocus(document.getElementById('defaultSettingsModal'));
     }
 
     async function saveDefaultSettings() {
@@ -3914,6 +4085,236 @@ if (clientsBtn) clientsBtn.style.display = '';
       }));
       closeModal('defaultSettingsModal');
       toast('Default settings saved');
+    }
+
+    // =====================================================
+    // PHASE 2, ITEM 13a -- INSTALLABLE APP (Android)
+    // Captured, never auto-prompted -- only shown as a dismissible banner
+    // the therapist can act on or ignore.
+    // =====================================================
+    let _aloDeferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      _aloDeferredInstallPrompt = e;
+      if (localStorage.getItem('alo_install_dismissed') === '1') return;
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'flex';
+    });
+
+    async function _aloInstallPrompt() {
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'none';
+      if (!_aloDeferredInstallPrompt) return;
+      _aloDeferredInstallPrompt.prompt();
+      try {
+        await _aloDeferredInstallPrompt.userChoice;
+      } catch (err) {
+        console.warn('Install prompt outcome unavailable:', err);
+      }
+      _aloDeferredInstallPrompt = null;
+    }
+
+    function _aloDismissInstallBanner() {
+      localStorage.setItem('alo_install_dismissed', '1');
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    window.addEventListener('appinstalled', () => {
+      _aloDeferredInstallPrompt = null;
+      localStorage.setItem('alo_install_dismissed', '1');
+    });
+
+    // =====================================================
+    // PHASE 2, ITEM 9 -- THERAPIST TOUR (driver.js)
+    // Skippable at every step (default allowClose behavior: close button,
+    // Escape, overlay click). "Dismiss permanently" = writing
+    // onboarding_skipped_at once, which the auto-offer check below reads.
+    // Overlay only -- never blocks the dashboard underneath.
+    // =====================================================
+
+    function _aloClientActive() {
+      const cp = document.getElementById('clientPage');
+      return !!(cp && cp.classList.contains('active'));
+    }
+
+    // Fire-and-forget bookkeeping PATCH. Never blocks or fails the tour --
+    // a failed write here should not stop a therapist from finishing/skipping.
+    function _aloWriteOnboardingTimestamp(field) {
+      if (!therapistId) return;
+      apiMutate(`/rest/v1/therapists?id=eq.${therapistId}`, 'PATCH', {
+        [field]: new Date().toISOString()
+      }).catch(err => console.warn(`Onboarding timestamp write failed (${field}):`, err));
+    }
+
+    function _aloTourSteps(driverRef) {
+      // driverRef is a { current: driverObj } box so steps can call
+      // moveNext()/moveTo() on an instance that doesn't exist yet at
+      // array-build time.
+      return [
+        {
+          // Step 1: Dashboard home
+          popover: {
+            title: 'Welcome to your dashboard', /* COPY: Kano review */
+            description: 'This is your home page, the first thing you see each time you sign in. ' +
+              'It gives you a daily overview so you never have to go hunting for what changed.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 2: Needs Attention
+          element: '#attentionSection',
+          popover: {
+            title: 'Needs Attention', /* COPY: Kano review */
+            description: 'Crisis alerts and client messages land here first. ' +
+              'It exists so the highest-priority items never get buried under routine updates.', /* COPY: Kano review */
+            side: 'bottom',
+          }
+        },
+        {
+          // Step 3: Client list, test-client row
+          element: () => document.querySelector('#clientsList .client-item'),
+          onHighlightStarted: () => {
+            const sb = document.querySelector('.sidebar');
+            if (sb && !sb.classList.contains('open')) toggleSidebar();
+          },
+          popover: {
+            title: 'Your client list', /* COPY: Kano review */
+            description: 'Every client you work with is listed here, most urgent first. ' +
+              'Click through to a client to see everything relevant to their next session.', /* COPY: Kano review */
+            side: 'right',
+            onNextClick: () => {
+              const row = document.querySelector('#clientsList .client-item');
+              if (row) row.click();
+              driverRef.current.moveNext();
+            }
+          }
+        },
+        {
+          // Step 4: Client detail
+          element: () => _aloClientActive() ? document.getElementById('clientName') : undefined,
+          popover: {
+            title: 'Client detail', /* COPY: Kano review */
+            description: 'This page is everything about one client -- session prep, notes, homework, and safety info. ' +
+              'It replaces flipping between separate tools before a session.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 5: Session notes
+          element: () => _aloClientActive() ? document.getElementById('notesContainer') : undefined,
+          onHighlightStarted: () => {
+            const tabs = document.querySelectorAll('.tab');
+            if (tabs[1]) switchTab('tools', tabs[1]);
+          },
+          popover: {
+            title: 'Session notes', /* COPY: Kano review */
+            description: 'Add and review session notes here, in one place tied to the client. ' +
+              'Zero-Knowledge means these are your clinical notes only -- never client chat content.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 6: Homework
+          element: () => _aloClientActive() ? document.getElementById('homeworkForm') : undefined,
+          popover: {
+            title: 'Assign homework', /* COPY: Kano review */
+            description: 'Assign an exercise from a template or write your own, and Alo carries it into the chat. ' +
+              'It exists so between-session practice is easy to hand off.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 7: Shared journal (skips gracefully if the client has no shared entries)
+          element: () => {
+            if (!_aloClientActive()) return undefined;
+            const el = document.getElementById('sharedJournalCard');
+            return (el && el.style.display !== 'none') ? el : undefined;
+          },
+          popover: {
+            title: 'Shared journal entries', /* COPY: Kano review */
+            description: 'When a client chooses to share a journal entry from Alo, it appears here. ' +
+              'This only shows entries the client explicitly shared -- never their full chat history.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 8: Client Settings
+          element: () => _aloClientActive() ? document.querySelector('.client-header-settings-btn') : undefined,
+          popover: {
+            title: 'Client Settings', /* COPY: Kano review */
+            description: 'Update the client\'s name, next session date, and emergency contact from here. ' +
+              'It exists so that information stays current without leaving the client page.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 9: Crisis flow, seeded resolved alert (skips gracefully if none exists)
+          element: () => {
+            if (!_aloClientActive()) return undefined;
+            const card = document.getElementById('crisisAlertsPrepCard');
+            if (!card || card.style.display === 'none') return undefined;
+            return card.querySelector('details') || undefined;
+          },
+          onHighlightStarted: () => {
+            const tabs = document.querySelectorAll('.tab');
+            if (tabs[0]) switchTab('prep', tabs[0]);
+          },
+          popover: {
+            title: 'Crisis alerts, resolved', /* COPY: Kano review */
+            description: 'Every crisis alert -- open or resolved -- stays visible here with what action was taken. ' +
+              'It exists so the safety record for a client is never just in your memory.', /* COPY: Kano review */
+          }
+        },
+        {
+          // Step 10: Emergency contact panel
+          element: () => _aloClientActive() ? document.querySelector('#editClientModal .emergency-title') : undefined,
+          onHighlightStarted: () => showEditClientModal(),
+          popover: {
+            title: 'Emergency contact', /* COPY: Kano review */
+            description: 'Keep a client phone number and emergency contact on file here. ' +
+              'It exists so that information is one click away during an active crisis alert.', /* COPY: Kano review */
+            onNextClick: () => {
+              _aloTourFinished = true;
+              closeModal('editClientModal');
+              driverRef.current.moveNext();
+            }
+          }
+        },
+      ];
+    }
+
+    let _aloTourFinished = false;
+
+    function startAloTour() {
+      if (typeof window.driver === 'undefined') {
+        console.warn('Tour library failed to load; skipping tour.');
+        return;
+      }
+      _aloTourFinished = false;
+      const driverRef = { current: null };
+      const driverObj = window.driver.js.driver({
+        showProgress: true,
+        allowClose: true,
+        skipMissingElement: true,
+        overlayClickBehavior: 'close',
+        steps: _aloTourSteps(driverRef),
+        onDestroyed: () => {
+          _aloWriteOnboardingTimestamp(_aloTourFinished ? 'onboarding_completed_at' : 'onboarding_skipped_at');
+        }
+      });
+      driverRef.current = driverObj;
+      driverObj.drive();
+    }
+    window.startAloTour = startAloTour;
+
+    // Auto-offer once: only when neither timestamp has ever been set.
+    async function _aloMaybeAutoOfferTour() {
+      if (!therapistId) return;
+      try {
+        const rows = await api(`/rest/v1/therapists?id=eq.${therapistId}&select=onboarding_completed_at,onboarding_skipped_at`);
+        const row = rows?.[0];
+        if (row && row.onboarding_completed_at == null && row.onboarding_skipped_at == null) {
+          startAloTour();
+        }
+      } catch (err) {
+        console.warn('Tour auto-offer check failed:', err);
+      }
     }
   </script>
 </body>
