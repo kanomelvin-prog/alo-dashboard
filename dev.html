@@ -921,6 +921,8 @@ function showForgotPassword() {
     </div>
   `;
   document.body.appendChild(overlay);
+  var _releaseTrap = trapFocus(overlay);
+  addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
   document.getElementById('forgotEmail')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') submitForgotPassword();
   });
@@ -1514,11 +1516,78 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     });
 
+    // COSMETIC-1/-2 (Phase 3, backlog N3): shared focus trap, mirroring the
+    // helper of the same name and behavior added to alo-client-chat-full_v1
+    // this same session -- one implementation per app, per the task, since
+    // the two files share no runtime. Tabbing off either end of the visible
+    // modal/drawer wraps back inside it instead of reaching the page behind.
+    var FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea:not([disabled]), ' +
+      'input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    function trapFocus(container) {
+      function getFocusable() {
+        return Array.prototype.filter.call(
+          container.querySelectorAll(FOCUSABLE_SELECTOR),
+          function(el) { return el.offsetParent !== null; }
+        );
+      }
+      function handleKeydown(e) {
+        if (e.key !== 'Tab') return;
+        var focusables = getFocusable();
+        if (focusables.length === 0) return;
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        var active = document.activeElement;
+        if (e.shiftKey) {
+          if (active === first || !container.contains(active)) { e.preventDefault(); last.focus(); }
+        } else {
+          if (active === last || !container.contains(active)) { e.preventDefault(); first.focus(); }
+        }
+      }
+      container.addEventListener('keydown', handleKeydown);
+      return function releaseFocusTrap() {
+        container.removeEventListener('keydown', handleKeydown);
+      };
+    }
+
+    // Per-modal-id release functions for the three static (reused, not
+    // recreated) modals below, so closeModal() -- their one shared close
+    // path for X, Cancel, backdrop AND Escape alike -- can release the trap
+    // on every exit, not just Escape.
+    var _staticModalTrapReleases = {};
+
     function closeModal(id, event) {
       if (event && event.target !== event.currentTarget) return;
       document.getElementById(id).classList.remove('show');
       setFormDirty(false);
+      if (_staticModalTrapReleases[id]) {
+        _staticModalTrapReleases[id]();
+        _staticModalTrapReleases[id] = null;
+      }
     }
+
+    // COSMETIC-1/-2 (Phase 3, backlog N3): shared Escape-to-close helpers.
+    // See the file header comment above closeModal() for which of the two
+    // to use where.
+    function addEscToClose(el, closeFn) {
+      document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape' && document.body.contains(el)) {
+          closeFn();
+          document.removeEventListener('keydown', escHandler);
+        }
+      });
+    }
+
+    function wireEscToStaticModal(modalId) {
+      document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        var el = document.getElementById(modalId);
+        if (el && el.classList.contains('show')) closeModal(modalId);
+      });
+    }
+    wireEscToStaticModal('inviteModal');
+    wireEscToStaticModal('editClientModal');
+    wireEscToStaticModal('defaultSettingsModal');
 
     // =====================================================
     // DASHBOARD LOADING
@@ -1983,6 +2052,8 @@ function setButtonLoading(btn, loading, loadingText) {
       `;
       overlay.onclick = (evt) => { if (evt.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     async function submitResolveCrisis(crisisEventId) {
@@ -2596,6 +2667,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     function showNoteForm() {
@@ -2658,6 +2731,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
       document.body.appendChild(modal);
+      var _releaseTrap = trapFocus(modal);
+      addEscToClose(modal, () => { _releaseTrap(); modal.remove(); });
     }
 
         async function saveNote(e) {
@@ -2769,6 +2844,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
       document.body.appendChild(modal);
+      var _releaseTrap = trapFocus(modal);
+      addEscToClose(modal, () => { _releaseTrap(); modal.remove(); });
     }
 
     async function updateNote(noteId, e) {
@@ -3565,6 +3642,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       popup.className = 'cal-popup';
       popup.innerHTML = html;
       document.body.appendChild(popup);
+      var _releaseTrap = trapFocus(popup);
+      addEscToClose(popup, () => { _releaseTrap(); popup.remove(); });
 
       // Close on outside click
       setTimeout(() => {
@@ -3602,6 +3681,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     // =====================================================
@@ -3639,6 +3720,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       `;
       overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
       document.body.appendChild(overlay);
+      var _releaseTrap = trapFocus(overlay);
+      addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
     }
 
     function getHomeworkMonths(homework) {
@@ -3732,6 +3815,7 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     function showInviteModal() {
       document.getElementById('inviteModal').classList.add('show');
+      _staticModalTrapReleases['inviteModal'] = trapFocus(document.getElementById('inviteModal'));
       document.getElementById('inviteResult').style.display = 'none';
       document.getElementById('inviteClientName').value = '';
       document.getElementById('generateInviteBtn').style.display = 'inline-flex';
@@ -3804,6 +3888,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       document.getElementById('settingJournalSharing').checked = currentClient.allow_journal_sharing ?? true;
 
       document.getElementById('editClientModal').classList.add('show');
+      _staticModalTrapReleases['editClientModal'] = trapFocus(document.getElementById('editClientModal'));
     }
 
     async function saveClientEdit() {
@@ -3964,6 +4049,7 @@ if (clientsBtn) clientsBtn.style.display = '';
 
     function showDefaultSettingsModal() {
       document.getElementById('defaultSettingsModal').classList.add('show');
+      _staticModalTrapReleases['defaultSettingsModal'] = trapFocus(document.getElementById('defaultSettingsModal'));
     }
 
     async function saveDefaultSettings() {
