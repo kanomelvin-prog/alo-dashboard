@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=35">
+  <link rel="stylesheet" href="dev.css?v=36">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -1976,7 +1976,11 @@ function setButtonLoading(btn, loading, loadingText) {
       demoClients.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
 
       const renderItem = (c) => {
-        const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        // Phase 2B item 5: the therapist's own is_demo client is always
+        // labeled "Your Test Client" in the UI, regardless of the raw
+        // display_name in the seed data.
+        const rowLabel = c.is_demo ? 'Your Test Client' : (c.display_name || 'Client');
+        const initials = rowLabel.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         const isPending = !c.client_id;
         const isActive = currentClient && ((currentClient.client_id && currentClient.client_id === c.client_id) || (!currentClient.client_id && currentClient.id === c.id));
 
@@ -2019,12 +2023,13 @@ function setButtonLoading(btn, loading, loadingText) {
             </div>
             <div class="client-info">
               <div class="client-name-row">
-                <span class="client-name">${esc(c.display_name || 'Client')}</span>
+                <span class="client-name">${esc(rowLabel)}</span>
                 <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
               </div>
               <div class="client-meta">
                 ${metaLine}
               </div>
+              ${c.is_demo ? '<div class="test-client-line">This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.</div>' : ''}
             </div>
           </div>
         `;
@@ -2207,10 +2212,11 @@ function setButtonLoading(btn, loading, loadingText) {
 if (clientsBtn) clientsBtn.style.display = 'none';
       document.getElementById('clientPage').classList.add('active');
 
-      document.getElementById('clientName').textContent = client.display_name || 'Client';
+      const clientRowLabel = client.is_demo ? 'Your Test Client' : (client.display_name || 'Client');
+      document.getElementById('clientName').textContent = clientRowLabel;
 
       // Avatar initials
-      const initials = (client.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const initials = clientRowLabel.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
       document.getElementById('clientAvatar').textContent = initials;
 
       const isPending = !client.client_id;
@@ -2227,15 +2233,15 @@ if (clientsBtn) clientsBtn.style.display = 'none';
         badgeEl.style.display = 'none';
       }
 
-      // Demo banner — makes sample/test status impossible to miss
+      // Phase 2B item 5: persistent test-client explanatory line (not a
+      // pill) — same copy as the list row, verbatim, regardless of
+      // pending/signed-up state.
       document.getElementById('demoClientBanner')?.remove();
       if (client.is_demo) {
         const demoBanner = document.createElement('div');
         demoBanner.id = 'demoClientBanner';
-        demoBanner.style.cssText = 'margin:8px 20px 0;padding:8px 12px;background:rgba(58,124,134,0.08);border:1px solid rgba(58,124,134,0.25);border-radius:8px;font-size:0.8125rem;color:#3A7C86;';
-        demoBanner.textContent = client.client_id
-          ? 'Demo client — sample data for exploring the dashboard. Not a real person.'
-          : 'Your testing account — redeem the invite code at alowen.ai to chat with Alo as a client yourself.';
+        demoBanner.className = 'test-client-line test-client-line-detail';
+        demoBanner.textContent = 'This is your own test account. Open it as a client to see exactly what yours will see. Nothing here is a real person.';
         const stickyHeaderEl = document.querySelector('.client-sticky-header');
         if (stickyHeaderEl) stickyHeaderEl.after(demoBanner);
       }

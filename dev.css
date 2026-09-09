@@ -292,6 +292,24 @@ button, input, select, textarea { font: inherit; }
 
 .logout-btn:hover { background: var(--bg); }
 
+/* === TEST CLIENT LINE (Phase 2B item 5) === */
+.test-client-line {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.test-client-line-detail {
+  margin: 8px 20px 0;
+  padding: 8px 12px;
+  background: rgba(58, 124, 134, 0.08);
+  border: 1px solid rgba(58, 124, 134, 0.25);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--sage);
+}
+
 /* === HELP MENU (Phase 2B item 4) === */
 .help-menu-wrap {
   position: relative;
