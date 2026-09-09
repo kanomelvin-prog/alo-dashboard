@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+           <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.botpress.cloud https://cdn.jsdelivr.net https://files.bpcontent.cloud;
+    style-src 'self' 'unsafe-inline' https://cdn.botpress.cloud;
+    img-src 'self' data: blob: https://files.bpcontent.cloud https://*.supabase.co;
+    connect-src 'self' https://lelsdezstbnzyxvsvbyx.supabase.co https://*.botpress.cloud wss://*.botpress.cloud https://files.bpcontent.cloud;
+    frame-src 'self' https://cdn.botpress.cloud;
+    font-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+  ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Alowen Clinical Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=32">
+  <link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -49,7 +60,70 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+          <input type="password" id="signupPassword" placeholder="Min. 12 characters">
+          <span class="form-hint">At least 12 characters. Avoid common passwords.</span>
+        </div>
+        <div class="form-group">
+          <label>License state</label>
+          <select id="signupLicenseState">
+            <option value="">Select a state</option>
+            <option value="AL">Alabama</option>
+            <option value="AK">Alaska</option>
+            <option value="AZ">Arizona</option>
+            <option value="AR">Arkansas</option>
+            <option value="CA">California</option>
+            <option value="CO">Colorado</option>
+            <option value="CT">Connecticut</option>
+            <option value="DE">Delaware</option>
+            <option value="DC">District of Columbia</option>
+            <option value="FL">Florida</option>
+            <option value="GA">Georgia</option>
+            <option value="HI">Hawaii</option>
+            <option value="ID">Idaho</option>
+            <option value="IL">Illinois</option>
+            <option value="IN">Indiana</option>
+            <option value="IA">Iowa</option>
+            <option value="KS">Kansas</option>
+            <option value="KY">Kentucky</option>
+            <option value="LA">Louisiana</option>
+            <option value="ME">Maine</option>
+            <option value="MD">Maryland</option>
+            <option value="MA">Massachusetts</option>
+            <option value="MI">Michigan</option>
+            <option value="MN">Minnesota</option>
+            <option value="MS">Mississippi</option>
+            <option value="MO">Missouri</option>
+            <option value="MT">Montana</option>
+            <option value="NE">Nebraska</option>
+            <option value="NV">Nevada</option>
+            <option value="NH">New Hampshire</option>
+            <option value="NJ">New Jersey</option>
+            <option value="NM">New Mexico</option>
+            <option value="NY">New York</option>
+            <option value="NC">North Carolina</option>
+            <option value="ND">North Dakota</option>
+            <option value="OH">Ohio</option>
+            <option value="OK">Oklahoma</option>
+            <option value="OR">Oregon</option>
+            <option value="PA">Pennsylvania</option>
+            <option value="RI">Rhode Island</option>
+            <option value="SC">South Carolina</option>
+            <option value="SD">South Dakota</option>
+            <option value="TN">Tennessee</option>
+            <option value="TX">Texas</option>
+            <option value="UT">Utah</option>
+            <option value="VT">Vermont</option>
+            <option value="VA">Virginia</option>
+            <option value="WA">Washington</option>
+            <option value="WV">West Virginia</option>
+            <option value="WI">Wisconsin</option>
+            <option value="WY">Wyoming</option>
+            <option value="AS">American Samoa</option>
+            <option value="GU">Guam</option>
+            <option value="MP">Northern Mariana Islands</option>
+            <option value="PR">Puerto Rico</option>
+            <option value="VI">U.S. Virgin Islands</option>
+          </select>
         </div>
         <button class="btn btn-primary btn-full" id="signupBtn" onclick="handleSignup()">Create Account</button>
         <p class="login-switch">
@@ -311,12 +385,15 @@
             <!-- LEFT: Session Notes (primary) -->
             <div class="tools-row-main">
               <div class="card">
-                <div class="card-header">
+                                <div class="card-header">
                   <span class="card-title">Session Notes</span>
-                  <button class="btn btn-primary add-note-btn" onclick="showNoteForm()">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    Add Note
-                  </button>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="btn btn-sm btn-secondary" id="viewAllNotesDrawerBtn" style="display:none;" onclick="openNotesDrawer()">View All</button>
+                    <button class="btn btn-primary add-note-btn" onclick="showNoteForm()">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                      Add Note
+                    </button>
+                  </div>
                 </div>
                 <div class="card-body" id="notesContainer">
                   <p class="text-muted-center">No session notes yet.</p>
@@ -880,7 +957,7 @@ async function submitForgotPassword() {
 // === CLIPBOARD UTILITY (works on HTTP and HTTPS) ===
 function copyToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
-    return copyToClipboard(text);
+    return navigator.clipboard.writeText(text);
   }
   // Fallback for HTTP
   const ta = document.createElement('textarea');
@@ -924,6 +1001,12 @@ function setButtonLoading(btn, loading, loadingText) {
     let clientSessions = {};
     let clientCrisis = {};
 
+    // A7/D2 — Generation counter for showClient(). Each call claims a token.
+    // After any await, the call checks whether a newer showClient() (or
+    // showHomePage()) has incremented the counter. If so, the older call
+    // abandons its render so stale data can't bleed into the wrong client.
+    let showClientGeneration = 0;
+
     // =====================================================
     // SUPABASE API HELPER
     // =====================================================
@@ -938,9 +1021,26 @@ function setButtonLoading(btn, loading, loadingText) {
       };
       const res = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers });
 
-      // Retry once on 401 (token expired after ~60 min)
+            // Retry once on 401 (token expired after ~60 min)
       if (res.status === 401 && session?.refresh_token) {
-        const refreshed = await refreshSession(session.refresh_token);
+        // A7/D6 — retry up to 2 more times with backoff if refresh fails
+        // due to a network error specifically. A real auth rejection
+        // (refreshSession returning null) stops retrying immediately.
+        let refreshed = null;
+        try {
+          refreshed = await refreshSession(session.refresh_token);
+        } catch (refreshErr) {
+          if (refreshErr.isNetworkError) {
+            for (let attempt = 1; attempt <= 2 && !refreshed; attempt++) {
+              await new Promise(r => setTimeout(r, attempt * 1500));
+              try {
+                refreshed = await refreshSession(session.refresh_token);
+              } catch (retryErr) {
+                if (!retryErr.isNetworkError) break;
+              }
+            }
+          }
+        }
         if (refreshed) {
           session = refreshed;
           therapistId = refreshed.user.id;
@@ -1022,6 +1122,12 @@ function setButtonLoading(btn, loading, loadingText) {
               return;
             }
 
+                        const locked = await isVerificationLocked(therapistId);
+            if (locked) {
+              showPendingVerification();
+              return;
+            }
+
             showApp();
             return;
           }
@@ -1048,7 +1154,7 @@ function setButtonLoading(btn, loading, loadingText) {
       if (e.key === 'Enter') handleSignup();
     });
 
-    async function refreshSession(refreshToken) {
+        async function refreshSession(refreshToken) {
       try {
         const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
           method: 'POST',
@@ -1058,9 +1164,18 @@ function setButtonLoading(btn, loading, loadingText) {
           },
           body: JSON.stringify({ refresh_token: refreshToken })
         });
+        // A7/D6 — !res.ok means the server actually responded and rejected
+        // the token (a real auth failure). null here signals "don't retry."
         if (!res.ok) return null;
         return await res.json();
-      } catch { return null; }
+      } catch (err) {
+        // A7/D6 — the fetch itself failed (no response at all) — this is a
+        // connectivity blip, not an auth rejection. Signal it distinctly
+        // so the caller knows retrying is worth it.
+        const networkErr = new Error('Network error during token refresh');
+        networkErr.isNetworkError = true;
+        throw networkErr;
+      }
     }
 
     function toggleAuthForm(mode) {
@@ -1077,104 +1192,157 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     }
 
+    // Maps a non-201 therapist-signup response to a message for the form.
+    // The function's error bodies are documented in R1_REPORT.md section 2.
+    // Never throws: a body that is missing or not JSON falls through to the
+    // status-code message.
+    async function signupErrorMessage(res) {
+      let body = null;
+      try {
+        body = await res.json();
+      } catch (_) {
+        // Empty or non-JSON body. Fall through to the status-based messages.
+      }
+
+      // 400 -- the function's validator names the field and supplies a message
+      // that never contains the submitted value. Safe to show verbatim.
+      if (body && body.error === 'validation' && body.message) return body.message;
+
+      if ((body && body.error === 'exists') || res.status === 409) {
+        return 'An account with that email already exists. Sign in instead.';
+      }
+      if (res.status === 403) {
+        return 'This page is not authorised to create accounts. Open the dashboard at its normal address and try again.';
+      }
+      if (res.status === 429) {
+        return 'Too many attempts. Please wait a few minutes and try again.';
+      }
+      // 500 -- the request id is safe to surface and is what support needs.
+      if (body && body.error === 'internal' && body.request_id) {
+        return 'Account creation failed. Please try again, or contact support with reference ' + body.request_id + '.';
+      }
+      return 'Account creation failed (error ' + res.status + '). Please try again.';
+    }
+
+    // Password grant plus the post-login checks. Shared by handleLogin and
+    // handleSignup so there is exactly one implementation of "you are in".
+    // Throws on any failure; the caller renders the message and clears its own
+    // button state.
+    async function completeSignIn(email, password) {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!res.ok) {
+        let body = null;
+        try { body = await res.json(); } catch (_) { /* non-JSON error body */ }
+        throw new Error((body && (body.error_description || body.msg)) || 'Login failed');
+      }
+
+      session = await res.json();
+      therapistId = session.user.id;
+      localStorage.setItem('alo_session', JSON.stringify(session));
+
+      const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
+      if (!profile?.[0] || profile[0].role !== 'therapist') {
+        throw new Error('This account is not a therapist account');
+      }
+
+      const locked = await isVerificationLocked(therapistId);
+      if (locked) {
+        showPendingVerification();
+        return;
+      }
+
+      showApp();
+    }
+
+    // Therapist signup. One server-side writer: the therapist-signup Edge
+    // Function creates both auth users and seeds every row in one transaction.
+    //
+    // This replaced a POST to /auth/v1/signup followed by two client-side
+    // inserts into profiles and therapists. Those inserts could not work:
+    // the profiles RLS INSERT policy pins role to 'individual', the therapists
+    // insert set `id` instead of `auth_user_id`, and neither checked its
+    // response -- fetch does not reject on 4xx, so both failed silently and
+    // the UI called showApp() anyway. Do not reintroduce them.
+    //
+    // Every fetch below has its status checked. There are no fire-and-forget
+    // calls left in this path.
     async function handleSignup() {
       const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
+      const licenseState = document.getElementById('signupLicenseState').value;
       const errorEl = document.getElementById('loginError');
       const infoEl = document.getElementById('loginInfo');
       errorEl.style.display = 'none';
       infoEl.style.display = 'none';
 
-      if (!name || !email || !password) {
-        errorEl.textContent = 'Please fill in all fields';
+      const showError = (msg) => {
+        errorEl.textContent = msg;
         errorEl.style.display = 'block';
+      };
+
+      // These mirror the Edge Function's validator so the ordinary mistakes
+      // cost no round trip. The function re-validates everything server-side --
+      // this is a convenience, never the gate.
+      if (!name || !email || !password || !licenseState) {
+        showError('Please fill in all fields');
         return;
       }
-      if (password.length < 6) {
-        errorEl.textContent = 'Password must be at least 6 characters';
-        errorEl.style.display = 'block';
+      if (name.length < 2 || name.length > 80) {
+        showError('Full name must be between 2 and 80 characters');
+        return;
+      }
+      if (password.length < 12) {
+        showError('Password must be at least 12 characters');
+        return;
+      }
+      if (password.length > 72) {
+        showError('Password must be at most 72 characters');
         return;
       }
 
       const btn = document.getElementById('signupBtn');
       setButtonLoading(btn, true, 'Creating account...');
       try {
-        const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/therapist-signup`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            email,
-            password,
-            data: { display_name: name, role: 'therapist' }
+            display_name: name,
+            email: email,
+            password: password,
+            license_state: licenseState
           })
         });
 
-        if (!signupRes.ok) {
-          const body = await signupRes.json();
-          throw new Error(body.error_description || body.msg || 'Signup failed');
+        // 201 is the ONLY success. Anything else is surfaced to the user and
+        // showApp() is never reached.
+        if (res.status !== 201) {
+          throw new Error(await signupErrorMessage(res));
         }
 
-        const signupData = await signupRes.json();
-
-        if (!signupData.access_token) {
-          infoEl.textContent = 'Account created! Check your email for a confirmation link, then sign in.';
-          infoEl.style.display = 'block';
-          toggleAuthForm('login');
-          return;
-        }
-
-        session = signupData;
-        therapistId = session.user.id;
-        localStorage.setItem('alo_session', JSON.stringify(session));
-
-        // Profile and therapist inserts — may fail if auth trigger already created them
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({
-              id: therapistId,
-              role: 'therapist',
-              display_name: name,
-              email: email
-            })
-          });
-        } catch (profileErr) {
-          console.log('Profile insert skipped (may already exist):', profileErr.message);
-        }
-
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/therapists`, {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({
-              id: therapistId,
-              license_type: 'pending',
-              license_verified: false
-            })
-          });
-        } catch (therapistErr) {
-          console.log('Therapist insert skipped (may already exist):', therapistErr.message);
-        }
-
-        showApp();
+        // The function created the account with email_confirm already set, so
+        // there is no confirmation step -- sign in with what was just typed.
+        await completeSignIn(email, password);
       } catch (err) {
-        errorEl.textContent = err.message;
-        errorEl.style.display = 'block';
+        const msg = (err && err.message) ? err.message : '';
+        if (err instanceof TypeError || msg === 'Failed to fetch' || msg === 'Load failed') {
+          showError('Could not reach the server. Check your connection and try again.');
+        } else {
+          showError(msg || 'Could not create the account. Please try again.');
+        }
       } finally {
         setButtonLoading(btn, false);
       }
@@ -1197,30 +1365,10 @@ function setButtonLoading(btn, loading, loadingText) {
 
       setButtonLoading(btn, true, 'Signing in...');
       try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        if (!res.ok) {
-          const body = await res.json();
-          throw new Error(body.error_description || body.msg || 'Login failed');
-        }
-
-        session = await res.json();
-        therapistId = session.user.id;
-        localStorage.setItem('alo_session', JSON.stringify(session));
-
-        const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
-        if (!profile?.[0] || profile[0].role !== 'therapist') {
-          throw new Error('This account is not a therapist account');
-        }
-
-        showApp();
+        // Same implementation handleSignup uses after a 201. Moved into
+        // completeSignIn during the R1 rewire; the steps and their order are
+        // unchanged from what was inline here.
+        await completeSignIn(email, password);
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
@@ -1236,7 +1384,41 @@ function setButtonLoading(btn, loading, loadingText) {
       showLogin();
     }
 
+        async function isVerificationLocked(id) {
+      try {
+        const rows = await api(`/rest/v1/therapists?id=eq.${id}&select=license_verified,verify_deadline`);
+        const row = rows?.[0];
+        if (!row) return false;
+        if (row.license_verified) return false;
+        if (!row.verify_deadline) return false;
+        return new Date(row.verify_deadline).getTime() < Date.now();
+      } catch (e) {
+        console.log('Verification check failed, defaulting to unlocked:', e.message);
+        return false;
+      }
+    }
+
+    function showPendingVerification() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'none';
+      let overlay = document.getElementById('pendingVerificationPage');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'pendingVerificationPage';
+        overlay.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:24px;text-align:center;font-family:inherit;';
+        overlay.innerHTML = `
+          <h2 style="margin-bottom:12px;">Account Pending Verification</h2>
+          <p style="max-width:420px;color:#555;line-height:1.5;">Your account is being reviewed before dashboard access opens up. This usually takes less than 10 days — reach out to <a href="mailto:kano@alowen.ai">kano@alowen.ai</a> if you have questions.</p>
+          <button onclick="handleLogout()" style="margin-top:20px;padding:10px 20px;border-radius:8px;border:none;background:#111;color:#fff;cursor:pointer;">Log Out</button>
+        `;
+        document.body.appendChild(overlay);
+      }
+      overlay.style.display = 'flex';
+    }
+
     function showLogin() {
+      const overlay = document.getElementById('pendingVerificationPage');
+      if (overlay) overlay.style.display = 'none';
       document.getElementById('loginPage').style.display = 'flex';
       document.getElementById('appContainer').style.display = 'none';
     }
@@ -1269,11 +1451,18 @@ function setButtonLoading(btn, loading, loadingText) {
     // =====================================================
     // UTILITY FUNCTIONS
     // =====================================================
-    function esc(str) {
+        function esc(str) {
       if (!str) return '';
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
+    }
+
+    // A7/D8 — safe for embedding inside a single-quoted onclick attribute.
+    // IDs are UUIDs today so this is precautionary, not fixing an active
+    // exploit — but the pattern itself is the risk the audit flagged.
+    function escJsAttr(str) {
+      return esc(str).replace(/'/g, '&#39;');
     }
 
     function timeAgo(date) {
@@ -1604,9 +1793,13 @@ function setButtonLoading(btn, loading, loadingText) {
       }).join('');
     }
 
-    function renderClientsList() {
+        function renderClientsList() {
       const statusOrder = { crisis: 0, 'needs-attention': 1, stable: 2, dormant: 3 };
-      allClients.sort((a, b) => {
+
+      const demoClients = allClients.filter(c => c.is_demo);
+      const regularClients = allClients.filter(c => !c.is_demo);
+
+      regularClients.sort((a, b) => {
         const isPendingA = !a.client_id;
         const isPendingB = !b.client_id;
         const sa = statusOrder[isPendingA ? 'dormant' : a.status] ?? 4;
@@ -1616,14 +1809,19 @@ function setButtonLoading(btn, loading, loadingText) {
         return (a.display_name || '').localeCompare(b.display_name || '');
       });
 
-      const html = allClients.map(c => {
+      demoClients.sort((a, b) => (a.display_name || '').localeCompare(b.display_name || ''));
+
+      const renderItem = (c) => {
         const initials = (c.display_name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         const isPending = !c.client_id;
         const isActive = currentClient && ((currentClient.client_id && currentClient.client_id === c.client_id) || (!currentClient.client_id && currentClient.id === c.id));
 
         let weatherClass = '';
         let weatherLabel = '';
-        if (isPending) {
+        if (c.is_demo) {
+          weatherClass = 'weather-dormant';
+          weatherLabel = isPending ? 'TEST' : 'DEMO';
+        } else if (isPending) {
           weatherClass = 'weather-dormant';
           weatherLabel = 'PENDING';
         } else if (c.status === 'crisis') {
@@ -1640,6 +1838,15 @@ function setButtonLoading(btn, loading, loadingText) {
           weatherLabel = 'STABLE';
         }
 
+        let metaLine;
+        if (c.is_demo && isPending) {
+          metaLine = `<span class="pending-label">Code: ${esc(c.invite_code || '')}</span><button onclick="event.stopPropagation(); copyToClipboard('${escJsAttr(c.invite_code || '')}').then(() => toast('Test account code copied'))" style="margin-left:6px;font-size:0.6875rem;padding:1px 8px;border-radius:999px;border:1px solid rgba(58,124,134,0.4);background:transparent;color:#3A7C86;cursor:pointer;">Copy</button>`;
+        } else if (isPending) {
+          metaLine = '<span class="pending-label">Pending signup</span>';
+        } else {
+          metaLine = timeAgo(new Date(c.lastActivity || c.created_at));
+        }
+
         return `
           <div class="client-item ${isActive ? 'active' : ''} status-${isPending ? 'dormant' : c.status}" onclick="showClient('${c.client_id || c.id}')" data-name="${esc(c.display_name || 'Client').toLowerCase()}">
             <div class="client-avatar">
@@ -1652,12 +1859,22 @@ function setButtonLoading(btn, loading, loadingText) {
                 <span class="weather-pill ${weatherClass}">${weatherLabel}</span>
               </div>
               <div class="client-meta">
-                ${isPending ? '<span class="pending-label">Pending signup</span>' : timeAgo(new Date(c.lastActivity || c.created_at))}
+                ${metaLine}
               </div>
             </div>
           </div>
         `;
-      }).join('');
+      };
+
+      let html = '';
+      if (demoClients.length) {
+        html += '<div style="padding:8px 16px 4px;font-size:0.6875rem;font-weight:700;letter-spacing:0.06em;color:var(--text-muted);">TESTING</div>';
+        html += demoClients.map(renderItem).join('');
+        if (regularClients.length) {
+          html += '<div style="border-top:1px solid var(--border);margin:8px 0 4px;"></div>';
+        }
+      }
+      html += regularClients.map(renderItem).join('');
 
       document.getElementById('clientsList').innerHTML = html || '<div class="section-empty">No clients yet</div>';
       document.getElementById('clientsList2').innerHTML = html;
@@ -1675,7 +1892,11 @@ function setButtonLoading(btn, loading, loadingText) {
           prefer: 'return=minimal'
         });
       } catch (err) {
+        // A7/D5+D12 — previously silent. UI/server mismatch left unread
+        // badges stale with no user signal. Surface failure via toast so
+        // the therapist knows the read-state update didn't land.
         console.error('Mark read failed:', err);
+        toast('Could not update message read status. Try reopening the client.');
       }
     }
 
@@ -1793,6 +2014,10 @@ function setButtonLoading(btn, loading, loadingText) {
       const client = allClients.find(c => c.client_id === clientIdOrLinkId || c.id === clientIdOrLinkId);
       if (!client) return;
 
+      // A7/D2 — claim a generation token before any synchronous state
+      // mutation. We re-check it after every await below.
+      const myGeneration = ++showClientGeneration;
+
       const sidebar = document.querySelector('.sidebar');
       if (sidebar && sidebar.classList.contains('open')) {
         toggleSidebar();
@@ -1817,13 +2042,29 @@ if (clientsBtn) clientsBtn.style.display = 'none';
 
       const isPending = !client.client_id;
 
-      // Badge (next to name)
+            // Badge (next to name)
       const badgeEl = document.getElementById('clientBadge');
       if (isPending) {
         badgeEl.style.display = 'inline-block';
         badgeEl.innerHTML = '<span style="background:#fff3cd;color:#856404;border-radius:999px;padding:2px 8px;font-size:0.6875rem;font-weight:600;">Pending</span>';
+      } else if (client.is_demo) {
+        badgeEl.style.display = 'inline-block';
+        badgeEl.innerHTML = '<span style="background:rgba(58,124,134,0.1);color:#3A7C86;border-radius:999px;padding:2px 8px;font-size:0.6875rem;font-weight:600;">Demo</span>';
       } else {
         badgeEl.style.display = 'none';
+      }
+
+      // Demo banner — makes sample/test status impossible to miss
+      document.getElementById('demoClientBanner')?.remove();
+      if (client.is_demo) {
+        const demoBanner = document.createElement('div');
+        demoBanner.id = 'demoClientBanner';
+        demoBanner.style.cssText = 'margin:8px 20px 0;padding:8px 12px;background:rgba(58,124,134,0.08);border:1px solid rgba(58,124,134,0.25);border-radius:8px;font-size:0.8125rem;color:#3A7C86;';
+        demoBanner.textContent = client.client_id
+          ? 'Demo client — sample data for exploring the dashboard. Not a real person.'
+          : 'Your testing account — redeem the invite code at alowen.ai to chat with Alo as a client yourself.';
+        const stickyHeaderEl = document.querySelector('.client-sticky-header');
+        if (stickyHeaderEl) stickyHeaderEl.after(demoBanner);
       }
 
       // Meta line (below name)
@@ -1861,10 +2102,17 @@ if (clientsBtn) clientsBtn.style.display = 'none';
       try {
         await loadClientData(cacheKey);
       } catch (err) {
+        // A7/D2 — if a newer showClient() has superseded us, stay quiet.
+        // The user has already moved on and the toast would be confusing.
+        if (myGeneration !== showClientGeneration) return;
         console.error('Error loading client data:', err);
         toast('Error loading client data. Try again.');
         return;
       }
+
+      // A7/D2 — another showClient() (or showHomePage()) ran while we
+      // were awaiting. Abandon render entirely; the newer call owns the UI.
+      if (myGeneration !== showClientGeneration) return;
 
       renderSessionPrep(cacheKey);
       renderNotes(cacheKey);
@@ -1889,6 +2137,9 @@ if (clientsBtn) clientsBtn.style.display = 'none';
     }
 
     function showHomePage() {
+      // A7/D2 — invalidate any in-flight showClient() loads so a
+      // late-resolving fetch can't render client data into the home view.
+      ++showClientGeneration;
       document.getElementById('homePage').style.display = 'grid';
       const clientsBtn = document.querySelector('.header-clients-btn');
 if (clientsBtn) clientsBtn.style.display = '';
@@ -1959,10 +2210,15 @@ if (clientsBtn) clientsBtn.style.display = '';
       el.classList.toggle('expanded');
     }
 
-    async function loadClientData(cacheKey) {
+        async function loadClientData(cacheKey) {
       const clientId = currentClient.client_id || currentClient.id;
 
-      const [notes, homework, messages, sessions, crisis] = await Promise.all([
+      // A7/D7 — allSettled instead of all: one failed section no longer
+      // blocks the other four from rendering. Failed sections fall back
+      // to an empty array and get flagged so you know data is missing,
+      // not that the client genuinely has none.
+      const labels = ['notes', 'homework', 'messages', 'sessions', 'crisis'];
+      const results = await Promise.allSettled([
         api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
         api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
         api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
@@ -1970,11 +2226,24 @@ if (clientsBtn) clientsBtn.style.display = '';
         api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc`)
       ]);
 
-      clientNotes[cacheKey] = notes || [];
-      clientHomework[cacheKey] = homework || [];
-      clientMessages[cacheKey] = messages || [];
-      clientSessions[cacheKey] = sessions || [];
-      clientCrisis[cacheKey] = crisis || [];
+      const [notesR, homeworkR, messagesR, sessionsR, crisisR] = results;
+      const failed = [];
+      results.forEach((r, i) => {
+        if (r.status === 'rejected') {
+          failed.push(labels[i]);
+          console.error(`[loadClientData] ${labels[i]} failed:`, r.reason);
+        }
+      });
+
+      clientNotes[cacheKey] = notesR.status === 'fulfilled' ? (notesR.value || []) : [];
+      clientHomework[cacheKey] = homeworkR.status === 'fulfilled' ? (homeworkR.value || []) : [];
+      clientMessages[cacheKey] = messagesR.status === 'fulfilled' ? (messagesR.value || []) : [];
+      clientSessions[cacheKey] = sessionsR.status === 'fulfilled' ? (sessionsR.value || []) : [];
+      clientCrisis[cacheKey] = crisisR.status === 'fulfilled' ? (crisisR.value || []) : [];
+
+      if (failed.length > 0) {
+        toast(`Couldn't load: ${failed.join(', ')}. Try refreshing.`);
+      }
     }
 
         function switchTab(tabName, btn) {
@@ -2241,42 +2510,76 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     // NOTES
     // =====================================================
-    function renderNotes(cacheKey) {
-      const notes = clientNotes[cacheKey] || [];
-
-      if (!notes.length) {
-        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">Session notes will appear here after you document your first session.</p>';
-        return;
-      }
-
-      document.getElementById('notesContainer').innerHTML = notes.map(n => `
+        function renderNoteCard(n) {
+      return `
         <div class="note-card">
           <div class="note-header">
             <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             <div class="note-actions">
               <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
-                <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${n.id}')">Copy for EHR</button>
-                <div class="ehr-dropdown" id="ehrDrop_${n.id}" style="display:none;">
-                  <button onclick="copyForEHR('${n.id}','soap',event)">SOAP</button>
-                  <button onclick="copyForEHR('${n.id}','dap',event)">DAP</button>
-                  <button onclick="copyForEHR('${n.id}','narrative',event)">Narrative</button>
+                <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${escJsAttr(n.id)}')">Copy for EHR</button>
+                <div class="ehr-dropdown" id="ehrDrop_${escJsAttr(n.id)}" style="display:none;">
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','soap',event)">SOAP</button>
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','dap',event)">DAP</button>
+                  <button onclick="copyForEHR('${escJsAttr(n.id)}','narrative',event)">Narrative</button>
                 </div>
               </div>
-              <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${n.id}')">Edit</button>
-              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${n.id}')">Delete</button>
+              <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${escJsAttr(n.id)}')">Edit</button>
+              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}')">Delete</button>
             </div>
           </div>
           <div class="note-type-badge">${esc(n.session_type || 'Individual')}</div>
           <div class="note-content">
-            ${n.themes ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'S', event)">Copy S</button> <strong>Themes:</strong> ${esc(n.themes)}</div>` : ''}
-            ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
-            ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
-            ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${n.id}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
+            ${n.themes ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'S', event)">Copy S</button> <strong>Themes:</strong> ${esc(n.themes)}</div>` : ''}
+            ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
+            ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
+            ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
             ${n.next_session_date ? `<div class="note-meta">Next session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
             ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
           </div>
         </div>
-      `).join('');
+      `;
+    }
+
+    function renderNotes(cacheKey) {
+      const notes = clientNotes[cacheKey] || [];
+
+      if (!notes.length) {
+        document.getElementById('notesContainer').innerHTML = '<p class="text-muted-center">Session notes will appear here after you document your first session.</p>';
+        const btn = document.getElementById('viewAllNotesDrawerBtn');
+        if (btn) btn.style.display = 'none';
+        return;
+      }
+
+      const preview = notes.slice(0, 3);
+      const hasMore = notes.length > 3;
+
+      document.getElementById('notesContainer').innerHTML = preview.map(n => renderNoteCard(n)).join('');
+
+      const btn = document.getElementById('viewAllNotesDrawerBtn');
+      if (btn) { btn.style.display = hasMore ? 'inline-flex' : 'none'; if (hasMore) btn.textContent = 'View All (' + notes.length + ')'; }
+    }
+
+    function openNotesDrawer() {
+      const cacheKey = currentClient?.client_id || currentClient?.id;
+      const notes = clientNotes[cacheKey] || [];
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay show';
+      overlay.id = 'notesDrawerOverlay';
+      overlay.innerHTML = `
+        <div class="drawer" onclick="event.stopPropagation()">
+          <div class="drawer-header">
+            <h3>All Session Notes — ${esc(currentClient?.display_name || 'Client')}</h3>
+            <button class="modal-close" onclick="document.getElementById('notesDrawerOverlay')?.remove()">&times;</button>
+          </div>
+          <div class="drawer-body">
+            ${notes.length ? notes.map(n => renderNoteCard(n)).join('') : '<p class="text-muted-center">No session notes</p>'}
+          </div>
+        </div>
+      `;
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
     }
 
     function showNoteForm() {
@@ -3422,7 +3725,18 @@ if (clientsBtn) clientsBtn.style.display = '';
         document.getElementById('inviteResult').style.display = 'block';
         document.getElementById('generateInviteBtn').style.display = 'none';
 
-        loadDashboard();
+        // A7/D3 — Await refresh and surface failures. Without this, a failed
+        // loadDashboard() after a successful invite insert would leave the
+        // user looking at a stale client list with no indication anything
+        // went wrong. The invite itself already succeeded (the await api()
+        // above resolved), so refresh failure is a distinct error mode and
+        // gets its own toast.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after invite generation:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error generating invite');
@@ -3513,7 +3827,18 @@ if (clientsBtn) clientsBtn.style.display = '';
         closeModal('editClientModal');
         toast('Client archived');
         showHomePage();
-        loadDashboard();
+
+        // A7/D3 — Await refresh and surface failures. showHomePage() above is
+        // synchronous (and bumps the D2 generation counter), so ordering is
+        // preserved. If the refresh fails, the user has already navigated home
+        // and would otherwise see a stale list with the archived client still
+        // present until next page load.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after archive:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
@@ -3561,7 +3886,16 @@ if (clientsBtn) clientsBtn.style.display = '';
         });
         document.getElementById('archivedClientsOverlay')?.remove();
         toast('Client restored');
-        loadDashboard();
+
+        // A7/D3 — Await refresh and surface failures. Without this, a failed
+        // refresh after restore would leave the restored client missing from
+        // the active list until manual reload, with no indication of failure.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('A7/D3 — Dashboard refresh failed after restore:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
       } catch (err) {
         console.error(err);
         toast('Error restoring client');
