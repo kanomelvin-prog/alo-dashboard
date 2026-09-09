@@ -405,7 +405,7 @@
                 <div class="quick-note-inner">
                   <label class="quick-note-label">Quick Note</label>
                   <textarea id="quickNoteText" class="quick-note-textarea" placeholder="Jot a quick thought..."></textarea>
-                  <button class="btn btn-primary btn-sm quick-note-save" onclick="saveQuickNote()">Save Quick Note</button>
+                  <button class="btn btn-primary btn-sm quick-note-save" id="quickNoteSaveBtn" onclick="saveQuickNote()">Save Quick Note</button>
                   <span class="quick-note-hint">Full note editing available on desktop/tablet</span>
                 </div>
               </div>
@@ -693,13 +693,13 @@
         <!-- Danger Zone -->
         <div class="form-group danger-zone">
           <label class="danger-zone-label">Danger Zone</label>
-          <button class="btn btn-sm btn-danger-outline" onclick="confirmDeleteClient()">Archive Client</button>
+          <button class="btn btn-sm btn-danger-outline" id="archiveClientBtn" onclick="confirmDeleteClient()">Archive Client</button>
           <span class="form-hint">Hides client from your dashboard. Their notes and data are preserved. Restore anytime from the bottom of the Clients sidebar.</span>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('editClientModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveClientEdit()">Save</button>
+        <button class="btn btn-primary" id="saveClientEditBtn" onclick="saveClientEdit()">Save</button>
       </div>
     </div>
   </div>
@@ -1961,7 +1961,7 @@ function setButtonLoading(btn, loading, loadingText) {
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" onclick="document.getElementById('resolveCrisisOverlay')?.remove()">Cancel</button>
-            <button class="btn btn-primary" onclick="submitResolveCrisis('${crisisEventId}')">Resolve Alert</button>
+            <button class="btn btn-primary" id="resolveCrisisSubmitBtn" onclick="submitResolveCrisis('${crisisEventId}')">Resolve Alert</button>
           </div>
         </div>
       `;
@@ -1981,6 +1981,11 @@ function setButtonLoading(btn, loading, loadingText) {
         return;
       }
 
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes a clinical
+      // record (crisis_events.acknowledged/action_taken). Disable while
+      // in-flight.
+      const btn = document.getElementById('resolveCrisisSubmitBtn');
+      setButtonLoading(btn, true, 'Resolving...');
       try {
         await apiMutate(`/rest/v1/crisis_events?id=eq.${crisisEventId}`, 'PATCH', {
           acknowledged: true,
@@ -2004,6 +2009,8 @@ function setButtonLoading(btn, loading, loadingText) {
         console.error(err);
         errorEl.textContent = 'Error resolving alert. Please try again.';
         errorEl.style.display = 'block';
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2525,7 +2532,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
               </div>
               <button class="btn btn-sm btn-secondary note-action-btn" onclick="showEditNoteForm('${escJsAttr(n.id)}')">Edit</button>
-              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}')">Delete</button>
+              <button class="btn btn-sm btn-danger-outline note-action-btn" onclick="deleteNote('${escJsAttr(n.id)}', this)">Delete</button>
             </div>
           </div>
           <div class="note-type-badge">${esc(n.session_type || 'Individual')}</div>
@@ -2652,7 +2659,9 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
       const cacheKey = currentClient.client_id || currentClient.id;
 
-
+      // SILENT-4 (Phase 3): a double-submit here double-POSTs a session note.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
           therapist_id: therapistId,
@@ -2678,6 +2687,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error saving note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2754,6 +2765,10 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function updateNote(noteId, e) {
       e.preventDefault();
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-submit here double-PATCHes a session note.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
           method: 'PATCH',
@@ -2778,12 +2793,20 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error updating note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
-    async function deleteNote(noteId) {
+    async function deleteNote(noteId, btn) {
       if (!confirm('Delete this session note? This cannot be undone.')) return;
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-click here double-DELETEs (harmless on
+      // the second call, but the button's own row is about to be removed
+      // from the DOM by renderNotes() below -- disable it for the interval
+      // between confirm() resolving and that re-render landing).
+      setButtonLoading(btn, true, 'Deleting...');
       try {
         await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
           method: 'DELETE',
@@ -2797,6 +2820,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error deleting note');
+        setButtonLoading(btn, false);
       }
     }
 
@@ -2920,6 +2944,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
 
       const cacheKey = currentClient.client_id || currentClient.id;
+
+      // SILENT-4 (Phase 3): a double-click here double-POSTs a session note.
+      const btn = document.getElementById('quickNoteSaveBtn');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
           therapist_id: therapistId,
@@ -2940,6 +2968,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error saving note');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3140,7 +3170,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
       const cacheKey = currentClient.client_id || currentClient.id;
 
-
+      // SILENT-4 (Phase 3): a double-submit here double-POSTs a homework
+      // assignment.
+      const btn = e.target.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true, 'Assigning...');
       try {
         await apiMutate('/rest/v1/homework_cards', 'POST', {
           therapist_id: therapistId,
@@ -3164,6 +3197,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error assigning homework');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3708,6 +3743,13 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function generateInvite() {
       const name = document.getElementById('inviteClientName').value.trim();
 
+      // SILENT-4 (Phase 3): the audit's named example -- a double-click here
+      // double-fires and mints two invite_code rows for one client. Disable
+      // while in-flight; the button is hidden on success below regardless
+      // (existing behavior), so this only matters for the window before
+      // that happens and for the failure path, where it must re-enable.
+      const btn = document.getElementById('generateInviteBtn');
+      setButtonLoading(btn, true, 'Generating...');
       try {
         const code = 'ALO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -3740,6 +3782,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error generating invite');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3768,6 +3812,10 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function saveClientEdit() {
       if (!currentClient) return;
 
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes the client
+      // record, including safety_notes and emergency contact fields.
+      const btn = document.getElementById('saveClientEditBtn');
+      setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
           display_name: document.getElementById('editClientName').value,
@@ -3807,6 +3855,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error updating client');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3819,6 +3869,12 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function archiveClient() {
       if (!currentClient) return;
 
+      // SILENT-4 (Phase 3): a double-click here (between confirm() resolving
+      // and this PATCH landing) double-archives the same record. Harmless in
+      // that both PATCHes set the same status, but disabling matches the
+      // rest of this batch's treatment for clinical-record mutations.
+      const btn = document.getElementById('archiveClientBtn');
+      setButtonLoading(btn, true, 'Archiving...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
           status: 'archived'
@@ -3842,6 +3898,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error archiving client');
+      } finally {
+        setButtonLoading(btn, false);
       }
     }
 
@@ -3865,7 +3923,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                     <div style="font-weight:600;font-size:0.875rem;">${esc(c.display_name || 'Client')}</div>
                     <div style="font-size:0.75rem;color:var(--text-muted);">Archived ${c.updated_at ? new Date(c.updated_at).toLocaleDateString() : ''}</div>
                   </div>
-                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}')">Restore</button>
+                  <button class="btn btn-sm btn-primary" onclick="restoreClient('${c.id}', this)">Restore</button>
                 </div>
               `).join('') : '<p class="text-muted-center">No archived clients</p>'}
             </div>
@@ -3879,7 +3937,11 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
     }
 
-    async function restoreClient(linkId) {
+    async function restoreClient(linkId, btn) {
+      // SILENT-4 (Phase 3): a double-click here double-PATCHes the record.
+      // The whole overlay is removed on success below, so this only matters
+      // for the in-flight window and the failure path.
+      setButtonLoading(btn, true, 'Restoring...');
       try {
         await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
           status: 'active'
@@ -3899,6 +3961,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error restoring client');
+        setButtonLoading(btn, false);
       }
     }
 
