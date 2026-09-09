@@ -2274,13 +2274,6 @@ if (clientsBtn) clientsBtn.style.display = '';
     // =====================================================
     // DETAIL PAGE UTILITIES
     // =====================================================
-    function toggleDetailSidebar() {
-      const layout = document.getElementById('clientPage');
-      if (layout) {
-        layout.classList.toggle('sidebar-open');
-      }
-    }
-
     function toggleHwForm() {
       const expanded = document.getElementById('hwFormExpanded');
       if (!expanded) return;
@@ -3317,18 +3310,6 @@ if (clientsBtn) clientsBtn.style.display = '';
 
     function navigateCalendar(dir) {
       calendarOffset += dir;
-      const cacheKey = currentClient?.client_id || currentClient?.id;
-      if (cacheKey) renderCalendar(cacheKey);
-    }
-
-    function navigateStrip(dir) {
-      if (dir === 0) {
-        stripOffset = 0; // Home = reset to today
-      } else {
-        stripOffset += dir;
-      }
-      // Don't go into the future
-      if (stripOffset > 0) stripOffset = 0;
       const cacheKey = currentClient?.client_id || currentClient?.id;
       if (cacheKey) renderCalendar(cacheKey);
     }
