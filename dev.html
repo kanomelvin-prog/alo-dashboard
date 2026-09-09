@@ -1426,17 +1426,19 @@ function setButtonLoading(btn, loading, loadingText) {
       showLogin();
     }
 
-        async function isVerificationLocked(id) {
+        async function isVerificationLocked(uid) {
+      // D22: fail CLOSED. Locked unless we can positively confirm the
+      // therapist is either onboarded or still within their verify window.
       try {
-        const rows = await api(`/rest/v1/therapists?id=eq.${id}&select=license_verified,verify_deadline`);
+        const rows = await api(`/rest/v1/therapists?auth_user_id=eq.${uid}&select=onboarded,verify_deadline`);
         const row = rows?.[0];
-        if (!row) return false;
-        if (row.license_verified) return false;
+        if (!row) return true;
+        if (row.onboarded === true) return false;
         if (!row.verify_deadline) return false;
         return new Date(row.verify_deadline).getTime() < Date.now();
       } catch (e) {
-        console.log('Verification check failed, defaulting to unlocked:', e.message);
-        return false;
+        console.log('Verification check failed, defaulting to LOCKED (fail closed):', e.message);
+        return true;
       }
     }
 
