@@ -49,14 +49,45 @@ After reading, confirm current version, highest priority, and what we must never
 - `CLAUDE.md` — this file
 ## Working Rules
 ### Git workflow
-- Work directly on `main`. No feature branches at this stage.
-- Solo developer, single-environment project. Branches add overhead without benefit.
-- Push to main triggers GitHub Pages deploy (allow 1-2 min to propagate).
-- Verify every push actually landed: after `git push`, run `git status` and `git log --oneline -3` to confirm the commit is on `origin/main`.
+**Branch workflow ADOPTED 2026-09-08. This supersedes the earlier "work directly on main" rule.**
+- Claude Code never commits to `main` and never pushes to `main`. All work goes to a branch named `auto/<short-topic>`, pushed, and merged to `main` by Kano via PR.
+- Rationale for the change: pushing straight to `main` here *is* a production deploy, because GitHub Pages publishes `main`. A branch puts a review step between a code change and dashboard.alowen.ai. This matches how `alo-supabase` has worked since 2026-09-02, and R1 (`auto/r1-signup-rewire`, PR #1) was the first dashboard change to use it.
+- Kano merges. Kano promotes. Claude Code does neither.
+- Push to `main` triggers a GitHub Pages deploy (allow 1-2 min to propagate).
+- Verify every push actually landed: after `git push`, run `git status` and `git log --oneline -3`, and confirm against the remote with `git ls-remote origin <branch>`. A push that only exists locally is not a push.
+- Delete an `auto/*` branch only after confirming it is fully merged: `git merge-base --is-ancestor <branch-tip> origin/main`. If that check fails, keep the branch and say why.
+
 ### File discipline
 - **Never touch production files unless explicitly told to.** Every prompt should name the files to modify.
-- When copying dev to production, check whether `index.html` references a different CSS filename than `dev.html`. If `dev.html` references `dev.css?v=N` and `index.html` references `styles.css?v=N`, rewrite the stylesheet reference during the copy.
+- Edit `dev.html` / `dev.css`. `index.html` and `styles.css` change only during an explicit promotion.
 - Always increment the cache buster version (`?v=N`) when CSS changes.
+
+### Promotion parity checklist
+`dev.html` references `dev.css?v=N`; `index.html` must reference `styles.css?v=N`. Copying dev over production without rewriting that line points production at a file that is not deployed, and the dashboard loads unstyled. Run all of these after every promotion, before pushing:
+
+```bash
+grep -c 'styles\.css?v=29' index.html   # must be 1 (bump 29 to the new N)
+grep -c 'dev\.css' index.html           # must be 0
+grep -c 'dev\.css?v=' dev.html          # must be 1
+```
+
+Then verify on GitHub, not just locally — the deployed file is the one that matters:
+
+```bash
+git ls-remote origin main                                    # commit is on the remote
+curl -sI https://dashboard.alowen.ai/styles.css | head -1     # 200, after ~2 min
+```
+
+A promotion is not done until the parity greps pass **and** the remote has been checked.
+
+### LIVE CHANGE banner convention
+Anything that touches production — a promotion to `index.html` / `styles.css`, a push to `main`, a merged PR, an Edge Function redeploy, applied SQL, or an auth or Supabase configuration change — must be called out with a banner in the summary and in the commit body:
+
+```
+LIVE CHANGE — <what changed> — affects <who/what> — verify with <command or URL>
+```
+
+State it before doing the thing where possible, and always after. The point is that a change reaching real therapists is never buried in the middle of a paragraph of routine work. Routine dev-file edits do not get a banner; if everything is banner-worthy, nothing is.
 ### Commit messages
 - No required format. Plain descriptive messages are fine.
 - Examples: `Phase 1A: Share journal entry toggle`, `Fix: timeline badge refreshes immediately`, `Dashboard: shared journal entries view`
