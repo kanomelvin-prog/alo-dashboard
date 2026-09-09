@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=33">
+  <link rel="stylesheet" href="dev.css?v=34">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -795,6 +795,21 @@
     <span class="install-banner-text">Add this dashboard to your home screen for one-tap access.</span>
     <button class="btn btn-sm btn-primary" id="installBannerInstallBtn" onclick="_aloInstallPrompt()">Install</button>
     <button class="install-banner-close" onclick="_aloDismissInstallBanner()" aria-label="Dismiss">&times;</button>
+  </div>
+
+  <!-- Phase 2B, item 3: therapist first-screen overlay (spec section 2.2).
+       One-time, shown instead of the bare tour auto-offer when neither
+       onboarding timestamp is set. Never reappears once one is. -->
+  <div class="first-screen-overlay" id="firstScreenOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Welcome to your dashboard">
+    <div class="first-screen-card">
+      <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+      <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
+      <p class="first-screen-block"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
+      <div class="first-screen-actions">
+        <button class="btn btn-primary btn-full" onclick="_aloFirstScreenShowMeAround()">Show me around</button>
+        <button class="btn btn-secondary btn-full" onclick="_aloFirstScreenExploreAlone()">I'll explore on my own</button>
+      </div>
+    </div>
   </div>
 
   <!-- Phase 2, item 9: driver.js therapist tour -->
@@ -4150,6 +4165,28 @@ if (clientsBtn) clientsBtn.style.display = '';
       }).catch(err => console.warn(`Onboarding timestamp write failed (${field}):`, err));
     }
 
+    // Phase 2B item 3: one-time first-screen overlay, shown in place of the
+    // bare tour auto-offer. Both buttons dismiss in one click.
+    function _aloShowFirstScreen() {
+      const overlay = document.getElementById('firstScreenOverlay');
+      if (overlay) overlay.style.display = 'flex';
+    }
+
+    function _aloHideFirstScreen() {
+      const overlay = document.getElementById('firstScreenOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function _aloFirstScreenShowMeAround() {
+      _aloHideFirstScreen();
+      startAloTour();
+    }
+
+    function _aloFirstScreenExploreAlone() {
+      _aloHideFirstScreen();
+      _aloWriteOnboardingTimestamp('onboarding_skipped_at');
+    }
+
     function _aloTourSteps(driverRef) {
       // driverRef is a { current: driverObj } box so steps can call
       // moveNext()/moveTo() on an instance that doesn't exist yet at
@@ -4302,7 +4339,7 @@ if (clientsBtn) clientsBtn.style.display = '';
         const rows = await api(`/rest/v1/therapists?id=eq.${therapistId}&select=onboarding_completed_at,onboarding_skipped_at`);
         const row = rows?.[0];
         if (row && row.onboarding_completed_at == null && row.onboarding_skipped_at == null) {
-          startAloTour();
+          _aloShowFirstScreen();
         }
       } catch (err) {
         console.warn('Tour auto-offer check failed:', err);
