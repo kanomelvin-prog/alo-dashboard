@@ -292,19 +292,54 @@ button, input, select, textarea { font: inherit; }
 
 .logout-btn:hover { background: var(--bg); }
 
-/* TEMP: replaced by help menu */
-.tour-temp-link {
-  font-size: 0.75rem;
-  color: var(--sage);
-  text-decoration: underline;
-  padding: 12px 4px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
+/* === HELP MENU (Phase 2B item 4) === */
+.help-menu-wrap {
+  position: relative;
+  display: inline-block;
 }
 
-.tour-temp-link:hover { color: var(--sage-hover); }
+.help-menu-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.help-menu-btn:hover { background: var(--bg); }
+
+.help-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(120, 100, 80, 0.12);
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.help-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  min-height: 44px;
+}
+
+.help-dropdown button:hover { background: var(--sage-light); }
+.help-dropdown button:not(:last-child) { border-bottom: 1px solid var(--border-subtle); }
 
 /* === DISCLAIMER BANNER === */
 .disclaimer-banner {
@@ -2096,7 +2131,7 @@ font-size: 0.6875rem;
 .home-icon svg { width: 18px; height: 18px; }
 .user-name { display: none; }
 .logout-btn { font-size: 0.6875rem; padding: 4px 8px; }
-.tour-temp-link { display: none; } /* TEMP: replaced by help menu */
+.help-menu-btn { font-size: 0.6875rem; padding: 4px 8px; }
 
 /* Show clients toggle */
 .header-clients-btn {

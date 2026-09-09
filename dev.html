@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=34">
+  <link rel="stylesheet" href="dev.css?v=35">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -164,8 +164,18 @@
       </button>
 
       <div class="header-right">
-        <!-- TEMP: replaced by help menu -->
-        <a href="#" class="tour-temp-link" onclick="startAloTour(); return false;">Show me around</a>
+        <!-- Phase 2B, item 4: help menu -->
+        <div class="help-menu-wrap">
+          <button class="help-menu-btn" onclick="toggleHelpMenu(event)" aria-haspopup="true" aria-label="Help menu">
+            Help
+          </button>
+          <div class="help-dropdown" id="helpDropdown" style="display:none;">
+            <button onclick="_aloHelpMenuAction('tour')">Show me around</button>
+            <button onclick="_aloHelpMenuAction('testClient')">Your test client</button>
+            <button onclick="_aloHelpMenuAction('howAloWorks')">How Alo works</button>
+            <button onclick="_aloHelpMenuAction('whatClientsSee')">What clients see</button>
+          </div>
+        </div>
         <span class="user-name" id="therapistName"></span>
         <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
       </div>
@@ -779,6 +789,31 @@
         <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Phase 2B, item 4: help menu modals -->
+  <div class="modal-overlay" id="howAloWorksModal" onclick="closeModal('howAloWorksModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>How Alo works</h3>
+        <button class="modal-close" onclick="closeModal('howAloWorksModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+        <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
+        <p class="first-screen-block" style="margin-bottom:0;"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="whatClientsSeeModal" onclick="closeModal('whatClientsSeeModal', event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>What clients see</h3>
+        <button class="modal-close" onclick="closeModal('whatClientsSeeModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="whatClientsSeeModalBody"></div>
     </div>
   </div>
 
@@ -1630,6 +1665,8 @@ function setButtonLoading(btn, loading, loadingText) {
     wireEscToStaticModal('inviteModal');
     wireEscToStaticModal('editClientModal');
     wireEscToStaticModal('defaultSettingsModal');
+    wireEscToStaticModal('howAloWorksModal');
+    wireEscToStaticModal('whatClientsSeeModal');
 
     // =====================================================
     // DASHBOARD LOADING
@@ -4185,6 +4222,93 @@ if (clientsBtn) clientsBtn.style.display = '';
     function _aloFirstScreenExploreAlone() {
       _aloHideFirstScreen();
       _aloWriteOnboardingTimestamp('onboarding_skipped_at');
+    }
+
+    // =====================================================
+    // PHASE 2B, ITEM 4 -- HELP MENU
+    // =====================================================
+
+    function toggleHelpMenu(event) {
+      event.stopPropagation();
+      document.querySelectorAll('.help-dropdown').forEach(d => d.style.display = 'none');
+      const dropdown = document.getElementById('helpDropdown');
+      if (dropdown) dropdown.style.display = 'block';
+      const closeHandler = (e) => {
+        if (!e.target.closest('.help-menu-wrap')) {
+          document.querySelectorAll('.help-dropdown').forEach(d => d.style.display = 'none');
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeHandler), 0);
+    }
+
+    function _aloHelpMenuAction(action) {
+      document.querySelectorAll('.help-dropdown').forEach(d => d.style.display = 'none');
+      if (action === 'tour') { startAloTour(); return; }
+      if (action === 'testClient') { _aloOpenTestClient(); return; }
+      if (action === 'howAloWorks') { document.getElementById('howAloWorksModal').classList.add('show'); return; }
+      if (action === 'whatClientsSee') { _aloShowWhatClientsSeeModal(); return; }
+    }
+
+    // Navigates to the therapist's own test/demo client (is_demo = true).
+    // If it has been archived, restore it via the existing restore path
+    // (restoreClient) before opening it -- never re-implement the restore.
+    async function _aloOpenTestClient() {
+      const demo = allClients.find(c => c.is_demo);
+      if (demo) {
+        showClient(demo.client_id || demo.id);
+        return;
+      }
+      try {
+        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.archived&is_demo=eq.true&select=*`);
+        const archivedDemo = archived?.[0];
+        if (!archivedDemo) {
+          toast('Test client not found');
+          return;
+        }
+        await restoreClient(archivedDemo.id, null);
+        const restored = allClients.find(c => c.is_demo);
+        if (restored) showClient(restored.client_id || restored.id);
+      } catch (err) {
+        console.error('Help menu: test client lookup failed:', err);
+        toast('Error opening test client');
+      }
+    }
+
+    // Copy Pack v1.0 (Kano, 2026-09-09), spec §3.2. Source of truth is the
+    // chat app's TASK P2B-08 -- kept here too, verbatim, so the therapist
+    // dashboard's "What clients see" modal can render it read-only without a
+    // cross-repo fetch. The two copies can drift since the apps share no
+    // runtime; if the client-side copy changes, update this constant to match.
+    const ALO_CLIENT_ONBOARDING_SCREENS = [
+      {
+        title: 'What this is',
+        body: 'Alo is here for the time between sessions. When something comes up on a Tuesday night, you can talk it through instead of sitting on it until your next appointment.\n\nAlo asks more than it tells. It isn\'t a therapist, and it isn\'t trying to be one.'
+      },
+      {
+        title: 'What\'s yours',
+        body: 'Your conversations with Alo stay between you and Alo. Your therapist can\'t read them.\n\nIf you want to share something -- a journal entry, a note, a message -- you choose that, one thing at a time. Nothing is shared unless you share it.'
+      },
+      {
+        title: 'If things get hard',
+        body: 'Alo isn\'t built for a crisis. If you\'re in danger or thinking about hurting yourself, call or text 988 or go to your nearest emergency room.\n\nIf Alo notices you might be in trouble, it will tell you where to get help -- and it will let your therapist know something happened. Not what you said. Just that you might need them.'
+      },
+      {
+        title: 'Getting started',
+        body: 'Before their first conversation, clients confirm: "I understand what Alo is and isn\'t, and how sharing works." Then they tap "Start talking to Alo."'
+      }
+    ];
+
+    function _aloShowWhatClientsSeeModal() {
+      const body = document.getElementById('whatClientsSeeModalBody');
+      if (body) {
+        body.innerHTML = ALO_CLIENT_ONBOARDING_SCREENS.map(s => `
+          <p class="first-screen-block">
+            <strong>${esc(s.title)}.</strong> ${esc(s.body).replace(/\n\n/g, '<br><br>')}
+          </p>
+        `).join('');
+      }
+      document.getElementById('whatClientsSeeModal').classList.add('show');
     }
 
     function _aloTourSteps(driverRef) {
