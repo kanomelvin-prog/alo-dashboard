@@ -292,19 +292,82 @@ button, input, select, textarea { font: inherit; }
 
 .logout-btn:hover { background: var(--bg); }
 
-/* TEMP: replaced by help menu */
-.tour-temp-link {
+/* === TEST CLIENT LINE (Phase 2B item 5) === */
+.test-client-line {
   font-size: 0.75rem;
-  color: var(--sage);
-  text-decoration: underline;
-  padding: 12px 4px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
+  color: var(--text-light);
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
-.tour-temp-link:hover { color: var(--sage-hover); }
+/* D29: "Open as client" button, list row + detail banner */
+.open-as-client-btn {
+  margin-top: 8px;
+  min-height: 44px;
+}
+
+.test-client-line-detail .open-as-client-btn {
+  margin-top: 10px;
+}
+
+.test-client-line-detail {
+  margin: 8px 20px 0;
+  padding: 8px 12px;
+  background: rgba(58, 124, 134, 0.08);
+  border: 1px solid rgba(58, 124, 134, 0.25);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--sage);
+}
+
+/* === HELP MENU (Phase 2B item 4) === */
+.help-menu-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.help-menu-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.help-menu-btn:hover { background: var(--bg); }
+
+.help-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(120, 100, 80, 0.12);
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.help-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  min-height: 44px;
+}
+
+.help-dropdown button:hover { background: var(--sage-light); }
+.help-dropdown button:not(:last-child) { border-bottom: 1px solid var(--border-subtle); }
 
 /* === DISCLAIMER BANNER === */
 .disclaimer-banner {
@@ -839,6 +902,13 @@ button, input, select, textarea { font: inherit; }
   margin-bottom: 12px;
 }
 
+/* === ROLLOUT SUMMARY (Phase 2B item 6) === */
+.rollout-summary {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
 /* === SESSION PREVIEW & NOTES === */
 .session-preview { padding: 12px 0; }
 .session-preview-border { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 16px; }
@@ -1081,6 +1151,43 @@ button, input, select, textarea { font: inherit; }
   flex-shrink: 0;
 }
 
+/* === FIRST SCREEN OVERLAY (Phase 2B item 3) === */
+.first-screen-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.first-screen-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 560px;
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+}
+
+.first-screen-block {
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.first-screen-block:last-of-type { margin-bottom: 28px; }
+.first-screen-block strong { color: var(--charcoal); }
+
+.first-screen-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* === SETTINGS & TOGGLES === */
 .settings-section {
   margin-top: 20px;
@@ -1246,6 +1353,13 @@ button, input, select, textarea { font: inherit; }
 
 .invite-code:hover { color: var(--primary-hover); }
 .invite-hint { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* === INVITE SEND ACTIONS (Phase 2B item 7) === */
+.invite-send-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .invite-badge {
   display: inline-flex;
@@ -2059,7 +2173,7 @@ font-size: 0.6875rem;
 .home-icon svg { width: 18px; height: 18px; }
 .user-name { display: none; }
 .logout-btn { font-size: 0.6875rem; padding: 4px 8px; }
-.tour-temp-link { display: none; } /* TEMP: replaced by help menu */
+.help-menu-btn { font-size: 0.6875rem; padding: 4px 8px; }
 
 /* Show clients toggle */
 .header-clients-btn {
