@@ -4520,6 +4520,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       // record, including safety_notes and emergency contact fields.
       const btn = document.getElementById('saveClientEditBtn');
       setButtonLoading(btn, true, 'Saving...');
+      let privateSaved = false;
       try {
         const linkId = currentClient.id;
         const self = selfTherapistId();
@@ -4543,6 +4544,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           safety_notes: document.getElementById('editSafetyNotes').value
         }, { upsert: true, returning: PRIVATE_COLUMNS });
         clientPrivate[linkId] = { state: 'loaded', row: privateRows[0] };
+        privateSaved = true;
 
         // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
         // S7 fix F: none of the five private columns is sent to
@@ -4593,6 +4595,12 @@ if (clientsBtn) clientsBtn.style.display = '';
       } catch (err) {
         console.error(err);
         toast('Error updating client');
+        // S7 fix F: if the emergency fields were saved before the settings
+        // PATCH failed, the page must show what is now on file, not what was.
+        if (privateSaved && currentClient) {
+          checkEmergencyContactWarning();
+          renderCrisisAlerts(currentClient.client_id || currentClient.id);
+        }
       } finally {
         setButtonLoading(btn, false);
       }
