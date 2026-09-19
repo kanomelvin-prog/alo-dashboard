@@ -34,7 +34,7 @@
       <div class="login-logo">A</div>
       <h1 class="login-title">Alowen Dashboard</h1>
       <p class="login-subtitle">Clinical companion management</p>
-      <p class="login-trust">Client data is encrypted at rest and in transit. Alowen conversations are not permanently saved — chat history is automatically cleared.</p>
+      <p class="login-trust">Client data is encrypted at rest and in transit. Conversation history is saved for your clients, and they can delete it. You never see it.</p>
       <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
@@ -622,13 +622,13 @@
         <div class="form-group">
           <label>Display Name (optional)</label>
           <input type="text" id="inviteClientName" placeholder="e.g., Sarah M.">
-          <span class="form-hint">Friendly name visible only to you</span>
+          <span class="form-hint">Your client will see this as their name in Alo</span>
         </div>
         <div id="inviteResult" style="display: none;">
           <div class="invite-display">
             <div class="invite-hint">Share this code with your client</div>
             <div class="invite-code" id="inviteCodeDisplay" onclick="copyInviteCode()"></div>
-            <div class="invite-hint">Expires in 7 days • Click code to copy</div>
+            <div class="invite-hint">Click code to copy</div>
           </div>
           <div class="invite-send-actions">
             <button class="btn btn-secondary btn-full" onclick="_aloCopyInviteLink()">Copy link</button>
@@ -3710,11 +3710,20 @@ if (clientsBtn) clientsBtn.style.display = '';
       }
       text += '.\n\n';
 
-      if (unresolvedCrisis.length) {
-        text += 'Safety: ' + unresolvedCrisis.map(c => {
-          const date = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          return 'Alert on ' + date + ': ' + c.category + '; resolved via ' + c.alo_response_action;
-        }).join('. ') + '.';
+      // S7 fix I (R-B-12): this text is pasted into an EHR. It used to write
+      // "resolved via <alo_response_action>" for alerts that are, by
+      // construction of this list, NOT resolved -- and alo_response_action is
+      // what Alo said in the chat, not a resolution. An open alert is now
+      // written as open. "resolved via" appears only for an acknowledged
+      // alert, followed by the therapist's own action_taken. Resolved alerts
+      // are the same seven-day set the alert card shows. ASCII only, like the
+      // rest of the pack.
+      const recentlyResolvedCrisis = crisis.filter(c => c.acknowledged && c.acknowledged_at && new Date(c.acknowledged_at) > weekAgo);
+      const alertLine = (c) => 'Alert on ' + new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ': ' + c.category;
+      const safetyLines = unresolvedCrisis.map(c => alertLine(c) + ' -- open')
+        .concat(recentlyResolvedCrisis.map(c => alertLine(c) + (c.action_taken ? ' -- resolved via ' + c.action_taken : ' -- resolved')));
+      if (safetyLines.length) {
+        text += 'Safety: ' + safetyLines.join('. ') + '.';
       } else {
         text += 'Safety: No alerts.';
       }
@@ -4945,7 +4954,16 @@ if (clientsBtn) clientsBtn.style.display = '';
       },
       {
         title: 'What\'s yours',
-        body: 'Your conversations with Alo stay between you and Alo. Your therapist can\'t read them.\n\nIf you want to share something -- a journal entry, a note, a message -- you choose that, one thing at a time. Nothing is shared unless you share it.'
+        // S7 fix J (R-B-11): the old closing sentence, that nothing is shared
+        // without the client sharing it, was false. Presence, session counts
+        // and homework viewed/completed times reach the therapist with no
+        // client action (crisis alerts are the next screen's subject). The
+        // replacement is the sentence the chat
+        // app now shows on this screen (its Brief 3 fix J, R-C-13, on its
+        // main), so this modal still shows what clients actually see. Dashes
+        // stay "--" as in the rest of this constant; the chat app uses em
+        // dashes.
+        body: 'Your conversations with Alo stay between you and Alo. Your therapist can\'t read them.\n\nIf you want to share something -- a journal entry, a note, a message -- you choose that, one thing at a time. Beyond what you share, your therapist can see when you use Alo and when you view or complete homework they assign -- never what you say to Alo.'
       },
       {
         title: 'If things get hard',
@@ -5070,7 +5088,9 @@ if (clientsBtn) clientsBtn.style.display = '';
           },
           popover: {
             title: 'Crisis alerts',
-            description: 'Every alert, open or resolved, stays here with the action taken. The safety record never lives only in your memory.',
+            // S7 fix J (R-B-13): resolved alerts leave this card after 7 days
+            // (renderCrisisAlerts), so "every alert ... stays here" was false.
+            description: 'Open alerts stay here until you resolve them. Resolved alerts stay for 7 days with the action you took, then leave this card. The safety record never lives only in your memory.',
           }
         },
         {
