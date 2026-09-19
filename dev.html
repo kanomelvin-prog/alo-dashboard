@@ -21,7 +21,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-  <link rel="stylesheet" href="dev.css?v=39">
+  <link rel="stylesheet" href="dev.css?v=40">
   <!-- Phase 2, item 9: driver.js therapist tour. Pinned exact version + SRI, cdnjs only. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.8.0/driver.min.css"
         integrity="sha512-dBiCVIs5ayOv4qwu3u8yf+CvdLI2kFdXijpYiU5nM6mO61QRXzExoENn5nJiF3n8uBW/yEO+FoLLuYbkj8/frg=="
@@ -185,12 +185,21 @@
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
 
     <!-- HOMEPAGE -->
-    <div class="layout" id="homePage">
+    <!-- S7 fix D (R-B-05): home-not-loaded hides the home sections (and their
+         static "All clear" empty state) until a load has actually succeeded.
+         loadDashboard() removes it on success. A load that fails leaves it on
+         and shows #dashboardLoadError, so a failed load can never read as
+         "All clear" or sit on "Loading..." forever. -->
+    <div class="layout home-not-loaded" id="homePage">
       <div class="main home-content">
         <div>
           <div class="morning-greeting" id="morningGreeting">Good morning</div>
           <div class="morning-summary" id="morningSummary">Loading your dashboard...</div>
           <div class="rollout-summary" id="rolloutSummary" style="display:none;"></div>
+          <div class="dashboard-load-error" id="dashboardLoadError" style="display:none;" role="alert">
+            <span id="dashboardLoadErrorText"></span>
+            <button class="btn btn-sm btn-secondary" id="dashboardRetryBtn" onclick="retryDashboardLoad()">Try again</button>
+          </div>
         </div>
 
         <!-- Needs Attention (unified crisis + messages feed) -->
@@ -1603,7 +1612,14 @@ function setButtonLoading(btn, loading, loadingText) {
       const firstName = name.split(' ')[0];
       document.getElementById('morningGreeting').textContent = greeting + ', ' + firstName;
 
-      await loadDashboard();
+      try {
+        await loadDashboard();
+      } catch (err) {
+        // S7 fix D: loadDashboard() has already put the load-error state and
+        // its retry on the page. No tour over a dashboard that did not load;
+        // retryDashboardLoad() offers it once a load succeeds.
+        return;
+      }
       _aloMaybeAutoOfferTour();
     }
 
@@ -1735,6 +1751,55 @@ function setButtonLoading(btn, loading, loadingText) {
     // =====================================================
     // DASHBOARD LOADING
     // =====================================================
+    // S7 fix D (R-B-05) -- load state. loadDashboard() used to catch and log
+    // every failure and then resolve, so no caller could tell: the A7/D3
+    // refresh-failure toasts were unreachable, and a failed first load sat on
+    // "Loading your dashboard..." with an "All clear" section under it. It now
+    // rejects, after putting the failure on the page with a retry.
+    let dashboardLoadedOnce = false;
+
+    function markDashboardLoaded() {
+      dashboardLoadedOnce = true;
+      document.getElementById('homePage')?.classList.remove('home-not-loaded');
+      const box = document.getElementById('dashboardLoadError');
+      if (box) box.style.display = 'none';
+    }
+
+    function showDashboardLoadError() {
+      const box = document.getElementById('dashboardLoadError');
+      const text = document.getElementById('dashboardLoadErrorText');
+      // The headline ("All clear. 3 clients.") is a claim about now. It does
+      // not outlive a load that failed, first load or refresh.
+      const summaryEl = document.getElementById('morningSummary');
+      if (summaryEl) summaryEl.textContent = '';
+      if (dashboardLoadedOnce) {
+        // A refresh failed: the lists below are from the last good load.
+        if (text) text.textContent = 'Could not refresh your dashboard. What you see below may be out of date.';
+      } else {
+        // Nothing has loaded: the sections stay hidden (home-not-loaded), and
+        // the sidebar must not go on saying "No clients yet".
+        if (text) text.textContent = 'Could not load your dashboard. Check your connection and try again.';
+        const listEl = document.getElementById('clientsList');
+        if (listEl) listEl.innerHTML = '<div class="section-empty">Could not load clients</div>';
+      }
+      if (box) box.style.display = 'flex';
+    }
+
+    async function retryDashboardLoad() {
+      const btn = document.getElementById('dashboardRetryBtn');
+      setButtonLoading(btn, true, 'Loading...');
+      try {
+        await loadDashboard();
+        // A first load that failed returned from showApp() before the tour
+        // offer was ever checked.
+        if (!_aloTourOfferChecked) _aloMaybeAutoOfferTour();
+      } catch (err) {
+        // Still failing: loadDashboard() has left the error state up.
+      } finally {
+        setButtonLoading(btn, false);
+      }
+    }
+
     async function loadDashboard() {
       try {
         // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
@@ -1778,6 +1843,10 @@ function setButtonLoading(btn, loading, loadingText) {
 
           document.getElementById('clientsList').innerHTML = '<div class="section-empty">No clients yet</div>';
           document.getElementById('clientsList2').innerHTML = '';
+          // S7 fix D: this is a load that succeeded, so it must not go on
+          // reading "Loading your dashboard...". The welcome card says the rest.
+          document.getElementById('morningSummary').textContent = '';
+          markDashboardLoaded();
           return;
         }
 
@@ -1873,8 +1942,14 @@ function setButtonLoading(btn, loading, loadingText) {
           }
         }
 
+        markDashboardLoaded();
+
       } catch (err) {
+        // S7 fix D (R-B-05): say so on the page, then reject. Swallowing this
+        // is what made every caller's failure handling unreachable.
         console.error('Dashboard load error:', err);
+        showDashboardLoadError();
+        throw err;
       }
     }
 
@@ -2368,7 +2443,16 @@ function setButtonLoading(btn, loading, loadingText) {
 
         document.getElementById('resolveCrisisOverlay')?.remove();
         toast('Crisis alert resolved');
-        await loadDashboard();
+
+        // S7 fix D: loadDashboard() now rejects. The alert IS resolved at this
+        // point, so a failed refresh must not fall into the catch below and
+        // report "Error resolving alert". Same handling as the A7/D3 sites.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('Dashboard refresh failed after resolving an alert:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
 
         if (currentClient) {
           const cacheKey = currentClient.client_id || currentClient.id;
@@ -4285,7 +4369,16 @@ if (clientsBtn) clientsBtn.style.display = '';
 
         closeModal('editClientModal');
         toast('Client updated');
-        await loadDashboard();
+
+        // S7 fix D: loadDashboard() now rejects. Both writes above landed, so
+        // a failed refresh must not fall into the catch below and report
+        // "Error updating client". Same handling as the A7/D3 sites.
+        try {
+          await loadDashboard();
+        } catch (refreshErr) {
+          console.error('Dashboard refresh failed after client edit:', refreshErr);
+          toast('List refresh failed — reload the page to see latest');
+        }
 
         // Refresh client detail view with updated data
         if (currentClient) {
@@ -4830,9 +4923,14 @@ if (clientsBtn) clientsBtn.style.display = '';
     }
     window.startAloTour = startAloTour;
 
+    // S7 fix D: set once the check below has run for this sign-in, so the
+    // dashboard's retry button only runs it when showApp() never got that far.
+    let _aloTourOfferChecked = false;
+
     // Auto-offer once: only when neither timestamp has ever been set.
     async function _aloMaybeAutoOfferTour() {
       if (!therapistId) return;
+      _aloTourOfferChecked = true;
       try {
         const rows = await api(`/rest/v1/therapists?id=eq.${therapistId}&select=onboarding_completed_at,onboarding_skipped_at`);
         const row = rows?.[0];

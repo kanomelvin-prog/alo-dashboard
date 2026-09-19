@@ -909,6 +909,31 @@ button, input, select, textarea { font: inherit; }
   margin-bottom: 12px;
 }
 
+/* === DASHBOARD LOAD ERROR (S7 fix D, R-B-05) === */
+/* Until a load has succeeded the home sections stay hidden, so neither a
+   pending nor a failed load can show their static "All clear" empty state. */
+.home-not-loaded .section { display: none; }
+
+.dashboard-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  color: var(--danger-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.dashboard-load-error .btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 /* === SESSION PREVIEW & NOTES === */
 .session-preview { padding: 12px 0; }
 .session-preview-border { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 16px; }
