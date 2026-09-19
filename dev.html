@@ -1106,6 +1106,29 @@ function setButtonLoading(btn, loading, loadingText) {
     // column. Labels and timestamps only. Never widen this to select=*.
     const CRISIS_EVENT_COLUMNS = 'id,client_id,severity,category,alo_response_action,acknowledged,acknowledged_at,action_taken,created_at';
 
+    // S7 fix F (R-B-17) -- therapist-private fields (client phone, emergency
+    // contact, safety notes) live in therapist_client_private, keyed by the
+    // link id, behind a policy only the row's therapist passes. This file no
+    // longer reads or writes them on therapist_clients, a row the client's own
+    // JWT can read. Fetched per client, when that client's page or alert is
+    // opened -- never for the whole client list.
+    //   { state: 'loaded', row }   row is {} when nothing is on file yet
+    //   { state: 'failed' }        UNKNOWN. Never render this as "none on file",
+    //                              and never open the edit form over it.
+    //   (no entry)                 not asked for yet
+    let clientPrivate = {};
+    const PRIVATE_COLUMNS = 'therapist_client_id,client_phone,emergency_contact_name,emergency_contact_phone,safety_notes';
+
+    // Every read of therapist_clients names its columns. select=* would keep
+    // pulling the five private columns into the browser for as long as they
+    // still exist on that table (Migration v1.5 Step 3 drops them).
+    // created_at / updated_at are deliberately absent: no migration, seed or
+    // query in any of the three repos confirms they exist on this table, and
+    // PostgREST fails the whole request on an unknown column. The two places
+    // that read them degrade to showing no date; if Studio confirms the
+    // columns, adding the names here restores both.
+    const THERAPIST_CLIENT_COLUMNS = 'id,therapist_id,client_id,display_name,invite_code,status,is_demo,next_session_date,allow_homework,allow_messages,allow_history,allow_journal_sharing';
+
     // A7/D2 — Generation counter for showClient(). Each call claims a token.
     // After any await, the call checks whether a newer showClient() (or
     // showHomePage()) has incremented the counter. If so, the older call
@@ -1714,7 +1737,8 @@ function setButtonLoading(btn, loading, loadingText) {
     // =====================================================
     async function loadDashboard() {
       try {
-        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=in.(active,pending)&select=*`);
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=in.(active,pending)&select=${THERAPIST_CLIENT_COLUMNS}`);
 
         if (!links?.length) {
           document.getElementById('alertsList').innerHTML = '';
@@ -2086,7 +2110,11 @@ function setButtonLoading(btn, loading, loadingText) {
         } else if (isPending) {
           metaLine = '<span class="pending-label">Pending signup</span>';
         } else if (c.is_demo) {
-          metaLine = timeAgo(new Date(c.lastActivity || c.created_at));
+          // created_at is not in THERAPIST_CLIENT_COLUMNS (unconfirmed column),
+          // so with no activity in the window this line is empty rather than
+          // "Invalid Date".
+          const demoWhen = c.lastActivity || c.created_at;
+          metaLine = demoWhen ? timeAgo(new Date(demoWhen)) : '';
         } else if (c.lastActivity) {
           // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
           // lastActivity comes from already-fetched session_metadata.
@@ -2157,6 +2185,50 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     }
 
+    // S7 fix F (R-B-17): one private-row read outside loadClientData(), for
+    // the resolve modal opened from the home page, where no client page has
+    // loaded it. Never throws: the entry it stores and returns says whether
+    // the row is loaded or the read failed.
+    async function loadClientPrivate(link) {
+      let entry;
+      try {
+        const rows = await api(`/rest/v1/therapist_client_private?therapist_client_id=eq.${link.id}&select=${PRIVATE_COLUMNS}`);
+        entry = { state: 'loaded', row: rows?.[0] || {} };
+      } catch (err) {
+        console.error('[therapist_client_private] load failed:', err);
+        entry = { state: 'failed' };
+      }
+      clientPrivate[link.id] = entry;
+      return entry;
+    }
+
+    // S7 fix F: the one emergency panel, used by the resolve modal and by the
+    // client page's alert card (it used to be two copies of the same markup).
+    // `entry` is clientPrivate[linkId], or null while it is still loading.
+    // Unknown is said out loud; it is never drawn as "No phone on file".
+    function emergencyPanelHtml(entry) {
+      let body;
+      if (!entry) {
+        body = '<div>Loading emergency contact information...</div>';
+      } else if (entry.state !== 'loaded') {
+        body = '<div>Could not load emergency contact information. Reload the page to try again.</div>';
+      } else {
+        const p = entry.row;
+        body = `
+            <div><strong>Client phone:</strong> ${p.client_phone ? esc(p.client_phone) : '<span class="text-muted">No phone on file</span>'}</div>
+            <div><strong>Emergency contact:</strong> ${p.emergency_contact_name ? esc(p.emergency_contact_name) : '<span class="text-muted">None</span>'}${p.emergency_contact_phone ? ' · ' + esc(p.emergency_contact_phone) : ''}</div>
+            <div style="margin-top:8px;"><strong>Safety notes:</strong><br>
+              <span style="color: var(--text-light)">${p.safety_notes ? esc(p.safety_notes) : 'None on file'}</span>
+            </div>`;
+      }
+      return `
+        <div class="highlight-box" style="margin-bottom:12px;">
+          <strong>Emergency panel</strong>
+          <div style="margin-top:6px; font-size:0.875rem;">${body}</div>
+        </div>
+      `;
+    }
+
     // S7 fix B (R-B-07): an alert can be opened or resolved only when it is a
     // known event that belongs to one of this therapist's own client links.
     // Per-client cache first, then the homepage list. There is no fallback to
@@ -2183,10 +2255,11 @@ function setButtonLoading(btn, loading, loadingText) {
       const eventObj = own.event;
       const client = own.client;
 
-      const phone = client?.phone || '';
-      const eName = client?.emergency_contact_name || '';
-      const ePhone = client?.emergency_contact_phone || '';
-      const safety = client?.safety_notes || '';
+      // S7 fix F: opened from a client page, that client's private row is
+      // already loaded. Opened from the home page it is not, so the panel says
+      // "Loading" and is filled in below once the row arrives.
+      const privateEntry = clientPrivate[client.id];
+      const privateKnown = privateEntry && privateEntry.state === 'loaded';
 
       // S7 fix A: the modal says which alert this is with severity, category,
       // Alo's action and the timestamp. Never any text from the conversation.
@@ -2211,16 +2284,7 @@ function setButtonLoading(btn, loading, loadingText) {
               </div>
             </div>
 
-            <div class="highlight-box" style="margin-bottom: 12px;">
-              <strong>Emergency panel</strong>
-              <div style="margin-top:6px; font-size:0.875rem;">
-                <div><strong>Client phone:</strong> ${phone ? esc(phone) : '<span class="text-muted">No phone on file</span>'}</div>
-                <div><strong>Emergency contact:</strong> ${eName ? esc(eName) : '<span class="text-muted">None</span>'}${ePhone ? ' · ' + esc(ePhone) : ''}</div>
-                <div style="margin-top:8px;"><strong>Safety notes:</strong><br>
-                  <span style="color: var(--text-light)">${safety ? esc(safety) : 'None on file'}</span>
-                </div>
-              </div>
-            </div>
+            <div id="resolveEmergencyPanel">${emergencyPanelHtml(privateKnown ? privateEntry : null)}</div>
 
             <div class="form-group">
               <label>Action taken <span style="color:var(--danger)">*</span></label>
@@ -2254,6 +2318,16 @@ function setButtonLoading(btn, loading, loadingText) {
       document.body.appendChild(overlay);
       var _releaseTrap = trapFocus(overlay);
       addEscToClose(overlay, () => { _releaseTrap(); overlay.remove(); });
+
+      // S7 fix F: not loaded yet (opened from the home page), or the last read
+      // failed: fetch the private row now. The panel is only written if this
+      // same modal is still on the page when the answer arrives.
+      if (!privateKnown) {
+        loadClientPrivate(client).then(entry => {
+          const panel = overlay.isConnected ? overlay.querySelector('#resolveEmergencyPanel') : null;
+          if (panel) panel.innerHTML = emergencyPanelHtml(entry);
+        });
+      }
     }
 
     async function submitResolveCrisis(crisisEventId) {
@@ -2520,22 +2594,26 @@ if (clientsBtn) clientsBtn.style.display = '';
 
         async function loadClientData(cacheKey) {
       const clientId = currentClient.client_id || currentClient.id;
+      const linkId = currentClient.id;
+      const self = selfTherapistId();
 
       // A7/D7 — allSettled instead of all: one failed section no longer
       // blocks the other four from rendering. Failed sections fall back
       // to an empty array and get flagged so you know data is missing,
       // not that the client genuinely has none.
-      const labels = ['notes', 'homework', 'messages', 'sessions', 'crisis'];
+      const labels = ['notes', 'homework', 'messages', 'sessions', 'crisis', 'emergency info'];
       const results = await Promise.allSettled([
-        api(`/rest/v1/session_notes?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=session_date.desc`),
-        api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&order=created_at.desc`),
-        api(`/rest/v1/client_messages?therapist_id=eq.${therapistId}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
+        api(`/rest/v1/session_notes?therapist_id=eq.${self}&client_id=eq.${clientId}&order=session_date.desc`),
+        api(`/rest/v1/homework_cards?therapist_id=eq.${self}&client_id=eq.${clientId}&order=created_at.desc`),
+        api(`/rest/v1/client_messages?therapist_id=eq.${self}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
         api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc`),
         // S7 fix A: explicit columns, never select=* (see CRISIS_EVENT_COLUMNS).
-        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&select=${CRISIS_EVENT_COLUMNS}`)
+        api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&select=${CRISIS_EVENT_COLUMNS}`),
+        // S7 fix F: this client's private row, by link id (see clientPrivate).
+        api(`/rest/v1/therapist_client_private?therapist_client_id=eq.${linkId}&select=${PRIVATE_COLUMNS}`)
       ]);
 
-      const [notesR, homeworkR, messagesR, sessionsR, crisisR] = results;
+      const [notesR, homeworkR, messagesR, sessionsR, crisisR, privateR] = results;
       const failed = [];
       results.forEach((r, i) => {
         if (r.status === 'rejected') {
@@ -2549,6 +2627,11 @@ if (clientsBtn) clientsBtn.style.display = '';
       clientMessages[cacheKey] = messagesR.status === 'fulfilled' ? (messagesR.value || []) : [];
       clientSessions[cacheKey] = sessionsR.status === 'fulfilled' ? (sessionsR.value || []) : [];
       clientCrisis[cacheKey] = crisisR.status === 'fulfilled' ? (crisisR.value || []) : [];
+      // S7 fix F: no row yet means nothing on file ({}); a failed read means
+      // unknown, which the emergency panel and the edit form treat differently.
+      clientPrivate[linkId] = privateR.status === 'fulfilled'
+        ? { state: 'loaded', row: privateR.value?.[0] || {} }
+        : { state: 'failed' };
 
       if (failed.length > 0) {
         toast(`Couldn't load: ${failed.join(', ')}. Try refreshing.`);
@@ -3188,10 +3271,17 @@ if (clientsBtn) clientsBtn.style.display = '';
 
       if (!currentClient || !currentClient.client_id) return; // skip for pending clients
 
+      // S7 fix F: read from therapist_client_private. If that row could not be
+      // loaded the fields are unknown, which is not the same as missing, so no
+      // "missing" banner is shown.
+      const privateEntry = clientPrivate[currentClient.id];
+      if (!privateEntry || privateEntry.state !== 'loaded') return;
+      const p = privateEntry.row;
+
       const missing = [];
-      if (!currentClient.phone) missing.push('client phone');
-      if (!currentClient.emergency_contact_name) missing.push('emergency contact name');
-      if (!currentClient.emergency_contact_phone) missing.push('emergency contact phone');
+      if (!p.client_phone) missing.push('client phone');
+      if (!p.emergency_contact_name) missing.push('emergency contact name');
+      if (!p.emergency_contact_phone) missing.push('emergency contact phone');
 
       if (missing.length === 0) return;
 
@@ -3533,23 +3623,11 @@ if (clientsBtn) clientsBtn.style.display = '';
       } else {
         document.getElementById('crisisAlertButton').classList.remove('visible');
       }
-      const phone = currentClient?.phone || '';
-      const eName = currentClient?.emergency_contact_name || '';
-      const ePhone = currentClient?.emergency_contact_phone || '';
-      const safety = currentClient?.safety_notes || '';
-
-      const emergencyPanel = `
-        <div class="highlight-box" style="margin-bottom:12px;">
-          <strong>Emergency panel</strong>
-          <div style="margin-top:6px; font-size:0.875rem;">
-            <div><strong>Client phone:</strong> ${phone ? esc(phone) : '<span class="text-muted">No phone on file</span>'}</div>
-            <div><strong>Emergency contact:</strong> ${eName ? esc(eName) : '<span class="text-muted">None</span>'}${ePhone ? ' · ' + esc(ePhone) : ''}</div>
-            <div style="margin-top:8px;"><strong>Safety notes:</strong><br>
-              <span style="color: var(--text-light)">${safety ? esc(safety) : 'None on file'}</span>
-            </div>
-          </div>
-        </div>
-      `;
+      // S7 fix F: from therapist_client_private, loaded by loadClientData().
+      // A failed read shows as "could not load", never as "none on file".
+      const emergencyPanel = emergencyPanelHtml(
+        (currentClient && clientPrivate[currentClient.id]) || { state: 'failed' }
+      );
 
       const alertsHtml = emergencyPanel +
         unacknowledged.map(c => `
@@ -4046,17 +4124,22 @@ if (clientsBtn) clientsBtn.style.display = '';
       const btn = document.getElementById('generateInviteBtn');
       setButtonLoading(btn, true, 'Generating...');
       try {
-        const code = 'ALO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-        const result = await api('/rest/v1/therapist_clients', {
+        // S7 fix G (R-B-18): the code is no longer minted here. The pending row
+        // is inserted without invite_code; the column's database default
+        // (generate_invite_code()) mints it, and the row comes back
+        // (api() defaults to Prefer: return=representation) narrowed to the two
+        // columns needed. The modal and the copy / text / email actions all
+        // read the code from inviteCodeDisplay, so this is their one source.
+        const rows = await api('/rest/v1/therapist_clients?select=id,invite_code', {
           method: 'POST',
           body: JSON.stringify({
-            therapist_id: therapistId,
-            invite_code: code,
+            therapist_id: selfTherapistId(), // S7 fix H: from the session, never supplied
             display_name: name || null,
             status: 'pending'
           })
         });
+        const code = rows?.[0]?.invite_code;
+        if (!code) throw new Error('Invite insert returned no invite_code');
 
         document.getElementById('inviteCodeDisplay').textContent = code;
         document.getElementById('inviteResult').style.display = 'block';
@@ -4126,12 +4209,28 @@ if (clientsBtn) clientsBtn.style.display = '';
     function showEditClientModal() {
       if (!currentClient) return;
 
+      // S7 fix F (R-B-17): the emergency fields come from
+      // therapist_client_private. The form only opens over a row that is
+      // actually loaded. Opened over an unknown row it would show blanks, and
+      // Save would then write those blanks over whatever is really on file.
+      const privateEntry = clientPrivate[currentClient.id];
+      if (!privateEntry || privateEntry.state !== 'loaded') {
+        const linkId = currentClient.id;
+        loadClientPrivate(currentClient).then(entry => {
+          if (!currentClient || currentClient.id !== linkId) return; // moved on meanwhile
+          if (entry.state === 'loaded') showEditClientModal();
+          else toast('Could not load emergency contact information. Try again.');
+        });
+        return;
+      }
+      const p = privateEntry.row;
+
       document.getElementById('editClientName').value = currentClient.display_name || '';
       document.getElementById('editNextSession').value = currentClient.next_session_date || '';
-      document.getElementById('editClientPhone').value = currentClient.phone || '';
-      document.getElementById('editEmergencyName').value = currentClient.emergency_contact_name || '';
-      document.getElementById('editEmergencyPhone').value = currentClient.emergency_contact_phone || '';
-      document.getElementById('editSafetyNotes').value = currentClient.safety_notes || '';
+      document.getElementById('editClientPhone').value = p.client_phone || '';
+      document.getElementById('editEmergencyName').value = p.emergency_contact_name || '';
+      document.getElementById('editEmergencyPhone').value = p.emergency_contact_phone || '';
+      document.getElementById('editSafetyNotes').value = p.safety_notes || '';
       document.getElementById('settingHomework').checked = currentClient.allow_homework ?? true;
       document.getElementById('settingMessages').checked = currentClient.allow_messages ?? true;
       document.getElementById('settingHistory').checked = currentClient.allow_history ?? true;
@@ -4144,19 +4243,40 @@ if (clientsBtn) clientsBtn.style.display = '';
     async function saveClientEdit() {
       if (!currentClient) return;
 
-      // SILENT-4 (Phase 3): a double-click here double-PATCHes the client
+      // SILENT-4 (Phase 3): a double-click here double-writes the client
       // record, including safety_notes and emergency contact fields.
       const btn = document.getElementById('saveClientEditBtn');
       setButtonLoading(btn, true, 'Saving...');
       try {
-        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
-        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}&therapist_id=eq.${selfTherapistId()}`, 'PATCH', {
-          display_name: document.getElementById('editClientName').value,
-          next_session_date: document.getElementById('editNextSession').value || null,
-          phone: document.getElementById('editClientPhone').value,
+        const linkId = currentClient.id;
+        const self = selfTherapistId();
+        if (!allClients.some(c => c.id === linkId)) {
+          throw new Error('Client link is not one of this therapist\'s own');
+        }
+
+        // S7 fix F (R-B-17): the emergency fields go to
+        // therapist_client_private and nowhere else, as an upsert keyed on the
+        // link id (there is no row until the first save). Written first: if it
+        // fails nothing else has changed, and if the settings PATCH below
+        // fails the form stays open and saving again is harmless, since both
+        // writes are idempotent. clinical_context is not sent: this form has
+        // no field for it, and an upsert leaves unnamed columns untouched.
+        // S7 fix E: an empty answer (policy filtered it) is a failure.
+        const privateRows = await apiMutate('/rest/v1/therapist_client_private?on_conflict=therapist_client_id', 'POST', {
+          therapist_client_id: linkId,
+          client_phone: document.getElementById('editClientPhone').value,
           emergency_contact_name: document.getElementById('editEmergencyName').value,
           emergency_contact_phone: document.getElementById('editEmergencyPhone').value,
-          safety_notes: document.getElementById('editSafetyNotes').value,
+          safety_notes: document.getElementById('editSafetyNotes').value
+        }, { upsert: true, returning: PRIVATE_COLUMNS });
+        clientPrivate[linkId] = { state: 'loaded', row: privateRows[0] };
+
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        // S7 fix F: none of the five private columns is sent to
+        // therapist_clients any more.
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}&therapist_id=eq.${self}`, 'PATCH', {
+          display_name: document.getElementById('editClientName').value,
+          next_session_date: document.getElementById('editNextSession').value || null,
           allow_homework: document.getElementById('settingHomework').checked,
           allow_messages: document.getElementById('settingMessages').checked,
          allow_history: document.getElementById('settingHistory').checked,
@@ -4184,6 +4304,9 @@ if (clientsBtn) clientsBtn.style.display = '';
 
         // Re-check emergency contact warning after edit
         checkEmergencyContactWarning();
+        // S7 fix F: the alert card's emergency panel shows the same fields, so
+        // it is redrawn from the row that was just saved.
+        if (currentClient) renderCrisisAlerts(currentClient.client_id || currentClient.id);
 
       } catch (err) {
         console.error(err);
@@ -4239,7 +4362,8 @@ if (clientsBtn) clientsBtn.style.display = '';
 
     async function showArchivedClients() {
       try {
-        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.archived&select=*`);
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=eq.archived&select=${THERAPIST_CLIENT_COLUMNS}`);
 
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay show';
@@ -4434,7 +4558,8 @@ if (clientsBtn) clientsBtn.style.display = '';
         return;
       }
       try {
-        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${therapistId}&status=eq.archived&is_demo=eq.true&select=*`);
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=eq.archived&is_demo=eq.true&select=${THERAPIST_CLIENT_COLUMNS}`);
         const archivedDemo = archived?.[0];
         if (!archivedDemo) {
           toast('Test client not found');
