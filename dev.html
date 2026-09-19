@@ -1145,9 +1145,135 @@ function setButtonLoading(btn, loading, loadingText) {
     let showClientGeneration = 0;
 
     // =====================================================
+    // SIGN-OUT RESET (S7 fix C, R-B-03)
+    // =====================================================
+    // Sign-out used to hide the app and show the login page over the same
+    // live DOM and the same globals, so the next sign-in in that tab opened on
+    // the previous therapist's last client page: name, notes, messages, phone,
+    // emergency contact, safety notes. Every sign-out path now goes through
+    // signOutLocally(), and completeSignIn() clears again before it shows the
+    // app, so a sign-in always lands on Home over a page that holds nothing
+    // from anyone else.
+
+    // Bumped at every auth boundary (sign-out, sign-in). Async work captures it
+    // before its first await and re-checks after: an answer that comes back
+    // under a different epoch belongs to a session that is gone, and is
+    // dropped rather than cached, rendered, or -- for a token refresh --
+    // installed over whoever is signed in now.
+    let authEpoch = 0;
+
+    function assertSameAuthEpoch(epoch) {
+      if (epoch !== authEpoch) {
+        const err = new Error('Signed out while this request was in flight');
+        err.isStaleAuth = true;
+        throw err;
+      }
+    }
+
+    // The app's markup exactly as shipped, taken here at parse time before
+    // anything has rendered into it. Restoring it wholesale is what makes the
+    // reset complete by construction: a card, banner or input added to the
+    // client page later is covered without anyone remembering to list it.
+    // Handlers in this file are inline attributes, so they survive the round
+    // trip, and nothing holds a reference to a node inside these containers.
+    const _pristineAppHtml = document.getElementById('appContainer').innerHTML;
+    const _pristineStaticModalHtml = {};
+    document.querySelectorAll('.modal-overlay[id]').forEach(m => {
+      _pristineStaticModalHtml[m.id] = m.innerHTML;
+    });
+
+    // Memory and page, not the session. Safe to call at any time.
+    function clearAppState() {
+      // In-flight client loads must not render after this (the A7/D2 counter).
+      ++showClientGeneration;
+
+      currentClient = null;
+      allClients = [];
+      clientNotes = {};
+      clientHomework = {};
+      clientMessages = {};
+      clientSessions = {};
+      clientCrisis = {};
+      clientPrivate = {};
+      window._allCrisisEvents = [];
+      window._allHomeMessages = [];
+      window._monthDays = [];
+      window._stripDays = [];
+      calendarOffset = 0;
+      stripOffset = 0;
+      dashboardLoadedOnce = false;
+      _aloTourOfferChecked = false;
+      setFormDirty(false);
+
+      // A tour left running would sit over the login page, pointing at nodes
+      // that are about to be replaced. Nulled first: see _aloActiveTour.
+      if (_aloActiveTour) {
+        const tour = _aloActiveTour;
+        _aloActiveTour = null;
+        try { tour.destroy(); } catch (e) { /* best effort */ }
+      }
+
+      // Everything built on the fly that can hold client data: the drawers,
+      // the note forms, the resolve / all-alerts / all-messages / archived
+      // overlays, the calendar day popup. The two auth-flow overlays (forgot
+      // password, set new password) hold none and are left alone.
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        if (overlay.id && Object.prototype.hasOwnProperty.call(_pristineStaticModalHtml, overlay.id)) return;
+        if (overlay.querySelector('#resetNewPass, #forgotEmail')) return;
+        overlay.remove();
+      });
+      document.getElementById('calDayPopup')?.remove();
+
+      // The static modals: closed, focus trap released, back to shipped
+      // markup. Otherwise the edit form keeps the last client's phone,
+      // emergency contact and safety notes in its hidden inputs, and the
+      // invite modal keeps the last code.
+      Object.keys(_pristineStaticModalHtml).forEach(id => {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        closeModal(id);
+        modal.innerHTML = _pristineStaticModalHtml[id];
+      });
+
+      const firstScreen = document.getElementById('firstScreenOverlay');
+      if (firstScreen) firstScreen.style.display = 'none';
+
+      document.getElementById('appContainer').innerHTML = _pristineAppHtml;
+      // toggleSidebar() locks page scrolling while the mobile sidebar is open.
+      document.body.style.overflow = '';
+    }
+
+    // The sign-in form is only hidden while the app is up, so whatever was
+    // typed into it -- the password included -- was still sitting in its
+    // inputs at sign-out, one click on "Sign In" away from the next person at
+    // the same computer.
+    function clearLoginForm() {
+      ['loginEmail', 'loginPassword', 'signupName', 'signupEmail', 'signupPassword', 'signupLicenseState'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      toggleAuthForm('login'); // also hides the login error / info lines
+    }
+
+    // Every sign-out path ends up here: the Sign Out button, a rejected token
+    // refresh in api(), and a stored session that turns out not to be a
+    // therapist's. (This file has no SDK, so there is no SIGNED_OUT event.)
+    // Callers show the login page and any message themselves, afterwards.
+    function signOutLocally() {
+      ++authEpoch;
+      session = null;
+      therapistId = null;
+      localStorage.removeItem('alo_session');
+      clearAppState();
+      clearLoginForm();
+    }
+
+    // =====================================================
     // SUPABASE API HELPER
     // =====================================================
     async function api(endpoint, options = {}) {
+      // S7 fix C: see authEpoch. Re-checked after every await in here.
+      const myEpoch = authEpoch;
       const token = session?.access_token || SUPABASE_ANON_KEY;
       const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -1157,27 +1283,36 @@ function setButtonLoading(btn, loading, loadingText) {
         ...options.headers
       };
       const res = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers });
+      assertSameAuthEpoch(myEpoch);
 
             // Retry once on 401 (token expired after ~60 min)
       if (res.status === 401 && session?.refresh_token) {
         // A7/D6 — retry up to 2 more times with backoff if refresh fails
         // due to a network error specifically. A real auth rejection
         // (refreshSession returning null) stops retrying immediately.
+        // S7 fix C: the token is captured once, so a retry can never pick up
+        // (and spend) the refresh token of whoever signed in meanwhile.
+        const refreshToken = session.refresh_token;
         let refreshed = null;
         try {
-          refreshed = await refreshSession(session.refresh_token);
+          refreshed = await refreshSession(refreshToken);
         } catch (refreshErr) {
           if (refreshErr.isNetworkError) {
             for (let attempt = 1; attempt <= 2 && !refreshed; attempt++) {
               await new Promise(r => setTimeout(r, attempt * 1500));
+              assertSameAuthEpoch(myEpoch);
               try {
-                refreshed = await refreshSession(session.refresh_token);
+                refreshed = await refreshSession(refreshToken);
               } catch (retryErr) {
                 if (!retryErr.isNetworkError) break;
               }
             }
           }
         }
+        // S7 fix C: this refresh belongs to the session that sent the request.
+        // If that session has signed out since, its result is neither
+        // installed over the current one nor allowed to force a logout.
+        assertSameAuthEpoch(myEpoch);
         if (refreshed) {
           session = refreshed;
           therapistId = refreshed.user.id;
@@ -1190,17 +1325,18 @@ function setButtonLoading(btn, loading, loadingText) {
             ...options.headers
           };
           const retryRes = await fetch(`${SUPABASE_URL}${endpoint}`, { ...options, headers: retryHeaders });
+          assertSameAuthEpoch(myEpoch);
           if (!retryRes.ok) {
             const body = await retryRes.text();
             throw new Error(`API ${retryRes.status}: ${body}`);
           }
           const text = await retryRes.text();
+          assertSameAuthEpoch(myEpoch);
           return text ? JSON.parse(text) : null;
         }
         // Refresh failed — force re-login
-        localStorage.removeItem('alo_session');
-        session = null;
-        therapistId = null;
+        // S7 fix C (R-B-03): a forced sign-out resets exactly like the button.
+        signOutLocally();
         showLogin();
         toast('Session expired. Please log in again.');
         throw new Error('Session expired');
@@ -1211,6 +1347,7 @@ function setButtonLoading(btn, loading, loadingText) {
         throw new Error(`API ${res.status}: ${body}`);
       }
       const text = await res.text();
+      assertSameAuthEpoch(myEpoch);
       return text ? JSON.parse(text) : null;
     }
 
@@ -1272,9 +1409,9 @@ function setButtonLoading(btn, loading, loadingText) {
               }
             } catch (roleErr) {
               console.log('Session is not a therapist account');
-              localStorage.removeItem('alo_session');
-              session = null;
-              therapistId = null;
+              // S7 fix C: the same reset as every other sign-out path. It runs
+              // before the message below is set, because it clears that line.
+              signOutLocally();
 
               // Show clear error message instead of generic login
               const errorEl = document.getElementById('loginError');
@@ -1413,6 +1550,18 @@ function setButtonLoading(btn, loading, loadingText) {
       therapistId = session.user.id;
       localStorage.setItem('alo_session', JSON.stringify(session));
 
+      // S7 fix C (R-B-03): a sign-in is an auth boundary of its own. Whatever
+      // is still in flight from before it is dropped (authEpoch), and the app
+      // is cleared again here so it opens on Home over an empty page however
+      // the last session ended -- this does not rely on a sign-out path having
+      // run. The password has done its job; it does not stay in the form.
+      ++authEpoch;
+      clearAppState();
+      ['loginPassword', 'signupPassword'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
       const profile = await api(`/rest/v1/profiles?id=eq.${therapistId}&select=role`);
       if (!profile?.[0] || profile[0].role !== 'therapist') {
         throw new Error('This account is not a therapist account');
@@ -1543,9 +1692,8 @@ function setButtonLoading(btn, loading, loadingText) {
     }
 
     function handleLogout() {
-      session = null;
-      therapistId = null;
-      localStorage.removeItem('alo_session');
+      // S7 fix C (R-B-03): reset everything, then show the login page.
+      signOutLocally();
       showLogin();
     }
 
@@ -1591,6 +1739,11 @@ function setButtonLoading(btn, loading, loadingText) {
     }
 
     async function showApp() {
+      // S7 fix C (R-B-03): the app always opens on Home, never on whatever
+      // view was last up, and nothing below writes a name or a dashboard into
+      // the page for a session that has since signed out.
+      const myEpoch = authEpoch;
+      showHomePage();
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('appContainer').style.display = 'block';
 
@@ -1601,6 +1754,7 @@ function setButtonLoading(btn, loading, loadingText) {
       } catch (err) {
         console.error('Profile load failed, using fallback:', err);
       }
+      if (myEpoch !== authEpoch) return;
 
       document.getElementById('therapistName').textContent = name;
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -1620,6 +1774,7 @@ function setButtonLoading(btn, loading, loadingText) {
         // retryDashboardLoad() offers it once a load succeeds.
         return;
       }
+      if (myEpoch !== authEpoch) return;
       _aloMaybeAutoOfferTour();
     }
 
@@ -1801,9 +1956,13 @@ function setButtonLoading(btn, loading, loadingText) {
     }
 
     async function loadDashboard() {
+      // S7 fix C: a load that started under a session that has since signed
+      // out renders nothing and reports nothing (see authEpoch).
+      const myEpoch = authEpoch;
       try {
         // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
         const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=in.(active,pending)&select=${THERAPIST_CLIENT_COLUMNS}`);
+        if (myEpoch !== authEpoch) return;
 
         if (!links?.length) {
           document.getElementById('alertsList').innerHTML = '';
@@ -1865,6 +2024,7 @@ function setButtonLoading(btn, loading, loadingText) {
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
           clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
         ]);
+        if (myEpoch !== authEpoch) return;
 
         // S7 fix B: the query above already asks for own clients only. This is
         // the same rule applied to the answer, so a row with no client or with
@@ -1945,6 +2105,8 @@ function setButtonLoading(btn, loading, loadingText) {
         markDashboardLoaded();
 
       } catch (err) {
+        // S7 fix C: not this session's failure to report (see authEpoch).
+        if (myEpoch !== authEpoch) return;
         // S7 fix D (R-B-05): say so on the page, then reject. Swallowing this
         // is what made every caller's failure handling unreachable.
         console.error('Dashboard load error:', err);
@@ -2252,6 +2414,9 @@ function setButtonLoading(btn, loading, loadingText) {
           read_by: self
         });
       } catch (err) {
+        // S7 fix C: a sign-out while this was in flight is not a read-status
+        // failure to tell the next person about.
+        if (err && err.isStaleAuth) return;
         // A7/D5+D12 — previously silent. UI/server mismatch left unread
         // badges stale with no user signal. Surface failure via toast so
         // the therapist knows the read-state update didn't land.
@@ -2265,6 +2430,7 @@ function setButtonLoading(btn, loading, loadingText) {
     // loaded it. Never throws: the entry it stores and returns says whether
     // the row is loaded or the read failed.
     async function loadClientPrivate(link) {
+      const myEpoch = authEpoch;
       let entry;
       try {
         const rows = await api(`/rest/v1/therapist_client_private?therapist_client_id=eq.${link.id}&select=${PRIVATE_COLUMNS}`);
@@ -2273,6 +2439,8 @@ function setButtonLoading(btn, loading, loadingText) {
         console.error('[therapist_client_private] load failed:', err);
         entry = { state: 'failed' };
       }
+      // S7 fix C: never cached for a session that has since signed out.
+      if (myEpoch !== authEpoch) return { state: 'failed' };
       clientPrivate[link.id] = entry;
       return entry;
     }
@@ -2623,6 +2791,12 @@ if (clientsBtn) clientsBtn.style.display = '';
       var container = document.getElementById('sharedJournalContainer');
       if (!card || !container) return;
 
+      // S7 fix C: this load belongs to the showClient() call that started it.
+      // It claims no token of its own; it only checks that the view has not
+      // moved on (another client, Home, or a sign-out, which bumps the same
+      // counter) before it writes entries into the page.
+      var myGeneration = showClientGeneration;
+
       try {
         var entries = await api(
           '/rest/v1/journal_entries?client_id=eq.' + clientIdParam
@@ -2631,6 +2805,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           + '&limit=30'
           + '&select=id,title,content,source,created_at,entry_type'
         );
+        if (myGeneration !== showClientGeneration) return;
 
         if (!entries || entries.length === 0) {
           card.style.display = 'none';
@@ -2667,6 +2842,7 @@ if (clientsBtn) clientsBtn.style.display = '';
         }).join('');
 
       } catch (err) {
+        if (myGeneration !== showClientGeneration) return;
         console.error('[Dashboard] Shared journal load failed:', err);
         card.style.display = 'none';
       }
@@ -2677,6 +2853,8 @@ if (clientsBtn) clientsBtn.style.display = '';
     }
 
         async function loadClientData(cacheKey) {
+      // S7 fix C: see authEpoch. Nothing from a signed-out session is cached.
+      const myEpoch = authEpoch;
       const clientId = currentClient.client_id || currentClient.id;
       const linkId = currentClient.id;
       const self = selfTherapistId();
@@ -2696,6 +2874,8 @@ if (clientsBtn) clientsBtn.style.display = '';
         // S7 fix F: this client's private row, by link id (see clientPrivate).
         api(`/rest/v1/therapist_client_private?therapist_client_id=eq.${linkId}&select=${PRIVATE_COLUMNS}`)
       ]);
+
+      if (myEpoch !== authEpoch) return;
 
       const [notesR, homeworkR, messagesR, sessionsR, crisisR, privateR] = results;
       const failed = [];
@@ -4693,6 +4873,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       try { tab.opener = null; } catch (e) { /* best effort on old browsers */ }
 
       setButtonLoading(btn, true, 'Opening...');
+      // S7 fix C: this path talks to the server without api(), so it carries
+      // its own authEpoch checks. A sign-out while it is in flight closes the
+      // tab instead of installing a refreshed session or opening the chat.
+      const myEpoch = authEpoch;
       try {
         const call = (accessToken) => fetch(`${SUPABASE_URL}/functions/v1/open-as-client`, {
           method: 'POST',
@@ -4703,6 +4887,7 @@ if (clientsBtn) clientsBtn.style.display = '';
         });
 
         let res = await call(session?.access_token || '');
+        assertSameAuthEpoch(myEpoch);
 
         // open-as-client is verify_jwt = true and calls auth.getUser itself,
         // so an hour-old access token 401s here. Refresh once and retry,
@@ -4715,24 +4900,30 @@ if (clientsBtn) clientsBtn.style.display = '';
           } catch (refreshErr) {
             refreshed = null;
           }
+          assertSameAuthEpoch(myEpoch);
           if (refreshed) {
             session = refreshed;
             therapistId = refreshed.user.id;
             localStorage.setItem('alo_session', JSON.stringify(refreshed));
             res = await call(refreshed.access_token);
+            assertSameAuthEpoch(myEpoch);
           }
         }
 
         if (!res.ok) throw new Error('open_as_client_rejected');
 
         const body = await res.json();
+        assertSameAuthEpoch(myEpoch);
         if (!body || typeof body.url !== 'string') throw new Error('open_as_client_no_url');
 
         // replace() rather than assign(): the token URL becomes that tab's
         // only history entry, which the chat app then strips in turn.
         tab.location.replace(body.url);
-      } catch {
+      } catch (err) {
         tab.close();
+        // S7 fix C: signed out meanwhile -- nothing to tell whoever is here now.
+        // (Only the flag is read; the error is still never shown or logged.)
+        if (err && err.isStaleAuth) return;
         // Deliberately generic and cause-free. Nothing that could carry the
         // token is interpolated here -- not the response body, not an error
         // object, not the status.
@@ -4900,6 +5091,11 @@ if (clientsBtn) clientsBtn.style.display = '';
     }
 
     let _aloTourFinished = false;
+    // S7 fix C: the running tour, if any, so clearAppState() can take it down.
+    // clearAppState() nulls this before it calls destroy(), which is how
+    // onDestroyed below tells a reset from the therapist closing the tour: a
+    // reset is neither a finish nor a skip, so it writes no timestamp.
+    let _aloActiveTour = null;
 
     function startAloTour() {
       if (typeof window.driver === 'undefined') {
@@ -4915,10 +5111,14 @@ if (clientsBtn) clientsBtn.style.display = '';
         overlayClickBehavior: 'close',
         steps: _aloTourSteps(driverRef),
         onDestroyed: () => {
+          const endedByReset = _aloActiveTour !== driverObj;
+          _aloActiveTour = null;
+          if (endedByReset) return;
           _aloWriteOnboardingTimestamp(_aloTourFinished ? 'onboarding_completed_at' : 'onboarding_skipped_at');
         }
       });
       driverRef.current = driverObj;
+      _aloActiveTour = driverObj;
       driverObj.drive();
     }
     window.startAloTour = startAloTour;
