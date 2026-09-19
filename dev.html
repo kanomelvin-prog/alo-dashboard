@@ -1175,12 +1175,40 @@ function setButtonLoading(btn, loading, loadingText) {
       return text ? JSON.parse(text) : null;
     }
 
-    async function apiMutate(endpoint, method, body) {
-      return api(endpoint, {
-        method,
-        body: JSON.stringify(body),
-        prefer: 'return=minimal'
-      });
+    // S7 fix E (R-B-06) -- the one mutation helper. A PATCH or DELETE that RLS
+    // (or a stale id) filters down to zero rows still comes back 2xx from
+    // PostgREST, so "no error" was being toasted as success. PATCH, DELETE and
+    // upserts now ask for the rows they touched (return=representation,
+    // narrowed by `returning` so a mutation never echoes note or safety text
+    // back over the wire) and an empty answer throws, which lands in each
+    // caller's existing failure copy. Plain POSTs keep return=minimal: an
+    // insert cannot match zero rows, it either inserts or errors.
+    async function apiMutate(endpoint, method, body, opts = {}) {
+      const upsert = opts.upsert === true;
+      const verify = upsert || method === 'PATCH' || method === 'DELETE';
+      let url = endpoint;
+      let prefer = 'return=minimal';
+      if (verify) {
+        url += (endpoint.includes('?') ? '&' : '?') + 'select=' + (opts.returning || 'id');
+        prefer = upsert ? 'resolution=merge-duplicates,return=representation' : 'return=representation';
+      }
+      const request = { method, prefer };
+      if (body !== undefined) request.body = JSON.stringify(body);
+      const rows = await api(url, request);
+      if (verify && (!Array.isArray(rows) || rows.length === 0)) {
+        throw new Error(`${method} ${endpoint.split('?')[0]} changed no rows`);
+      }
+      return rows;
+    }
+
+    // S7 fix H (R-B-14, R-B-16) -- the therapist guard. Every therapist_id this
+    // file adds to a URL filter or a POST body comes from here: the signed-in
+    // session's own user id, never a value read from the page, a row, or a
+    // parameter. Throws rather than building a request with no guard in it.
+    function selfTherapistId() {
+      const id = session?.user?.id;
+      if (!id) throw new Error('No signed-in therapist');
+      return id;
     }
 
     // =====================================================
@@ -1727,7 +1755,8 @@ function setButtonLoading(btn, loading, loadingText) {
 
         const [crisisEvents, messages, homework, sessions] = await Promise.all([
           api(`/rest/v1/crisis_events?or=(client_id.in.(${idFilter}),client_id.is.null)&acknowledged=eq.false&order=created_at.desc&limit=50`),
-          clientIds.length ? api(`/rest/v1/client_messages?client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
+          // S7 fix H (R-B-14): only messages written to this therapist.
+          clientIds.length ? api(`/rest/v1/client_messages?therapist_id=eq.${selfTherapistId()}&client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
           clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
         ]);
@@ -2081,15 +2110,21 @@ function setButtonLoading(btn, loading, loadingText) {
     }
 
     async function markClientMessagesRead(clientId) {
+      // S7 fix E: this PATCH is filtered on read=eq.false, so with nothing
+      // unread "zero rows" is the normal answer, not a failure. Only send it
+      // when the list loadClientData() just fetched has unread messages in
+      // it; then an empty result does mean the update did not land.
+      const unread = (clientMessages[clientId] || []).filter(m => !m.read);
+      if (!unread.length) return;
+
       try {
-        await api(`/rest/v1/client_messages?client_id=eq.${clientId}&read=eq.false`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            read: true,
-            read_at: new Date().toISOString(),
-            read_by: therapistId
-          }),
-          prefer: 'return=minimal'
+        // S7 fix H (R-B-14): scoped to messages written to this therapist, the
+        // same filter the per-client read in loadClientData() already uses.
+        const self = selfTherapistId();
+        await apiMutate(`/rest/v1/client_messages?therapist_id=eq.${self}&client_id=eq.${clientId}&read=eq.false`, 'PATCH', {
+          read: true,
+          read_at: new Date().toISOString(),
+          read_by: self
         });
       } catch (err) {
         // A7/D5+D12 — previously silent. UI/server mismatch left unread
@@ -2867,7 +2902,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
-          therapist_id: therapistId,
+          therapist_id: selfTherapistId(), // S7 fix H: from the session, never supplied
           client_id: currentClient.client_id || currentClient.id,
           session_date: document.getElementById('noteDate').value,
           session_type: document.getElementById('noteType').value,
@@ -2975,19 +3010,16 @@ if (clientsBtn) clientsBtn.style.display = '';
       const btn = e.target.querySelector('button[type="submit"]');
       setButtonLoading(btn, true, 'Saving...');
       try {
-        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            session_date: document.getElementById('editNoteDate').value,
-            session_type: document.getElementById('editNoteType').value,
-            themes: document.getElementById('editNoteThemes').value,
-            observations: document.getElementById('editNoteObs').value,
-            interventions: document.getElementById('editNoteInt').value,
-            plan: document.getElementById('editNotePlan').value,
-            next_session_date: document.getElementById('editNoteNextSession').value || null,
-            billing_justification: document.getElementById('editNoteBilling').checked
-          }),
-          prefer: 'return=minimal'
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        await apiMutate(`/rest/v1/session_notes?id=eq.${noteId}&therapist_id=eq.${selfTherapistId()}`, 'PATCH', {
+          session_date: document.getElementById('editNoteDate').value,
+          session_type: document.getElementById('editNoteType').value,
+          themes: document.getElementById('editNoteThemes').value,
+          observations: document.getElementById('editNoteObs').value,
+          interventions: document.getElementById('editNoteInt').value,
+          plan: document.getElementById('editNotePlan').value,
+          next_session_date: document.getElementById('editNoteNextSession').value || null,
+          billing_justification: document.getElementById('editNoteBilling').checked
         });
         delete clientNotes[cacheKey];
         await loadClientData(cacheKey);
@@ -3013,10 +3045,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       // between confirm() resolving and that re-render landing).
       setButtonLoading(btn, true, 'Deleting...');
       try {
-        await api(`/rest/v1/session_notes?id=eq.${noteId}`, {
-          method: 'DELETE',
-          prefer: 'return=minimal'
-        });
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        await apiMutate(`/rest/v1/session_notes?id=eq.${noteId}&therapist_id=eq.${selfTherapistId()}`, 'DELETE');
         delete clientNotes[cacheKey];
         await loadClientData(cacheKey);
         renderNotes(cacheKey);
@@ -3155,7 +3185,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       setButtonLoading(btn, true, 'Saving...');
       try {
         await apiMutate('/rest/v1/session_notes', 'POST', {
-          therapist_id: therapistId,
+          therapist_id: selfTherapistId(), // S7 fix H: from the session, never supplied
           client_id: currentClient.client_id || currentClient.id,
           session_date: new Date().toISOString().split('T')[0],
           session_type: 'Quick Note',
@@ -3381,7 +3411,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       setButtonLoading(btn, true, 'Assigning...');
       try {
         await apiMutate('/rest/v1/homework_cards', 'POST', {
-          therapist_id: therapistId,
+          therapist_id: selfTherapistId(), // S7 fix H: from the session, never supplied
           client_id: currentClient.client_id || currentClient.id,
           homework_type: document.getElementById('hwType').value,
           title: document.getElementById('hwTitle').value,
@@ -4054,7 +4084,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       const btn = document.getElementById('saveClientEditBtn');
       setButtonLoading(btn, true, 'Saving...');
       try {
-        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}&therapist_id=eq.${selfTherapistId()}`, 'PATCH', {
           display_name: document.getElementById('editClientName').value,
           next_session_date: document.getElementById('editNextSession').value || null,
           phone: document.getElementById('editClientPhone').value,
@@ -4113,7 +4144,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       const btn = document.getElementById('archiveClientBtn');
       setButtonLoading(btn, true, 'Archiving...');
       try {
-        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}`, 'PATCH', {
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${currentClient.id}&therapist_id=eq.${selfTherapistId()}`, 'PATCH', {
           status: 'archived'
         });
 
@@ -4180,7 +4212,8 @@ if (clientsBtn) clientsBtn.style.display = '';
       // for the in-flight window and the failure path.
       setButtonLoading(btn, true, 'Restoring...');
       try {
-        await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}`, 'PATCH', {
+        // S7 fix E + H: verified (zero rows = failure copy below) and guarded.
+        await apiMutate(`/rest/v1/therapist_clients?id=eq.${linkId}&therapist_id=eq.${selfTherapistId()}`, 'PATCH', {
           status: 'active'
         });
         document.getElementById('archivedClientsOverlay')?.remove();
