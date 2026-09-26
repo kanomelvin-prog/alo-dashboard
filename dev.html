@@ -3690,8 +3690,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       text += 'Source: Client self-directed use of an emotional support tool. No session transcript available.\n\n';
       text += 'Engagement: Client engaged in ' + recentSessions.length + ' Alo session' + (recentSessions.length !== 1 ? 's' : '') + ' (last: ' + lastSession + ').\n\n';
 
-      const themes = recentSessions.map(s => s.primary_mode || 'emotional processing').filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'general emotional processing';
-      text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
+      // S8 B4 (D-052): no themes line. It presented Alo's own interaction-mode
+      // label (or a stock phrase when a session had none) as something the
+      // client reported, in text headed for an EHR, on a dashboard that
+      // promises therapists "not themes". Do not reintroduce it.
 
       if (homework.length) {
         text += 'Homework: ' + homework.map(h => {
