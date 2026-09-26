@@ -511,17 +511,7 @@
                             <option value="other">Other</option>
                           </select>
                         </div>
-                        <div class="form-group">
-                          <label class="tooltip-trigger">Sensitivity
-                            <span class="tooltip-icon">?</span>
-                            <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
-                          </label>
-                          <select id="hwSensitivity">
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                          </select>
-                        </div>
+                        <!-- S8 B3 (D-007): Sensitivity control removed; returns when the bot reads it (Therapist Homework spec, Gate B). -->
                         <div class="form-group full">
                           <label>Treatment Plan Goal (SimplePractice)</label>
                           <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
@@ -534,7 +524,7 @@
                         </div>
                       </div>
                     </div>
-                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, sensitivity, rationale)</button>
+                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, rationale)</button>
                     <div class="form-actions">
                       <button type="submit" class="btn btn-primary">Assign Homework</button>
                     </div>
@@ -2940,7 +2930,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       if (expandBtn) {
         expandBtn.textContent = expanded.classList.contains('show')
           ? '− Less options'
-          : '+ More options (type, sensitivity, rationale)';
+          : '+ More options (type, rationale)';
       }
     }
 
@@ -3855,7 +3845,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           title: document.getElementById('hwTitle').value,
           goal: document.getElementById('hwGoal').value,
           clinical_rationale: document.getElementById('hwRationale').value,
-          sensitivity_level: document.getElementById('hwSensitivity').value,
+          sensitivity_level: 'low', // S8 B3 (D-007): what the removed control sent by default
           treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
           is_active: true
         });
