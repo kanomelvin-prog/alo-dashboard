@@ -819,8 +819,9 @@
           showPasswordResetModal(accessToken);
         } catch (e) {
           // Fallback if modal code fails
-          const newPass = prompt('Enter your new password (min 6 characters):');
-          if (newPass && newPass.length >= 6) {
+          // S8 B6 (D-025, R-B-22): the same 12-character minimum as sign-up.
+          const newPass = prompt('Enter your new password (min 12 characters):');
+          if (newPass && newPass.length >= 12) {
             fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
               method: 'PUT',
               headers: {
@@ -833,6 +834,8 @@
               if (r.ok) { alert('Password updated!'); window.location.href = window.location.pathname; }
               else { r.text().then(t => alert('Error: ' + t)); }
             });
+          } else if (newPass) {
+            alert('Password must be at least 12 characters');
           }
         }
       });
@@ -852,7 +855,7 @@ function showPasswordResetModal(accessToken) {
         <div class="login-error" id="resetError" style="display:none;"></div>
         <div class="form-group">
           <label>New Password</label>
-          <input type="password" id="resetNewPass" placeholder="Min. 6 characters" autofocus>
+          <input type="password" id="resetNewPass" placeholder="Min. 12 characters" autofocus>
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
@@ -880,8 +883,10 @@ async function submitPasswordReset(accessToken) {
   const confirmPass = document.getElementById('resetConfirmPass').value;
   errorEl.style.display = 'none';
 
-  if (!newPass || newPass.length < 6) {
-    errorEl.textContent = 'Password must be at least 6 characters';
+  // S8 B6 (D-025, R-B-22): one password policy. Sign-up enforces 12 here and
+  // in the therapist-signup function; the reset path now does the same.
+  if (!newPass || newPass.length < 12) {
+    errorEl.textContent = 'Password must be at least 12 characters';
     errorEl.style.display = 'block';
     return;
   }
