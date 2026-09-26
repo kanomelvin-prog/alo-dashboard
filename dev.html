@@ -747,56 +747,6 @@
     </div>
   </div>
 
-  <!-- Default Client Settings Modal -->
-  <div class="modal-overlay" id="defaultSettingsModal" onclick="closeModal('defaultSettingsModal', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Default Client Settings</h3>
-        <button class="modal-close" onclick="closeModal('defaultSettingsModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-intro">These defaults apply to all new clients. Override per-client in Edit.</p>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Homework visibility</div>
-            <div class="setting-hint">Client can see assigned homework in chat</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHomework" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Message to therapist</div>
-            <div class="setting-hint">Client can send async messages</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultMessages" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Conversation history</div>
-            <div class="setting-hint">Client can view their own past sessions</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHistory" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="settings-default-note">
-          Changes here apply to future clients only. Existing clients keep their current settings unless edited individually.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Phase 2B, item 4: help menu modals -->
   <div class="modal-overlay" id="howAloWorksModal" onclick="closeModal('howAloWorksModal', event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -1896,7 +1846,6 @@ function setButtonLoading(btn, loading, loadingText) {
     }
     wireEscToStaticModal('inviteModal');
     wireEscToStaticModal('editClientModal');
-    wireEscToStaticModal('defaultSettingsModal');
     wireEscToStaticModal('howAloWorksModal');
     wireEscToStaticModal('whatClientsSeeModal');
 
@@ -4716,21 +4665,6 @@ if (clientsBtn) clientsBtn.style.display = '';
         toast('Error restoring client');
         setButtonLoading(btn, false);
       }
-    }
-
-    function showDefaultSettingsModal() {
-      document.getElementById('defaultSettingsModal').classList.add('show');
-      _staticModalTrapReleases['defaultSettingsModal'] = trapFocus(document.getElementById('defaultSettingsModal'));
-    }
-
-    async function saveDefaultSettings() {
-      localStorage.setItem('alo_default_settings', JSON.stringify({
-        homework: document.getElementById('defaultHomework').checked,
-        messages: document.getElementById('defaultMessages').checked,
-        history: document.getElementById('defaultHistory').checked
-      }));
-      closeModal('defaultSettingsModal');
-      toast('Default settings saved');
     }
 
     // =====================================================
