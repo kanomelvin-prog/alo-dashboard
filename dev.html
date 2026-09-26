@@ -34,8 +34,8 @@
       <div class="login-logo">A</div>
       <h1 class="login-title">Alowen Dashboard</h1>
       <p class="login-subtitle">Clinical companion management</p>
-      <p class="login-trust">Client data is encrypted at rest and in transit. Conversation history is saved for your clients, and they can delete it. You never see it.</p>
-      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol.</p>
+      <p class="login-trust">Client data travels over encrypted connections, and our database encrypts it at rest. Conversation history is saved to each client's Alo account, and they can delete it from there. You never see it.</p>
+      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
@@ -222,7 +222,7 @@
             </div>
             <span id="messagesCount" style="display:none;">0</span>
             <!-- Shared empty state -->
-            <div class="section-empty" id="attentionEmpty">All clear — no items needing attention.</div>
+            <div class="section-empty" id="attentionEmpty">All clear — no open alerts from your active clients.</div>
           </div>
         </div>
 
@@ -520,7 +520,7 @@
                         <div class="form-group full">
                           <label>Clinical Rationale (private)</label>
                           <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                          <span class="form-hint">For your records only -- client never sees this</span>
+                          <span class="form-hint">For your records only — not shown in the client's app</span>
                         </div>
                       </div>
                     </div>
@@ -649,7 +649,7 @@
         <div class="form-group">
           <label>Next Session Date</label>
           <input type="date" id="editNextSession">
-          <span class="form-hint">Used for session prep and Alo context</span>
+          <span class="form-hint">Saved with this client's record.</span>
         </div>
 
         <!-- Emergency Contact Section -->
@@ -729,7 +729,7 @@
             </label>
           </div>
           <div class="settings-default-note">
-            These settings control what features the client sees in their chat interface. Changes apply on client's next session.
+            These settings control what features the client sees in Alo. Changes apply the next time your client opens Alo.
           </div>
         </div>
 
@@ -755,7 +755,7 @@
         <button class="modal-close" onclick="closeModal('howAloWorksModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+        <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry or a message — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
         <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
         <p class="first-screen-block" style="margin-bottom:0;"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
       </div>
@@ -792,7 +792,7 @@
        onboarding timestamp is set. Never reappears once one is. -->
   <div class="first-screen-overlay" id="firstScreenOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Welcome to your dashboard">
     <div class="first-screen-card">
-      <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+      <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry or a message — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
       <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
       <p class="first-screen-block"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
       <div class="first-screen-actions">
@@ -1874,8 +1874,9 @@ function setButtonLoading(btn, loading, loadingText) {
     function showDashboardLoadError() {
       const box = document.getElementById('dashboardLoadError');
       const text = document.getElementById('dashboardLoadErrorText');
-      // The headline ("All clear. 3 clients.") is a claim about now. It does
-      // not outlive a load that failed, first load or refresh.
+      // The headline ("All clear — no open alerts from your active clients.
+      // 3 clients.") is a claim about now. It does not outlive a load that
+      // failed, first load or refresh.
       const summaryEl = document.getElementById('morningSummary');
       if (summaryEl) summaryEl.textContent = '';
       if (dashboardLoadedOnce) {
@@ -1943,7 +1944,7 @@ function setButtonLoading(btn, loading, loadingText) {
                 <div style="text-align: left; max-width: 320px; margin: 0 auto 24px; font-size: 0.9375rem; line-height: 1.8;">
                   <div><strong>1.</strong> Click <strong>+ Invite</strong> to create an invite code</div>
                   <div><strong>2.</strong> Share the code with your client</div>
-                  <div><strong>3.</strong> They connect via Alowen, and you see their activity here</div>
+                  <div><strong>3.</strong> They connect via Alowen, and what they choose to share — plus homework progress and any safety alert — shows up here</div>
                 </div>
                 <button class="btn btn-primary" onclick="showInviteModal()" style="padding: 10px 24px;">+ Invite Your First Client</button>
               </div>
@@ -2034,7 +2035,7 @@ function setButtonLoading(btn, loading, loadingText) {
         } else if (totalMessages > 0) {
           summaryEl.textContent = summaryParts.join(' · ');
         } else {
-          summaryEl.textContent = 'All clear. ' + summaryParts.join(' · ') + '.';
+          summaryEl.textContent = 'All clear — no open alerts from your active clients. ' + summaryParts.join(' · ') + '.';
         }
 
         // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
@@ -2075,7 +2076,7 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('alertsCount').textContent = count;
 
       if (!count) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No open alerts from your active clients</div>';
         return;
       }
 
@@ -3077,7 +3078,7 @@ if (clientsBtn) clientsBtn.style.display = '';
 
       // === WHAT CHANGED card ===
       if (isPending) {
-        document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. You can still write session notes and assign homework.</p>`;
+        document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. Session notes and homework open up once they connect.</p>`;
       } else {
         const changes = [];
         if (completedHw.length) changes.push(`<div><span class="change-badge new">Done</span> ${completedHw.map(h => esc(h.title)).join(', ')}</div>`);
@@ -3446,7 +3447,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       const n = notes.find(x => x.id === noteId);
       if (!n) return;
 
-      const header = 'Based on Alowen between-session data -- review and edit before adding to client record.\n\n';
+      const header = 'Session note from the Alowen dashboard — review and edit before adding to the client record.\n\n';
       let text = header;
 
       if (format === 'soap') {
@@ -4404,7 +4405,7 @@ if (clientsBtn) clientsBtn.style.display = '';
     // Phase 2B item 7: invite modal single-link (spec §2.6, ruling D28).
     // mailto:/sms: + clipboard only -- no send-invite Edge Function.
     function _aloInviteMessage(code) {
-      return `I mentioned Alo — it's for the time between our sessions. Here's your link: https://alowen.ai/?invite=${code}. Nothing you say there comes to me unless you choose to share it.`;
+      return `I mentioned Alo — it's for the time between our sessions. Here's your link: https://alowen.ai/?invite=${code}. What you say there stays between you and Alo. I only see what you choose to share, when you've used it, and a safety note if Alo is ever worried about you.`;
     }
 
     function _aloCopyInviteLink() {
@@ -4918,7 +4919,13 @@ if (clientsBtn) clientsBtn.style.display = '';
       },
       {
         title: 'If things get hard',
-        body: 'Alo isn\'t built for a crisis. If you\'re in danger or thinking about hurting yourself, call or text 988 or go to your nearest emergency room.\n\nIf Alo notices you might be in trouble, it will tell you where to get help -- and it will let your therapist know something happened. Not what you said. Just that you might need them.'
+        // S8 (D-065, ruling D40): the ruled sentence, verbatim -- its em dash
+        // included, the one exception to this constant's "--". Nothing
+        // notifies the therapist; they see the note the next time they open
+        // the dashboard, and the sentence now says so. The chat app's copy of
+        // this screen changes to the same sentence with the client brief
+        // (#4-client).
+        body: 'Alo isn\'t built for a crisis. If you\'re in danger or thinking about hurting yourself, call or text 988 or go to your nearest emergency room.\n\nIf Alo notices you might be in trouble, it will tell you where to get help — and it will leave a note for your therapist that something happened, which they see the next time they open their dashboard. Not what you said. Just that you might need them.'
       },
       {
         title: 'Getting started',
