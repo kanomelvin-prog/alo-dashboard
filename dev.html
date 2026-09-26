@@ -34,8 +34,8 @@
       <div class="login-logo">A</div>
       <h1 class="login-title">Alowen Dashboard</h1>
       <p class="login-subtitle">Clinical companion management</p>
-      <p class="login-trust">Client data is encrypted at rest and in transit. Conversation history is saved for your clients, and they can delete it. You never see it.</p>
-      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol.</p>
+      <p class="login-trust">Client data travels over encrypted connections, and our database encrypts it at rest. Conversation history is saved to each client's Alo account, and they can delete it from there. You never see it.</p>
+      <p class="login-trust" style="font-size: 0.6875rem; color: var(--text-muted);">Alowen supports between-session reflection. It is not emergency care or a crisis service. In a crisis, follow your clinical protocol. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
       <div class="login-error" id="loginError"></div>
       <div class="login-info" id="loginInfo"></div>
 
@@ -222,7 +222,7 @@
             </div>
             <span id="messagesCount" style="display:none;">0</span>
             <!-- Shared empty state -->
-            <div class="section-empty" id="attentionEmpty">All clear — no items needing attention.</div>
+            <div class="section-empty" id="attentionEmpty">All clear — no open alerts from your active clients.</div>
           </div>
         </div>
 
@@ -511,17 +511,7 @@
                             <option value="other">Other</option>
                           </select>
                         </div>
-                        <div class="form-group">
-                          <label class="tooltip-trigger">Sensitivity
-                            <span class="tooltip-icon">?</span>
-                            <span class="tooltip-content"><strong>Low:</strong> Alo can reference this homework naturally.<br><strong>Medium:</strong> Alo mentions it only if the client brings it up first.<br><strong>High:</strong> Alo never names it directly -- works on the underlying skill only.</span>
-                          </label>
-                          <select id="hwSensitivity">
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                          </select>
-                        </div>
+                        <!-- S8 B3 (D-007): Sensitivity control removed; returns when the bot reads it (Therapist Homework spec, Gate B). -->
                         <div class="form-group full">
                           <label>Treatment Plan Goal (SimplePractice)</label>
                           <input type="text" id="hwTxPlanGoal" placeholder="e.g., Reduce anxiety symptoms">
@@ -530,11 +520,11 @@
                         <div class="form-group full">
                           <label>Clinical Rationale (private)</label>
                           <textarea id="hwRationale" placeholder="Why this exercise for this client..."></textarea>
-                          <span class="form-hint">For your records only -- client never sees this</span>
+                          <span class="form-hint">For your records only — not shown in the client's app</span>
                         </div>
                       </div>
                     </div>
-                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, sensitivity, rationale)</button>
+                    <button type="button" class="hw-expand-btn" onclick="toggleHwForm()">+ More options (type, rationale)</button>
                     <div class="form-actions">
                       <button type="submit" class="btn btn-primary">Assign Homework</button>
                     </div>
@@ -659,7 +649,7 @@
         <div class="form-group">
           <label>Next Session Date</label>
           <input type="date" id="editNextSession">
-          <span class="form-hint">Used for session prep and Alo context</span>
+          <span class="form-hint">Saved with this client's record.</span>
         </div>
 
         <!-- Emergency Contact Section -->
@@ -739,7 +729,7 @@
             </label>
           </div>
           <div class="settings-default-note">
-            These settings control what features the client sees in their chat interface. Changes apply on client's next session.
+            These settings control what features the client sees in Alo. Changes apply the next time your client opens Alo.
           </div>
         </div>
 
@@ -757,56 +747,6 @@
     </div>
   </div>
 
-  <!-- Default Client Settings Modal -->
-  <div class="modal-overlay" id="defaultSettingsModal" onclick="closeModal('defaultSettingsModal', event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Default Client Settings</h3>
-        <button class="modal-close" onclick="closeModal('defaultSettingsModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-intro">These defaults apply to all new clients. Override per-client in Edit.</p>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Homework visibility</div>
-            <div class="setting-hint">Client can see assigned homework in chat</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHomework" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Message to therapist</div>
-            <div class="setting-hint">Client can send async messages</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultMessages" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">Conversation history</div>
-            <div class="setting-hint">Client can view their own past sessions</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="defaultHistory" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="settings-default-note">
-          Changes here apply to future clients only. Existing clients keep their current settings unless edited individually.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('defaultSettingsModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveDefaultSettings()">Save Defaults</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Phase 2B, item 4: help menu modals -->
   <div class="modal-overlay" id="howAloWorksModal" onclick="closeModal('howAloWorksModal', event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -815,7 +755,7 @@
         <button class="modal-close" onclick="closeModal('howAloWorksModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+        <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry or a message — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
         <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
         <p class="first-screen-block" style="margin-bottom:0;"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
       </div>
@@ -852,7 +792,7 @@
        onboarding timestamp is set. Never reappears once one is. -->
   <div class="first-screen-overlay" id="firstScreenOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Welcome to your dashboard">
     <div class="first-screen-card">
-      <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry, a message, a summary — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one.</p>
+      <p class="first-screen-block"><strong>What you'll see.</strong> When a client chooses to share something — a journal entry or a message — it shows up here. Homework you assign, and whether it got done. A safety alert if Alo ever detects one. Alerts appear on this dashboard when you open it — Alowen doesn't page, text or email you.</p>
       <p class="first-screen-block"><strong>What you won't see.</strong> Your clients' conversations with Alo. Not summaries, not themes, not "insights." That's the reason they'll trust it enough to be honest in it.</p>
       <p class="first-screen-block"><strong>What it asks of you.</strong> About fifteen minutes a week. Assign something between sessions if you want to. Glance at what's been shared before you meet. Resolve an alert if one comes in.</p>
       <div class="first-screen-actions">
@@ -879,8 +819,9 @@
           showPasswordResetModal(accessToken);
         } catch (e) {
           // Fallback if modal code fails
-          const newPass = prompt('Enter your new password (min 6 characters):');
-          if (newPass && newPass.length >= 6) {
+          // S8 B6 (D-025, R-B-22): the same 12-character minimum as sign-up.
+          const newPass = prompt('Enter your new password (min 12 characters):');
+          if (newPass && newPass.length >= 12) {
             fetch('https://lelsdezstbnzyxvsvbyx.supabase.co/auth/v1/user', {
               method: 'PUT',
               headers: {
@@ -893,6 +834,8 @@
               if (r.ok) { alert('Password updated!'); window.location.href = window.location.pathname; }
               else { r.text().then(t => alert('Error: ' + t)); }
             });
+          } else if (newPass) {
+            alert('Password must be at least 12 characters');
           }
         }
       });
@@ -912,7 +855,7 @@ function showPasswordResetModal(accessToken) {
         <div class="login-error" id="resetError" style="display:none;"></div>
         <div class="form-group">
           <label>New Password</label>
-          <input type="password" id="resetNewPass" placeholder="Min. 6 characters" autofocus>
+          <input type="password" id="resetNewPass" placeholder="Min. 12 characters" autofocus>
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
@@ -940,8 +883,10 @@ async function submitPasswordReset(accessToken) {
   const confirmPass = document.getElementById('resetConfirmPass').value;
   errorEl.style.display = 'none';
 
-  if (!newPass || newPass.length < 6) {
-    errorEl.textContent = 'Password must be at least 6 characters';
+  // S8 B6 (D-025, R-B-22): one password policy. Sign-up enforces 12 here and
+  // in the therapist-signup function; the reset path now does the same.
+  if (!newPass || newPass.length < 12) {
+    errorEl.textContent = 'Password must be at least 12 characters';
     errorEl.style.display = 'block';
     return;
   }
@@ -1112,7 +1057,7 @@ function setButtonLoading(btn, loading, loadingText) {
     // for, on every read. action_notes is bot-authored and can carry the
     // client's own words, so it is never requested: it does not reach this
     // browser, the Network panel, or a cache. Neither does any other free-text
-    // column. Labels and timestamps only. Never widen this to select=*.
+    // column. Labels and timestamps only. Never widen this to a wildcard select.
     const CRISIS_EVENT_COLUMNS = 'id,client_id,severity,category,alo_response_action,acknowledged,acknowledged_at,action_taken,created_at';
 
     // S7 fix F (R-B-17) -- therapist-private fields (client phone, emergency
@@ -1128,7 +1073,7 @@ function setButtonLoading(btn, loading, loadingText) {
     let clientPrivate = {};
     const PRIVATE_COLUMNS = 'therapist_client_id,client_phone,emergency_contact_name,emergency_contact_phone,safety_notes';
 
-    // Every read of therapist_clients names its columns. select=* would keep
+    // Every read of therapist_clients names its columns. A wildcard would keep
     // pulling the five private columns into the browser for as long as they
     // still exist on that table (Migration v1.5 Step 3 drops them).
     // created_at / updated_at are deliberately absent: no migration, seed or
@@ -1137,6 +1082,13 @@ function setButtonLoading(btn, loading, loadingText) {
     // that read them degrade to showing no date; if Studio confirms the
     // columns, adding the names here restores both.
     const THERAPIST_CLIENT_COLUMNS = 'id,therapist_id,client_id,display_name,invite_code,status,is_demo,next_session_date,allow_homework,allow_messages,allow_history,allow_journal_sharing';
+
+    // S8 B1 (A-24) -- the only session_metadata columns this file asks for,
+    // on both reads. Its rows are only ever counted and dated here: client_id
+    // groups the home load by client, and created_at dates every count, the
+    // calendar and the prep pack. No other column of that table is needed in
+    // this browser, so none is requested. Never widen this to a wildcard select.
+    const SESSION_METADATA_COLUMNS = 'client_id,created_at';
 
     // A7/D2 — Generation counter for showClient(). Each call claims a token.
     // After any await, the call checks whether a newer showClient() (or
@@ -1899,7 +1851,6 @@ function setButtonLoading(btn, loading, loadingText) {
     }
     wireEscToStaticModal('inviteModal');
     wireEscToStaticModal('editClientModal');
-    wireEscToStaticModal('defaultSettingsModal');
     wireEscToStaticModal('howAloWorksModal');
     wireEscToStaticModal('whatClientsSeeModal');
 
@@ -1923,8 +1874,9 @@ function setButtonLoading(btn, loading, loadingText) {
     function showDashboardLoadError() {
       const box = document.getElementById('dashboardLoadError');
       const text = document.getElementById('dashboardLoadErrorText');
-      // The headline ("All clear. 3 clients.") is a claim about now. It does
-      // not outlive a load that failed, first load or refresh.
+      // The headline ("All clear — no open alerts from your active clients.
+      // 3 clients.") is a claim about now. It does not outlive a load that
+      // failed, first load or refresh.
       const summaryEl = document.getElementById('morningSummary');
       if (summaryEl) summaryEl.textContent = '';
       if (dashboardLoadedOnce) {
@@ -1960,7 +1912,7 @@ function setButtonLoading(btn, loading, loadingText) {
       // out renders nothing and reports nothing (see authEpoch).
       const myEpoch = authEpoch;
       try {
-        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never a wildcard select.
         const links = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=in.(active,pending)&select=${THERAPIST_CLIENT_COLUMNS}`);
         if (myEpoch !== authEpoch) return;
 
@@ -1992,7 +1944,7 @@ function setButtonLoading(btn, loading, loadingText) {
                 <div style="text-align: left; max-width: 320px; margin: 0 auto 24px; font-size: 0.9375rem; line-height: 1.8;">
                   <div><strong>1.</strong> Click <strong>+ Invite</strong> to create an invite code</div>
                   <div><strong>2.</strong> Share the code with your client</div>
-                  <div><strong>3.</strong> They connect via Alowen, and you see their activity here</div>
+                  <div><strong>3.</strong> They connect via Alowen, and what they choose to share — plus homework progress and any safety alert — shows up here</div>
                 </div>
                 <button class="btn btn-primary" onclick="showInviteModal()" style="padding: 10px 24px;">+ Invite Your First Client</button>
               </div>
@@ -2017,12 +1969,13 @@ function setButtonLoading(btn, loading, loadingText) {
           // The guest branch is gone, so a stranger's alert can no longer reach
           // this list or push an own client's open alert past the 50-row cap.
           // With no signed-up client there is nothing to ask for.
-          // S7 fix A: explicit columns, never select=*.
+          // S7 fix A: explicit columns, never a wildcard select.
           clientIds.length ? api(`/rest/v1/crisis_events?client_id=in.(${idFilter})&acknowledged=eq.false&order=created_at.desc&limit=50&select=${CRISIS_EVENT_COLUMNS}`) : Promise.resolve([]),
           // S7 fix H (R-B-14): only messages written to this therapist.
           clientIds.length ? api(`/rest/v1/client_messages?therapist_id=eq.${selfTherapistId()}&client_id=in.(${idFilter})&read=eq.false&revoked_at=is.null&order=created_at.desc&limit=50`) : Promise.resolve([]),
           api(`/rest/v1/homework_cards?therapist_id=eq.${therapistId}&is_active=eq.true&select=id,client_id`),
-          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100`) : Promise.resolve([])
+          // S8 B1 (A-24): explicit columns (see SESSION_METADATA_COLUMNS).
+          clientIds.length ? api(`/rest/v1/session_metadata?client_id=in.(${idFilter})&order=created_at.desc&limit=100&select=${SESSION_METADATA_COLUMNS}`) : Promise.resolve([])
         ]);
         if (myEpoch !== authEpoch) return;
 
@@ -2082,7 +2035,7 @@ function setButtonLoading(btn, loading, loadingText) {
         } else if (totalMessages > 0) {
           summaryEl.textContent = summaryParts.join(' · ');
         } else {
-          summaryEl.textContent = 'All clear. ' + summaryParts.join(' · ') + '.';
+          summaryEl.textContent = 'All clear — no open alerts from your active clients. ' + summaryParts.join(' · ') + '.';
         }
 
         // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
@@ -2123,7 +2076,7 @@ function setButtonLoading(btn, loading, loadingText) {
       document.getElementById('alertsCount').textContent = count;
 
       if (!count) {
-        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No crisis alerts -- all clear</div>';
+        document.getElementById('alertsList').innerHTML = '<div class="section-empty">No open alerts from your active clients</div>';
         return;
       }
 
@@ -2868,8 +2821,9 @@ if (clientsBtn) clientsBtn.style.display = '';
         api(`/rest/v1/session_notes?therapist_id=eq.${self}&client_id=eq.${clientId}&order=session_date.desc`),
         api(`/rest/v1/homework_cards?therapist_id=eq.${self}&client_id=eq.${clientId}&order=created_at.desc`),
         api(`/rest/v1/client_messages?therapist_id=eq.${self}&client_id=eq.${clientId}&revoked_at=is.null&order=created_at.desc`),
-        api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc`),
-        // S7 fix A: explicit columns, never select=* (see CRISIS_EVENT_COLUMNS).
+        // S8 B1 (A-24): explicit columns (see SESSION_METADATA_COLUMNS).
+        api(`/rest/v1/session_metadata?client_id=eq.${clientId}&order=created_at.desc&select=${SESSION_METADATA_COLUMNS}`),
+        // S7 fix A: explicit columns, never a wildcard select (see CRISIS_EVENT_COLUMNS).
         api(`/rest/v1/crisis_events?client_id=eq.${clientId}&order=created_at.desc&select=${CRISIS_EVENT_COLUMNS}`),
         // S7 fix F: this client's private row, by link id (see clientPrivate).
         api(`/rest/v1/therapist_client_private?therapist_client_id=eq.${linkId}&select=${PRIVATE_COLUMNS}`)
@@ -2931,7 +2885,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       if (expandBtn) {
         expandBtn.textContent = expanded.classList.contains('show')
           ? '− Less options'
-          : '+ More options (type, sensitivity, rationale)';
+          : '+ More options (type, rationale)';
       }
     }
 
@@ -3124,7 +3078,7 @@ if (clientsBtn) clientsBtn.style.display = '';
 
       // === WHAT CHANGED card ===
       if (isPending) {
-        document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. You can still write session notes and assign homework.</p>`;
+        document.getElementById('prepSummary').innerHTML = `<p class="text-muted-center">Client hasn't signed up yet. Session notes and homework open up once they connect.</p>`;
       } else {
         const changes = [];
         if (completedHw.length) changes.push(`<div><span class="change-badge new">Done</span> ${completedHw.map(h => esc(h.title)).join(', ')}</div>`);
@@ -3280,7 +3234,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
                 <div class="form-group form-group-inline">
                   <input type="checkbox" id="noteBilling" class="checkbox-inline">
-                  <label for="noteBilling" class="label-inline">Include billing justification</label>
+                  <label for="noteBilling" class="label-inline">Add a medical-necessity line to complete</label>
                 </div>
               </div>
               <div class="form-actions">
@@ -3393,7 +3347,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
                 <div class="form-group form-group-inline">
                   <input type="checkbox" id="editNoteBilling" class="checkbox-inline" ${note.billing_justification ? 'checked' : ''}>
-                  <label for="editNoteBilling" class="label-inline">Include billing justification</label>
+                  <label for="editNoteBilling" class="label-inline">Add a medical-necessity line to complete</label>
                 </div>
               </div>
               <div class="form-actions">
@@ -3493,7 +3447,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       const n = notes.find(x => x.id === noteId);
       if (!n) return;
 
-      const header = 'Based on Alowen between-session data -- review and edit before adding to client record.\n\n';
+      const header = 'Session note from the Alowen dashboard — review and edit before adding to the client record.\n\n';
       let text = header;
 
       if (format === 'soap') {
@@ -3515,8 +3469,10 @@ if (clientsBtn) clientsBtn.style.display = '';
         text += parts.join(' ');
       }
 
+      // S8 B2 (D-049): the box adds a line for the clinician to complete. The
+      // dashboard never writes a medical-necessity justification itself.
       if (n.billing_justification) {
-        text += '\n\nMedical Necessity: Continued therapeutic support medically necessary for symptom management and functional improvement.';
+        text += '\n\nMedical necessity: [add your justification]';
       }
 
       copyToClipboard(text.trim()).then(() => {
@@ -3645,8 +3601,9 @@ if (clientsBtn) clientsBtn.style.display = '';
           const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
           text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
         }
+        // S8 B2 (D-049): a placeholder to complete, as in copyForEHR().
         if (n.billing_justification) {
-          text += (text ? '\n\n' : '') + 'Continued therapeutic support medically necessary for symptom management and functional improvement.';
+          text += (text ? '\n\n' : '') + 'Medical necessity: [add your justification]';
         }
       }
 
@@ -3690,8 +3647,10 @@ if (clientsBtn) clientsBtn.style.display = '';
       text += 'Source: Client self-directed use of an emotional support tool. No session transcript available.\n\n';
       text += 'Engagement: Client engaged in ' + recentSessions.length + ' Alo session' + (recentSessions.length !== 1 ? 's' : '') + ' (last: ' + lastSession + ').\n\n';
 
-      const themes = recentSessions.map(s => s.primary_mode || 'emotional processing').filter((v, i, a) => a.indexOf(v) === i).join(', ') || 'general emotional processing';
-      text += 'Themes: Client-reported focus areas: ' + themes + '.\n\n';
+      // S8 B4 (D-052): no themes line. It presented Alo's own interaction-mode
+      // label (or a stock phrase when a session had none) as something the
+      // client reported, in text headed for an EHR, on a dashboard that
+      // promises therapists "not themes". Do not reintroduce it.
 
       if (homework.length) {
         text += 'Homework: ' + homework.map(h => {
@@ -3841,7 +3800,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           title: document.getElementById('hwTitle').value,
           goal: document.getElementById('hwGoal').value,
           clinical_rationale: document.getElementById('hwRationale').value,
-          sensitivity_level: document.getElementById('hwSensitivity').value,
+          sensitivity_level: 'low', // S8 B3 (D-007): what the removed control sent by default
           treatment_plan_goal: document.getElementById('hwTxPlanGoal').value || null,
           is_active: true
         });
@@ -4446,7 +4405,7 @@ if (clientsBtn) clientsBtn.style.display = '';
     // Phase 2B item 7: invite modal single-link (spec §2.6, ruling D28).
     // mailto:/sms: + clipboard only -- no send-invite Edge Function.
     function _aloInviteMessage(code) {
-      return `I mentioned Alo — it's for the time between our sessions. Here's your link: https://alowen.ai/?invite=${code}. Nothing you say there comes to me unless you choose to share it.`;
+      return `I mentioned Alo — it's for the time between our sessions. Here's your link: https://alowen.ai/?invite=${code}. What you say there stays between you and Alo. I only see what you choose to share, when you've used it, and a safety note if Alo is ever worried about you.`;
     }
 
     function _aloCopyInviteLink() {
@@ -4652,7 +4611,7 @@ if (clientsBtn) clientsBtn.style.display = '';
 
     async function showArchivedClients() {
       try {
-        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never a wildcard select.
         const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=eq.archived&select=${THERAPIST_CLIENT_COLUMNS}`);
 
         const overlay = document.createElement('div');
@@ -4712,21 +4671,6 @@ if (clientsBtn) clientsBtn.style.display = '';
         toast('Error restoring client');
         setButtonLoading(btn, false);
       }
-    }
-
-    function showDefaultSettingsModal() {
-      document.getElementById('defaultSettingsModal').classList.add('show');
-      _staticModalTrapReleases['defaultSettingsModal'] = trapFocus(document.getElementById('defaultSettingsModal'));
-    }
-
-    async function saveDefaultSettings() {
-      localStorage.setItem('alo_default_settings', JSON.stringify({
-        homework: document.getElementById('defaultHomework').checked,
-        messages: document.getElementById('defaultMessages').checked,
-        history: document.getElementById('defaultHistory').checked
-      }));
-      closeModal('defaultSettingsModal');
-      toast('Default settings saved');
     }
 
     // =====================================================
@@ -4848,7 +4792,7 @@ if (clientsBtn) clientsBtn.style.display = '';
         return;
       }
       try {
-        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never select=*.
+        // S7 fix F: explicit columns (see THERAPIST_CLIENT_COLUMNS), never a wildcard select.
         const archived = await api(`/rest/v1/therapist_clients?therapist_id=eq.${selfTherapistId()}&status=eq.archived&is_demo=eq.true&select=${THERAPIST_CLIENT_COLUMNS}`);
         const archivedDemo = archived?.[0];
         if (!archivedDemo) {
@@ -4975,7 +4919,13 @@ if (clientsBtn) clientsBtn.style.display = '';
       },
       {
         title: 'If things get hard',
-        body: 'Alo isn\'t built for a crisis. If you\'re in danger or thinking about hurting yourself, call or text 988 or go to your nearest emergency room.\n\nIf Alo notices you might be in trouble, it will tell you where to get help -- and it will let your therapist know something happened. Not what you said. Just that you might need them.'
+        // S8 (D-065, ruling D40): the ruled sentence, verbatim -- its em dash
+        // included, the one exception to this constant's "--". Nothing
+        // notifies the therapist; they see the note the next time they open
+        // the dashboard, and the sentence now says so. The chat app's copy of
+        // this screen changes to the same sentence with the client brief
+        // (#4-client).
+        body: 'Alo isn\'t built for a crisis. If you\'re in danger or thinking about hurting yourself, call or text 988 or go to your nearest emergency room.\n\nIf Alo notices you might be in trouble, it will tell you where to get help — and it will leave a note for your therapist that something happened, which they see the next time they open their dashboard. Not what you said. Just that you might need them.'
       },
       {
         title: 'Getting started',
