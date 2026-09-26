@@ -3289,7 +3289,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
                 <div class="form-group form-group-inline">
                   <input type="checkbox" id="noteBilling" class="checkbox-inline">
-                  <label for="noteBilling" class="label-inline">Include billing justification</label>
+                  <label for="noteBilling" class="label-inline">Add a medical-necessity line to complete</label>
                 </div>
               </div>
               <div class="form-actions">
@@ -3402,7 +3402,7 @@ if (clientsBtn) clientsBtn.style.display = '';
                 </div>
                 <div class="form-group form-group-inline">
                   <input type="checkbox" id="editNoteBilling" class="checkbox-inline" ${note.billing_justification ? 'checked' : ''}>
-                  <label for="editNoteBilling" class="label-inline">Include billing justification</label>
+                  <label for="editNoteBilling" class="label-inline">Add a medical-necessity line to complete</label>
                 </div>
               </div>
               <div class="form-actions">
@@ -3524,8 +3524,10 @@ if (clientsBtn) clientsBtn.style.display = '';
         text += parts.join(' ');
       }
 
+      // S8 B2 (D-049): the box adds a line for the clinician to complete. The
+      // dashboard never writes a medical-necessity justification itself.
       if (n.billing_justification) {
-        text += '\n\nMedical Necessity: Continued therapeutic support medically necessary for symptom management and functional improvement.';
+        text += '\n\nMedical necessity: [add your justification]';
       }
 
       copyToClipboard(text.trim()).then(() => {
@@ -3654,8 +3656,9 @@ if (clientsBtn) clientsBtn.style.display = '';
           const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
           text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
         }
+        // S8 B2 (D-049): a placeholder to complete, as in copyForEHR().
         if (n.billing_justification) {
-          text += (text ? '\n\n' : '') + 'Continued therapeutic support medically necessary for symptom management and functional improvement.';
+          text += (text ? '\n\n' : '') + 'Medical necessity: [add your justification]';
         }
       }
 
