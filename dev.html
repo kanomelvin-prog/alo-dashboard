@@ -3153,7 +3153,7 @@ if (clientsBtn) clientsBtn.style.display = '';
             ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
             ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
             ${n.next_session_date ? `<div class="note-meta">Next session: ${parseDateOnly(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
-            ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
+            ${n.billing_justification ? `<div class="note-meta">Medical-necessity line included</div>` : ''}
           </div>
         </div>
       `;
