@@ -1756,6 +1756,21 @@ function setButtonLoading(btn, loading, loadingText) {
       return date.toLocaleDateString();
     }
 
+    // S11 A (D41 item 6) -- date-only columns (session_notes.session_date and
+    // next_session_date) arrive as 'YYYY-MM-DD'. new Date() reads that form as
+    // UTC midnight, which is the evening before anywhere west of UTC, so a
+    // note dated the 22nd showed as the 21st in the Americas, in the prep pack
+    // and Copy P as well as on the page. This reads it as that calendar day in
+    // the viewer's own time zone. Date-only values only: a timestamp
+    // (created_at, completed_at, viewed_at, acknowledged_at, ...) is a moment,
+    // and new Date() is already right for it. A value not in the YYYY-MM-DD
+    // form is parsed exactly as before.
+    function parseDateOnly(value) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+      if (!m) return new Date(value);
+      return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    }
+
     function truncate(str, len) {
       if (!str || str.length <= len) return str;
       return str.substring(0, len) + '...';
@@ -1907,6 +1922,19 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     }
 
+    // S11 C: the rollout line, in English that holds for 0, 1 and many.
+    // `total` is at least 1 (the line is hidden when there are no clients).
+    function rolloutSentence(opened, total) {
+      if (total === 1) {
+        return opened ? 'Your 1 client has opened Alo.' : "Your 1 client hasn't opened Alo yet.";
+      }
+      if (opened === total) return `All ${total} of your clients have opened Alo.`;
+      if (opened === 0) return `None of your ${total} clients have opened Alo yet.`;
+      const waiting = total - opened;
+      return `${opened} of your ${total} clients ${opened === 1 ? 'has' : 'have'} opened Alo. ` +
+        `${waiting} ${waiting === 1 ? "hasn't" : "haven't"} yet.`;
+    }
+
     async function loadDashboard() {
       // S7 fix C: a load that started under a session that has since signed
       // out renders nothing and reports nothing (see authEpoch).
@@ -2021,11 +2049,22 @@ function setButtonLoading(btn, loading, loadingText) {
         updateAttentionCard();
         renderClientPulse();
 
+        // S11 C (D41 item 6): the headline's client count and the rollout line
+        // below count one set, so they can never disagree. The headline used
+        // to count every row the load returned, the therapist's own test
+        // account (is_demo) included, while the rollout line left it out, so
+        // one real client read as "2 clients" over "1 of your 1 clients".
+        // Real clients only: not the test account. Archived rows never get
+        // here (the load asks for active and pending links only). A pending
+        // client is a real person who was invited and has not opened Alo yet,
+        // so it is counted, and the rollout line counts it as "hasn't yet".
+        const realClients = allClients.filter(c => !c.is_demo);
+
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
         const activeHw = allClients.reduce((sum, c) => sum + (c.homeworkCount || 0), 0);
         const summaryParts = [];
-        summaryParts.push(allClients.length + ' client' + (allClients.length !== 1 ? 's' : ''));
+        summaryParts.push(realClients.length + ' client' + (realClients.length !== 1 ? 's' : ''));
         if (totalMessages > 0) summaryParts.push(totalMessages + ' unread message' + (totalMessages > 1 ? 's' : ''));
         if (totalAlerts > 0) summaryParts.push(totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : ''));
         if (activeHw > 0) summaryParts.push(activeHw + ' active homework');
@@ -2040,15 +2079,13 @@ function setButtonLoading(btn, loading, loadingText) {
 
         // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
         // derived from lastActivity, which is already computed above from
-        // already-fetched session_metadata. Excludes the therapist's own
-        // is_demo test client, which isn't part of rollout.
+        // already-fetched session_metadata. Counts realClients, the same set
+        // as the headline above (S11 C).
         const rolloutEl = document.getElementById('rolloutSummary');
         if (rolloutEl) {
-          const realClients = allClients.filter(c => !c.is_demo);
           if (realClients.length > 0) {
             const openedCount = realClients.filter(c => c.lastActivity).length;
-            const notOpenedCount = realClients.length - openedCount;
-            rolloutEl.textContent = `${openedCount} of your ${realClients.length} clients have opened Alo. ${notOpenedCount} haven't yet.`;
+            rolloutEl.textContent = rolloutSentence(openedCount, realClients.length);
             rolloutEl.style.display = 'block';
           } else {
             rolloutEl.style.display = 'none';
@@ -3067,7 +3104,7 @@ if (clientsBtn) clientsBtn.style.display = '';
         document.getElementById('lastSessionsPreview').innerHTML = `
           <div class="session-preview">
             <div class="session-preview-header">
-              <span class="session-preview-date">${new Date(lastNote.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+              <span class="session-preview-date">${parseDateOnly(lastNote.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
               <span class="session-preview-type">${esc(lastNote.session_type || 'Individual')}</span>
             </div>
             ${lastNote.themes ? `<p class="session-preview-text"><strong>Themes:</strong> ${esc(lastNote.themes)}</p>` : ''}
@@ -3117,7 +3154,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       return `
         <div class="note-card">
           <div class="note-header">
-            <span class="note-date">${new Date(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span class="note-date">${parseDateOnly(n.session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
             <div class="note-actions">
               <div class="ehr-dropdown-wrap" style="position:relative;display:inline-block;">
                 <button class="btn btn-sm btn-secondary note-action-btn" onclick="toggleEhrDropdown(event, '${escJsAttr(n.id)}')">Copy for EHR</button>
@@ -3137,8 +3174,8 @@ if (clientsBtn) clientsBtn.style.display = '';
             ${n.observations ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'O', event)">Copy O</button> <strong>Observations:</strong> ${esc(n.observations)}</div>` : ''}
             ${n.interventions ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'A', event)">Copy A</button> <strong>Interventions:</strong> ${esc(n.interventions)}</div>` : ''}
             ${n.plan ? `<div class="note-section"><button class="sp-section-btn" onclick="copySoapSection('${escJsAttr(n.id)}', 'P', event)">Copy P</button> <strong>Plan:</strong> ${esc(n.plan)}</div>` : ''}
-            ${n.next_session_date ? `<div class="note-meta">Next session: ${new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
-            ${n.billing_justification ? `<div class="note-meta">Billing justification included</div>` : ''}
+            ${n.next_session_date ? `<div class="note-meta">Next session: ${parseDateOnly(n.next_session_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>` : ''}
+            ${n.billing_justification ? `<div class="note-meta">Medical-necessity line included</div>` : ''}
           </div>
         </div>
       `;
@@ -3598,7 +3635,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       } else if (section === 'P') {
         text = n.plan || '';
         if (n.next_session_date) {
-          const nextDate = new Date(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+          const nextDate = parseDateOnly(n.next_session_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
           text += (text ? '\n\n' : '') + 'Next session: ' + nextDate;
         }
         // S8 B2 (D-049): a placeholder to complete, as in copyForEHR().
@@ -3702,7 +3739,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       prepPack += addendum;
 
       if (recentNote) {
-        const noteDate = new Date(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const noteDate = parseDateOnly(recentNote.session_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         prepPack += '\n\n----------------------------------------------------------------------------------\n\nLAST SESSION NOTE (' + noteDate + '):\n';
         if (recentNote.themes) prepPack += 'Themes: ' + recentNote.themes + '\n';
         if (recentNote.plan) prepPack += 'Plan: ' + recentNote.plan + '\n';
@@ -3931,6 +3968,13 @@ if (clientsBtn) clientsBtn.style.display = '';
       if (cacheKey) renderCalendar(cacheKey);
     }
 
+    // S11 A: the day a note sits on in the calendar. session_date is
+    // date-only (parseDateOnly); created_at, the fallback for a note with no
+    // session date, is a timestamp and stays a timestamp.
+    function noteCalendarDate(n) {
+      return n.session_date ? parseDateOnly(n.session_date) : new Date(n.created_at);
+    }
+
     function getActivityForDate(d, end, sessions, messages, homework, crisis, notes) {
       const dots = [];
       const details = [];
@@ -3954,7 +3998,7 @@ if (clientsBtn) clientsBtn.style.display = '';
       const cCount = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; }).length;
       if (cCount > 0) { dots.push('#dc2626'); details.push(cCount + ' crisis alert' + (cCount > 1 ? 's' : '')); }
 
-      const nCount = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }).length;
+      const nCount = notes.filter(n => { const t = noteCalendarDate(n); return t >= d && t <= end; }).length;
       if (nCount > 0) { dots.push('#9CA3AF'); details.push(nCount + ' session note' + (nCount > 1 ? 's' : '')); }
 
       return { dots, details };
@@ -4049,7 +4093,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           const co = h.completed_at ? new Date(h.completed_at) : null;
           return (ca >= d && ca <= end) || (co && co >= d && co <= end);
         });
-        const dayNotes = notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; });
+        const dayNotes = notes.filter(n => { const t = noteCalendarDate(n); return t >= d && t <= end; });
         const daySessions = sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; });
         const dayCrisis = crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; });
 
@@ -4102,7 +4146,7 @@ if (clientsBtn) clientsBtn.style.display = '';
           const co = h.completed_at ? new Date(h.completed_at) : null;
           return (ca >= d && ca <= end) || (co && co >= d && co <= end);
         }),
-        notes: notes.filter(n => { const t = new Date(n.session_date || n.created_at); return t >= d && t <= end; }),
+        notes: notes.filter(n => { const t = noteCalendarDate(n); return t >= d && t <= end; }),
         sessions: sessions.filter(s => { const t = new Date(s.created_at); return t >= d && t <= end; }),
         crisis: crisis.filter(c => { const t = new Date(c.created_at); return t >= d && t <= end; })
       };
