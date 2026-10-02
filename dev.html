@@ -1922,6 +1922,19 @@ function setButtonLoading(btn, loading, loadingText) {
       }
     }
 
+    // S11 C: the rollout line, in English that holds for 0, 1 and many.
+    // `total` is at least 1 (the line is hidden when there are no clients).
+    function rolloutSentence(opened, total) {
+      if (total === 1) {
+        return opened ? 'Your 1 client has opened Alo.' : "Your 1 client hasn't opened Alo yet.";
+      }
+      if (opened === total) return `All ${total} of your clients have opened Alo.`;
+      if (opened === 0) return `None of your ${total} clients have opened Alo yet.`;
+      const waiting = total - opened;
+      return `${opened} of your ${total} clients ${opened === 1 ? 'has' : 'have'} opened Alo. ` +
+        `${waiting} ${waiting === 1 ? "hasn't" : "haven't"} yet.`;
+    }
+
     async function loadDashboard() {
       // S7 fix C: a load that started under a session that has since signed
       // out renders nothing and reports nothing (see authEpoch).
@@ -2036,11 +2049,22 @@ function setButtonLoading(btn, loading, loadingText) {
         updateAttentionCard();
         renderClientPulse();
 
+        // S11 C (D41 item 6): the headline's client count and the rollout line
+        // below count one set, so they can never disagree. The headline used
+        // to count every row the load returned, the therapist's own test
+        // account (is_demo) included, while the rollout line left it out, so
+        // one real client read as "2 clients" over "1 of your 1 clients".
+        // Real clients only: not the test account. Archived rows never get
+        // here (the load asks for active and pending links only). A pending
+        // client is a real person who was invited and has not opened Alo yet,
+        // so it is counted, and the rollout line counts it as "hasn't yet".
+        const realClients = allClients.filter(c => !c.is_demo);
+
         const totalAlerts = (crisisEvents || []).length;
         const totalMessages = (messages || []).length;
         const activeHw = allClients.reduce((sum, c) => sum + (c.homeworkCount || 0), 0);
         const summaryParts = [];
-        summaryParts.push(allClients.length + ' client' + (allClients.length !== 1 ? 's' : ''));
+        summaryParts.push(realClients.length + ' client' + (realClients.length !== 1 ? 's' : ''));
         if (totalMessages > 0) summaryParts.push(totalMessages + ' unread message' + (totalMessages > 1 ? 's' : ''));
         if (totalAlerts > 0) summaryParts.push(totalAlerts + ' alert' + (totalAlerts > 1 ? 's' : ''));
         if (activeHw > 0) summaryParts.push(activeHw + ' active homework');
@@ -2055,15 +2079,13 @@ function setButtonLoading(btn, loading, loadingText) {
 
         // Phase 2B item 6: rollout surfaces (spec §2.5). Presence only --
         // derived from lastActivity, which is already computed above from
-        // already-fetched session_metadata. Excludes the therapist's own
-        // is_demo test client, which isn't part of rollout.
+        // already-fetched session_metadata. Counts realClients, the same set
+        // as the headline above (S11 C).
         const rolloutEl = document.getElementById('rolloutSummary');
         if (rolloutEl) {
-          const realClients = allClients.filter(c => !c.is_demo);
           if (realClients.length > 0) {
             const openedCount = realClients.filter(c => c.lastActivity).length;
-            const notOpenedCount = realClients.length - openedCount;
-            rolloutEl.textContent = `${openedCount} of your ${realClients.length} clients have opened Alo. ${notOpenedCount} haven't yet.`;
+            rolloutEl.textContent = rolloutSentence(openedCount, realClients.length);
             rolloutEl.style.display = 'block';
           } else {
             rolloutEl.style.display = 'none';
